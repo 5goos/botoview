@@ -1,0 +1,58 @@
+[
+  {
+    "v": "1.43.114",
+    "t": "Features - Adds support for an optional payload to invoke the Lambda function with as part of the Custom action Lambda execution block"
+  },
+  {
+    "v": "1.43.113",
+    "t": "Adds support for SSM Execution Block in Region switch plans"
+  },
+  {
+    "v": "1.43.103",
+    "t": "Adds a service quota checker to Region switch to verify quota parity between your primary and standby Region, and automatically submit quota limit increases. Adds an optional EC2 Auto Scaling and ECS setting that waits for instances or tasks in the scaled-up Region to be healthy in target groups."
+  },
+  {
+    "v": "1.43.76",
+    "t": "Adds support for Rds switchover read replica for Oracle databases in Region switch plans"
+  },
+  {
+    "v": "1.43.54",
+    "t": "Adds support for a client token in StartPlanExecution to make plan execution requests idempotent for safe retries."
+  },
+  {
+    "v": "1.43.22",
+    "t": "ARC Region Switch now supports three new execution blocks for multi-Region database workloads-Amazon Aurora Serverless scaling, Amazon Aurora Provisioned scaling, and Amazon Neptune Global Database failover."
+  },
+  {
+    "v": "1.43.7",
+    "t": "Adds support for enabling and disabling Lambda event source mappings in Region switch plans."
+  },
+  {
+    "v": "1.42.59",
+    "t": "Post-Recovery Workflows enable customers to maintain comprehensive disaster recovery automation. This allows customer SREs and leadership to have complete recovery orchestration from failover through post-recovery preparation, ensuring Regions remain ready for subsequent recovery events."
+  },
+  {
+    "v": "1.42.50",
+    "t": "Clarify documentation on ARC Region Switch start-plan-execution operation"
+  },
+  {
+    "v": "1.42.43",
+    "t": "Updates documentation for ARC Region switch and provides stronger validation for Amazon Aurora Global Database execution block parameters."
+  },
+  {
+    "v": "1.42.14",
+    "t": "Automatic Plan Execution Reports allow customers to maintain a concise record of their Region switch Plan executions.  This enables customer SREs and leadership to have a clear view of their recovery posture based on the generated reports for their Plan executions."
+  },
+  {
+    "v": "1.42.13",
+    "t": "New API to list Route 53 health checks created by ARC region switch for a plan in a specific AWS Region using the Region switch Regional data plane."
+  },
+  {
+    "v": "1.40.10",
+    "t": "Endpoint rule test and documentation update."
+  },
+  {
+    "v": "1.40.1",
+    "t": "This is the initial SDK release for Region switch"
+  }
+]

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://www.botoview.5goos.com/sitemap-index.xml

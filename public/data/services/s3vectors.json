@@ -1,0 +1,26 @@
+[
+  {
+    "v": "1.43.106",
+    "t": "Amazon S3 Vectors now supports metadata prefiltering, providing higher recall on filtered queries."
+  },
+  {
+    "v": "1.43.31",
+    "t": "Amazon S3 Vectors now supports paginated QueryVectors requests, returning up to 10,000 results per query."
+  },
+  {
+    "v": "1.42.1",
+    "t": "Amazon S3 Vectors provides cost-effective, elastic, and durable vector storage for queries based on semantic meaning and similarity."
+  },
+  {
+    "v": "1.40.68",
+    "t": "Amazon S3 Vectors provides cost-effective, elastic, and durable vector storage for queries based on semantic meaning and similarity."
+  },
+  {
+    "v": "1.40.60",
+    "t": "Update endpoint ruleset parameters casing"
+  },
+  {
+    "v": "1.39.5",
+    "t": "Amazon S3 Vectors provides cost-effective, elastic, and durable vector storage for queries based on semantic meaning and similarity."
+  }
+]

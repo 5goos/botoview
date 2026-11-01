@@ -1,0 +1,82 @@
+[
+  {
+    "v": "1.43.115",
+    "t": "Adding support for EKS Container Insights Telemetry Rules"
+  },
+  {
+    "v": "1.43.112",
+    "t": "Adding support for TransactionSearch telemetry rules."
+  },
+  {
+    "v": "1.43.106",
+    "t": "Enablement for Bedrock PaymentManager logs via Observability Admin Telemetry Rule"
+  },
+  {
+    "v": "1.43.100",
+    "t": "Amazon CloudWatch Omni is now generally available, an AI-powered unified observability for AI agents, applications, and infrastructure. Centralization now supports context graph for multi-account resource discovery, and dataset integrations makes logs available in CloudWatch datasets."
+  },
+  {
+    "v": "1.43.72",
+    "t": "CloudWatch Logs centralization rules now support tag propagation. You can configure a TagPropagationConfiguration on your centralization rule to automatically sync resource tags from source to destination log groups, with configurable conflict resolution strategies."
+  },
+  {
+    "v": "1.43.63",
+    "t": "Launch CMK support for Telemetry Enablement Organization and Account Rules."
+  },
+  {
+    "v": "1.43.54",
+    "t": "Enablement for ALB and Bedrock Knowledge Base logs via Observability Admin Telemetry Rule for account and organization level"
+  },
+  {
+    "v": "1.43.38",
+    "t": "Organization and account level telemetry rule via Observability Admin and CloudWatch pipelines for metrics"
+  },
+  {
+    "v": "1.43.25",
+    "t": "CloudWatch Observability Admin extends CentralizationRuleForOrganization APIs to support metrics, enabling centralization of metrics across accounts and Regions alongside logs."
+  },
+  {
+    "v": "1.43.1",
+    "t": "Observability Admin enablement launch for AWS Kafka, Bedrock Agent Core Workload Identity and OTel metric enablement."
+  },
+  {
+    "v": "1.42.92",
+    "t": "Enablement for Security Hub v2 via Observability Admin Telemetry Rule for account and organization level."
+  },
+  {
+    "v": "1.42.88",
+    "t": "CloudWatch Observability Admin adds support for multi-region telemetry evaluation and telemetry enablement rules."
+  },
+  {
+    "v": "1.42.80",
+    "t": "This release adds the Bedrock and Security Hub resource types for Omnia Enablement launch for March 31."
+  },
+  {
+    "v": "1.42.72",
+    "t": "Adding a new field in the CreateCentralizationRuleForOrganization, UpdateCentralizationRuleForOrganization API and updating the GetCentralizationRuleForOrganization API response to include the new field"
+  },
+  {
+    "v": "1.42.56",
+    "t": "Adding a new field in the CreateCentralizationRuleForOrganization, UpdateCentralizationRuleForOrganization API and updating the GetCentralizationRuleForOrganization API response to include the new field"
+  },
+  {
+    "v": "1.42.1",
+    "t": "CloudWatch Observability Admin adds pipelines configuration for third party log ingestion and transformation of all logs ingested, integration of CloudWatch logs with S3 Tables, and AWS account or organization level enablement for 7 AWS services."
+  },
+  {
+    "v": "1.40.51",
+    "t": "CloudWatch Observability Admin adds the ability to enable Resource tags for telemetry in a customer account. The release introduces new APIs to enable, disable and describe the status of Resource tags for telemetry feature. This new capability simplifies monitoring AWS resources using tags."
+  },
+  {
+    "v": "1.40.31",
+    "t": "CloudWatch Observability Admin adds the ability to enable telemetry centralization in customers' Organizations. The release introduces new APIs to manage centralization rules, which define settings to replicate telemetry data to a central destination in the customers' Organization."
+  },
+  {
+    "v": "1.40.1",
+    "t": "CloudWatch Observability Admin adds the ability to enable telemetry on AWS resources such as Amazon VPCs (Flow Logs) in customers AWS Accounts and Organizations. The release introduces new APIs to manage telemetry rules, which define telemetry settings to be applied on AWS resources."
+  },
+  {
+    "v": "1.35.71",
+    "t": "Amazon CloudWatch Observability Admin adds the ability to audit telemetry configuration for AWS resources in customers AWS Accounts and Organizations. The release introduces new APIs to turn on/off the new experience, which supports discovering supported AWS resources and their state of telemetry."
+  }
+]

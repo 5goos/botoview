@@ -1,0 +1,54 @@
+[
+  {
+    "v": "1.43.119",
+    "t": "Adds support for managing private pricing contracts and contractual investments including listing and associating contracts, retrieving contractual investments and their summaries, and creating, listing, and canceling contractual investment attestations"
+  },
+  {
+    "v": "1.43.104",
+    "t": "Adds support for (a) listing Business Support account charges via ListBusinessSupportAccountCharges and (b) subscription history via ListBusinessSupportSubscriptionHistory through the AWS Billing API."
+  },
+  {
+    "v": "1.43.101",
+    "t": "Added the ListBillingViewSegments API, which returns billing view segment information for a specified billing view ARN and time range. This API enables customers and integrated tools to programmatically determine the billing context of their accounts."
+  },
+  {
+    "v": "1.43.94",
+    "t": "Increased the maximum number of services returned in the supportEligibleSpendByService field of ListEnterpriseSupportLinkedAccountCharges"
+  },
+  {
+    "v": "1.43.62",
+    "t": "Adds GetEnterpriseSupportChargeSummary, GetEnterpriseSupportContractDetails, and ListEnterpriseSupportLinkedAccountCharges. These APIs provide first-time programmatic access to billing data for Enterprise Support usage previously only available upon request through AWS Concierge or Support."
+  },
+  {
+    "v": "1.43.41",
+    "t": "Adds support for managing AWS account credits and billing preferences, including retrieving credit details, viewing per-month credit allocation history, redeeming promotional codes, and configuring credit sharing and billing preferences."
+  },
+  {
+    "v": "1.42.26",
+    "t": "Cost Categories filtering support to BillingView data filter expressions through the new costCategories parameter, enabling users to filter billing views by AWS Cost Categories for more granular cost management and allocation."
+  },
+  {
+    "v": "1.41.0",
+    "t": "Added name filtering support to ListBillingViews API through the new names parameter to efficiently filter billing views by name."
+  },
+  {
+    "v": "1.40.59",
+    "t": "Update endpoint ruleset parameters casing"
+  },
+  {
+    "v": "1.40.40",
+    "t": "Add ability to combine custom billing views to create new consolidated views."
+  },
+  {
+    "v": "1.40.14",
+    "t": "Clarify IPv4 and IPv6 endpoints"
+  },
+  {
+    "v": "1.35.86",
+    "t": "Added new API's for defining and fetching Billing Views."
+  },
+  {
+    "v": "1.35.60",
+    "t": "Today, AWS announces the general availability of ListBillingViews API in the AWS SDKs, to enable AWS Billing Conductor (ABC) users to create proforma Cost and Usage Reports (CUR) programmatically."
+  }
+]

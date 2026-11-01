@@ -1,0 +1,34 @@
+[
+  {
+    "v": "1.43.21",
+    "t": "Add \"standardRegionalEndpoints\" back to fix 'Could not connect to the endpoint URL'"
+  },
+  {
+    "v": "1.43.20",
+    "t": "Added Transit and Intermodal travel modes to CalculateRoutes. Plan routes using public transit (bus, subway, train, ferry) or combine transit with driving, taxi, and rental car segments in a single multi-modal route."
+  },
+  {
+    "v": "1.43.3",
+    "t": "Added support for TravelTimeExceedsDriverWorkHours, ViolatedBlockedRoad, and ViolatedVehicleRestriction notice codes to the CalculateRoutes API response."
+  },
+  {
+    "v": "1.42.81",
+    "t": "This release makes RoutingBoundary optional in CalculateRouteMatrix, set StopDuration with a maximum value of 49999 for CalculateRoutes, set TrailerCount with a maximum value of 4, and introduces region restrictions for Grab Maps users."
+  },
+  {
+    "v": "1.40.54",
+    "t": "Update endpoint ruleset parameters casing"
+  },
+  {
+    "v": "1.40.18",
+    "t": "Added RouteFerryNotice PotentialViolatedVehicleRestrictionUsage value for CalculateRoutes. This value indicates when the Route is potentially forbidden for the given vehicle profile."
+  },
+  {
+    "v": "1.36.11",
+    "t": "The OptimizeWaypoints API now supports 50 waypoints per request (20 with constraints like AccessHours or AppointmentTime). It adds waypoint clustering via Clustering and ClusteringIndex for better optimization. Also, total distance validation is removed for greater flexibility."
+  },
+  {
+    "v": "1.35.52",
+    "t": "Release of Amazon Location Routes API. Routes enables you to plan efficient routes and streamline deliveries by leveraging real-time traffic, vehicle restrictions, and turn-by-turn directions."
+  }
+]

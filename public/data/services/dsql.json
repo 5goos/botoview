@@ -1,0 +1,54 @@
+[
+  {
+    "v": "1.43.79",
+    "t": "Corrected the validation pattern on the ServiceName response field in the GetVpcEndpointServiceName API to match the values Amazon Aurora DSQL actually returns."
+  },
+  {
+    "v": "1.43.70",
+    "t": "Improved validation of Kinesis stream ARN format to ensure only valid ARN characters are accepted"
+  },
+  {
+    "v": "1.43.64",
+    "t": "UpdateCluster now checks the RemovePeerCluster permission on the specific cluster being removed, not a wildcard and docs now clarify how to set kmsEncryptionKey so the cluster uses the AWS-owned key."
+  },
+  {
+    "v": "1.43.7",
+    "t": "Added support for Amazon Aurora DSQL change data capture (CDC) streams that deliver row-level database changes to Amazon Kinesis in JSON format. Includes CreateStream, GetStream, ListStreams, and DeleteStream operations."
+  },
+  {
+    "v": "1.41.1",
+    "t": "Added clusterVpcEndpoint field to GetVpcEndpointServiceName API response, returning the VPC connection endpoint for the cluster"
+  },
+  {
+    "v": "1.40.70",
+    "t": "Cluster endpoint added to CreateCluster and GetCluster API responses"
+  },
+  {
+    "v": "1.40.58",
+    "t": "Add support for resource-based policies for Aurora DSQL clusters. This will enable you to implement Block Public Access (BPA) which will help restrict access to your Aurora DSQL public or VPC endpoints."
+  },
+  {
+    "v": "1.40.55",
+    "t": "Update endpoint ruleset parameters casing"
+  },
+  {
+    "v": "1.38.22",
+    "t": "Features: support for customer managed encryption keys"
+  },
+  {
+    "v": "1.38.19",
+    "t": "CreateMultiRegionCluster and DeleteMultiRegionCluster APIs removed"
+  },
+  {
+    "v": "1.38.15",
+    "t": "CreateMultiRegionClusters and DeleteMultiRegionClusters APIs marked as deprecated. Introduced new multi-Region clusters creation experience through multiRegionProperties parameter in CreateCluster API."
+  },
+  {
+    "v": "1.37.35",
+    "t": "Added GetClusterEndpointService API. The new API allows retrieving endpoint service name specific to a cluster."
+  },
+  {
+    "v": "1.35.74",
+    "t": "Add new API operations for Amazon Aurora DSQL. Amazon Aurora DSQL is a serverless, distributed SQL database with virtually unlimited scale, highest availability, and zero infrastructure management."
+  }
+]

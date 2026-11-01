@@ -1,0 +1,58 @@
+[
+  {
+    "v": "1.43.119",
+    "t": "Adds support for Exascale storage with Oracle Exadata Database Service on Dedicated Infrastructure"
+  },
+  {
+    "v": "1.43.87",
+    "t": "Adds the ListFlexComponents API for listing the flex components available for a given DB system shape."
+  },
+  {
+    "v": "1.43.70",
+    "t": "Adds support for Oracle Exadata on Exascale Infrastructure (ExaDB-XS) resources including storage vaults and VM clusters."
+  },
+  {
+    "v": "1.43.56",
+    "t": "Documentation-only update to clarify the operation-specific valid values for the externalIdType field."
+  },
+  {
+    "v": "1.43.51",
+    "t": "Adds support for sourcing Autonomous Database admin and wallet passwords from customer-managed AWS Secrets Manager secrets, including password source configuration and summaries, and enabling or disabling the OCI IAM service role for Secrets Manager integration via InitializeService."
+  },
+  {
+    "v": "1.43.26",
+    "t": "Releases Autonomous Database Serverless APIs, autonomousDatabaseOciIntegrationIamRoles, linkedOciTenancyId, linkedOciCompartmentId, and subscriptionErrors fields in GetOciOnboardingStatus API response."
+  },
+  {
+    "v": "1.42.80",
+    "t": "Adds support for EC2 Placement Group integration with ODB Network. The GetOdbNetwork and ListOdbNetworks API responses now include the ec2PlacementGroupIds field."
+  },
+  {
+    "v": "1.42.59",
+    "t": "ODB Networking Route Management is a feature improvement which allows for implicit creation and deletion of EC2 Routes in the Peer Network Route Table designated by the customer via new optional input. This feature release is combined with Multiple App-VPC functionality for ODB Network Peering(s)."
+  },
+  {
+    "v": "1.42.31",
+    "t": "Adds support for associating and disassociating IAM roles with Autonomous VM cluster resources through the AssociateIamRoleToResource and DisassociateIamRoleFromResource APIs. The GetCloudAutonomousVmCluster and ListCloudAutonomousVmClusters API responses now include the iamRoles field."
+  },
+  {
+    "v": "1.42.7",
+    "t": "The following APIs now return CloudExadataInfrastructureArn and OdbNetworkArn fields for improved resource identification and AWS service integration - GetCloudVmCluster, ListCloudVmClusters, GetCloudAutonomousVmCluster, and ListCloudAutonomousVmClusters."
+  },
+  {
+    "v": "1.41.2",
+    "t": "Adds AssociateIamRoleToResource and DisassociateIamRoleFromResource APIs for managing IAM roles. Enhances CreateOdbNetwork and UpdateOdbNetwork APIs with KMS, STS, and cross-region S3 parameters. Adds OCI identity domain support to InitializeService API."
+  },
+  {
+    "v": "1.40.58",
+    "t": "Doc-only update that removes duplicate values from descriptions of ODB peering APIs."
+  },
+  {
+    "v": "1.40.50",
+    "t": "This release adds APIs that allow you to specify CIDR ranges in your ODB peering connection."
+  },
+  {
+    "v": "1.39.1",
+    "t": "This release adds API operations for Oracle Database@AWS. You can use the APIs to create Exadata infrastructure, ODB networks, and Exadata and Autonomous VM clusters inside AWS data centers. The infrastructure is managed by OCI. You can integrate these resources with AWS services."
+  }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "v": "1.43.117",
+    "t": "Removes the ``AAA Certificate Services`` root from botocore's vendored CA bundle in response to the eMudhra/emSign CA incident. Sectigo used this root to cross-sign eMudhra intermediate CAs whose private keys were compromised. The vendored bundle is only used when ``certifi`` isn't installed; ``certifi`` users should upgrade to ``certifi>=2026.10.19``. See `#3838 <https://github.com/boto/botocore/pull/3838>`__."
+  },
+  {
+    "v": "1.43.54",
+    "t": "Raise a configuration error when the CA bundle value (ca_bundle, AWS_CA_BUNDLE, REQUESTS_CA_BUNDLE, or the client verify parameter) resolves to an empty or whitespace-only string."
+  },
+  {
+    "v": "1.12.20",
+    "t": "Added support for configuring a client certificate and key when establishing TLS connections."
+  }
+]

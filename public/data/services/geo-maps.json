@@ -1,0 +1,38 @@
+[
+  {
+    "v": "1.43.73",
+    "t": "Amazon Location Service now supports POI density and category filtering on dynamic maps. The GetStyleDescriptor API adds two optional parameters. PoiDensity (Off to VeryDense) controls POI volume, and PoiCategories filters by up to nine categories. Available on HERE and Grab map styles."
+  },
+  {
+    "v": "1.42.84",
+    "t": "This release updates API reference documentation for Amazon Location Service Maps APIs to reflect regional restrictions for Grab Maps users"
+  },
+  {
+    "v": "1.42.80",
+    "t": "This release expands map customization options with adjustable contour line density, dark mode support for Hybrid and Satellite views, enhanced traffic information across multiple map styles, and transit and truck travel modes for Monochrome and Hybrid map styles."
+  },
+  {
+    "v": "1.42.41",
+    "t": "Added support for optional style parameters in maps, including 3D terrain and 3D Buildings"
+  },
+  {
+    "v": "1.40.59",
+    "t": "Added support for optional AdditionalFeatures parameter in the V2 GetTile API."
+  },
+  {
+    "v": "1.40.55",
+    "t": "Added support for optional style parameters in maps, including Terrain, ContourDensity, Traffic, and TravelModes."
+  },
+  {
+    "v": "1.40.20",
+    "t": "Remove incorrect endpoint tests"
+  },
+  {
+    "v": "1.37.14",
+    "t": "Provide support for vector map styles in the GetStaticMap operation."
+  },
+  {
+    "v": "1.35.52",
+    "t": "Release of Amazon Location Maps API. Maps enables you to build digital maps that showcase your locations, visualize your data, and unlock insights to drive your business"
+  }
+]

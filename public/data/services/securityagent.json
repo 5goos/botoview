@@ -1,0 +1,78 @@
+[
+  {
+    "v": "1.43.121",
+    "t": "Adds support for attaching client certificates for mutual TLS (mTLS) authentication to penetration test target endpoints via the new ClientCertificates field on Assets, enabling pentesting of endpoints that require client certificate authentication."
+  },
+  {
+    "v": "1.43.112",
+    "t": "Adds support for Jira integration provider in AWS Security Agent."
+  },
+  {
+    "v": "1.43.111",
+    "t": "Adds a test scope field to specify whether a pentest targets a web application or a generative AI application."
+  },
+  {
+    "v": "1.43.110",
+    "t": "Include model field for suggested remediation steps as part of findings"
+  },
+  {
+    "v": "1.43.108",
+    "t": "Adds trigger filters that control which pull request events, target branches, and labels start an automatic code review."
+  },
+  {
+    "v": "1.43.105",
+    "t": "Adds support for Azure DevOps and Bitbucket Data Center integration providers."
+  },
+  {
+    "v": "1.43.104",
+    "t": "Run automated penetration tests directly from your CI-CD pipeline to scan code changes before they ship, gating deployments on the findings"
+  },
+  {
+    "v": "1.43.103",
+    "t": "This release adds the ListActorMessages operation, which returns the multi-factor authentication messages received at an actor's server-generated email address"
+  },
+  {
+    "v": "1.43.102",
+    "t": "Added support for Confluence export, enabling customers to publish security findings to Confluence pages."
+  },
+  {
+    "v": "1.43.79",
+    "t": "Adding private and self-signed certificate configuration support for penetration tests"
+  },
+  {
+    "v": "1.43.71",
+    "t": "Add support for setting a maximum task-hour budget cap on penetration tests and code reviews, and for revalidating previously reported findings via a new REVALIDATION job type."
+  },
+  {
+    "v": "1.43.67",
+    "t": "Added enableEmailMfa input field on Actor to enable email-based MFA during penetration tests. When enabled, a server-generated mfaForwardingAddress is returned. Set up a forwarding rule in your email provider to forward MFA emails to this address so the agent can complete email-based MFA login flows"
+  },
+  {
+    "v": "1.43.60",
+    "t": "Adds support for providing a branch override when configured integrated repositories"
+  },
+  {
+    "v": "1.43.57",
+    "t": "AWS Security Agent adds a new task hours field that reflects the active work done for a task."
+  },
+  {
+    "v": "1.43.32",
+    "t": "Updated AWS Security Agent SDK model with new APIs for threat modeling, code review, security requirements, and additional integration providers."
+  },
+  {
+    "v": "1.43.14",
+    "t": "Adds support for verification scripts on penetration test findings. Customers can now download executable scripts to independently reproduce confirmed vulnerabilities, with instructions and required environment variables provided for each finding."
+  },
+  {
+    "v": "1.43.7",
+    "t": "Add support for code reviews, a new resource type that enables automated security-focused static analysis of source code repositories."
+  },
+  {
+    "v": "1.43.3",
+    "t": "AWS Security Agent is adding a new target domain verification method for private VPC penetration testing. Additionally, the target domain resource will now have a verification status reason field to surface additional details about domain verification"
+  },
+  {
+    "v": "1.42.80",
+    "t": "AWS Security Agent is a service that proactively secures applications throughout the development lifecycle with automated security reviews and on-demand penetration testing."
+  }
+]

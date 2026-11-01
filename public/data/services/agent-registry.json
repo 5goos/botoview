@@ -1,0 +1,22 @@
+[
+  {
+    "v": "1.43.106",
+    "t": "Minor doc update for the AWS Agent Registry Custom metadata SearchDiscoverableRegistryRecords API"
+  },
+  {
+    "v": "1.43.104",
+    "t": "AWS Agent Registry adds support for custom metadata. Discovery APIs now return custom metadata on registry records and support filtering by metadata fields. Semantic search includes custom metadata for improved relevance. Filter customMetadata fields using eq, ne, and in operators."
+  },
+  {
+    "v": "1.43.85",
+    "t": "Release HTTP and AGUI descriptors to the dataplane model"
+  },
+  {
+    "v": "1.43.84",
+    "t": "AWS Agent Registry becomes Generally Available"
+  },
+  {
+    "v": "1.43.66",
+    "t": "Agent Registry's Public Preview release"
+  }
+]

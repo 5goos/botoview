@@ -1,0 +1,14 @@
+[
+  {
+    "v": "1.43.115",
+    "t": "Fixes a regression with urllib3 v2 where truncated response bodies read in chunks raised ``ResponseStreamingError`` before botocore could validate ``Content-Length``. These reads now raise ``IncompleteReadError`` again."
+  },
+  {
+    "v": "1.43.77",
+    "t": "Fixed an issue where reused connections could return a cached response status, dropping response headers."
+  },
+  {
+    "v": "1.31.15",
+    "t": "Move 100-continue behavior to use `HTTPConnections` request interface."
+  }
+]

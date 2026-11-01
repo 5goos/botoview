@@ -1,0 +1,30 @@
+[
+  {
+    "v": "1.43.116",
+    "t": "Documentation update release for AWS service"
+  },
+  {
+    "v": "1.43.115",
+    "t": "ModifyVolume is a new public API for WorkSpaces Core Managed Instances. Customers can change the size, type, IOPS, or throughput of an existing managed volume online, with no stop required. Customers track progress by calling EC2 DescribeVolumesModifications directly."
+  },
+  {
+    "v": "1.43.84",
+    "t": "Amazon WorkSpaces Core managed instances now support nested virtualization. Customers can enable nested virtualization with supported instance types at launch via CpuOptions.NestedVirtualization in CreateWorkspaceInstance to run hypervisors and virtual machines inside their WorkSpaces Instance."
+  },
+  {
+    "v": "1.43.55",
+    "t": "This release adds Smithy RPC v2 CBOR as an additional protocol alongside the existing AWS JSON 1.0. The SDK will prioritize its most performant protocol."
+  },
+  {
+    "v": "1.42.31",
+    "t": "Added billing configuration support for WorkSpaces Instances with monthly and hourly billing modes, including new filtering capabilities for instance type searches."
+  },
+  {
+    "v": "1.40.61",
+    "t": "Update endpoint ruleset parameters casing"
+  },
+  {
+    "v": "1.38.42",
+    "t": "Added support for Amazon WorkSpaces Instances API"
+  }
+]

@@ -1,0 +1,90 @@
+[
+  {
+    "v": "1.43.90",
+    "t": "This release adds support for configuring the EBS volume initialization rate and delete on termination behavior in launch configuration template"
+  },
+  {
+    "v": "1.43.87",
+    "t": "AWS Transform for migrations adds a second network migration option - apply your source security posture to existing VPCs. Upload a source network file with firewall rules, tag the in-scope VPCs, and AWS Transform matches source subnets to them by CIDR and generates the security groups."
+  },
+  {
+    "v": "1.43.30",
+    "t": "AWS Transform for VMware now supports Amazon FSx for NetApp ONTAP as a target storage. Customers can migrate source server disks directly to FSx for NetApp ONTAP iSCSI LUNs. Target storage is configurable per source server, and compute, network, and storage migrate together in coordinated waves."
+  },
+  {
+    "v": "1.43.25",
+    "t": "AWS Transform discovery tool now supported as network migration input source. You can now use the AWS Transform Discovery tool as a source for network migration alongside modelizeIT, enabling hybrid network migrations for environments running both VMware and non-VMware workloads."
+  },
+  {
+    "v": "1.43.8",
+    "t": "Introducing new option for security groups mapping - with MAP-DHCP the service translates security rules from your source environment with DHCP compatibility."
+  },
+  {
+    "v": "1.42.97",
+    "t": "Added network modernization support, enabling customers to edit, resize, merge, and split VPCs and subnets during migration while retaining functional, non-conflicting IP addresses."
+  },
+  {
+    "v": "1.42.68",
+    "t": "Network Migration APIs are now publicly available for direct programmatic access. Customers can now call Network Migration APIs directly without going through AWS Transform (ATX), enabling automation, integration with existing tools, and self-service migration workflows."
+  },
+  {
+    "v": "1.42.64",
+    "t": "Adds support for new storeSnapshotOnLocalZone field in ReplicationConfiguration and updateReplicationConfiguration"
+  },
+  {
+    "v": "1.42.6",
+    "t": "Added parameters encryption, IPv4/IPv6 protocol configuration, and enhanced tagging support for replication operations."
+  },
+  {
+    "v": "1.40.58",
+    "t": "Update endpoint ruleset parameters casing"
+  },
+  {
+    "v": "1.34.80",
+    "t": "Added USE_SOURCE as default option to LaunchConfigurationTemplate bootMode parameter."
+  },
+  {
+    "v": "1.32.3",
+    "t": "Removed invalid and unnecessary default values."
+  },
+  {
+    "v": "1.31.60",
+    "t": "This release includes the following new APIs: ListConnectors, CreateConnector,  UpdateConnector, DeleteConnector and UpdateSourceServer to support the source action framework feature."
+  },
+  {
+    "v": "1.30.1",
+    "t": "This release introduces the Global view feature and new Replication state APIs."
+  },
+  {
+    "v": "1.29.96",
+    "t": "This release introduces the Import and export feature and expansion of the post-launch actions"
+  },
+  {
+    "v": "1.29.17",
+    "t": "This release adds support for Application and Wave management. We also now support custom post-launch actions."
+  },
+  {
+    "v": "1.27.16",
+    "t": "New and modified APIs for the Post-Migration Framework"
+  },
+  {
+    "v": "1.24.44",
+    "t": "Removed required annotation from input fields in Describe operations requests. Added quotaValue to ServiceQuotaExceededException"
+  },
+  {
+    "v": "1.24.10",
+    "t": "Add support for GP3 and IO2 volume types. Add bootMode to LaunchConfiguration object (and as a parameter to UpdateLaunchConfigurationRequest)."
+  },
+  {
+    "v": "1.23.14",
+    "t": "Application Migration Service now supports an additional replication method that does not require agent installation on each source server. This option is available for source servers running on VMware vCenter versions 6.7 and 7.0."
+  },
+  {
+    "v": "1.20.106",
+    "t": "Bug fix: Remove not supported EBS encryption type \"NONE\""
+  },
+  {
+    "v": "1.20.47",
+    "t": "Add new service - Application Migration Service."
+  }
+]

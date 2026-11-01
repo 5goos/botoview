@@ -1,0 +1,186 @@
+[
+  {
+    "v": "1.43.122",
+    "t": "Adds AgentCore Runtime session endpoint support, including sessionEndpointUrl on the InvokeAgentRuntime response"
+  },
+  {
+    "v": "1.43.118",
+    "t": "Adds the dimension name to evaluation results and batch evaluation summaries. For multi-dimensional LLM-as-a-Judge evaluators, each result and summary now identifies which dimension it corresponds to."
+  },
+  {
+    "v": "1.43.115",
+    "t": "Adds the Builtin.FailureAnalysis evaluator for batch evaluations. GetBatchEvaluation now returns insightResults that group session failures into insights with root causes and suggested fixes."
+  },
+  {
+    "v": "1.43.112",
+    "t": "AgentCore Memory now supports Long-Term Memory Time-to-Live on Batch APIs."
+  },
+  {
+    "v": "1.43.99",
+    "t": "Amazon Bedrock AgentCore Harness now supports lifecycle hooks for invocations and tool calls, with Lambda, SNS, and EventBridge targets. This release also adds apiBase for custom OpenAI-compatible endpoints."
+  },
+  {
+    "v": "1.43.97",
+    "t": "Batch evaluation now supports evaluating specific traces within a session. Each session can specify up to 100 trace IDs to evaluate."
+  },
+  {
+    "v": "1.43.88",
+    "t": "Adds log group name prefix trace source selection, custom or source log group result destinations, and metrics namespace customization"
+  },
+  {
+    "v": "1.43.87",
+    "t": "Batch evaluation now supports up to 10 CloudWatch log groups per CloudWatchLogsSource"
+  },
+  {
+    "v": "1.43.83",
+    "t": "AgentCore Memory now supports direct ingestion into long-term memory via IngestData API"
+  },
+  {
+    "v": "1.43.78",
+    "t": "Increase spans count from 1k to 20k"
+  },
+  {
+    "v": "1.43.75",
+    "t": "AgentCore Memory now supports Flexible Namespaces and Non-Conversational Payloads in CreateEvent API"
+  },
+  {
+    "v": "1.43.72",
+    "t": "Add support for the Machine Payments Protocol (MPP) and x402 upto scheme payments protocol in Amazon Bedrock AgentCore Payments. Customers can now pay for MPP-gated resources and also pay services which requires upto scheme in x402"
+  },
+  {
+    "v": "1.43.69",
+    "t": "Adding online eval arn as input for recommendation API"
+  },
+  {
+    "v": "1.43.66",
+    "t": "Add support for capacity provider sessions in Amazon Bedrock AgentCore. Customers can now delete an active session running on a runtime instance launched through their capacity provider."
+  },
+  {
+    "v": "1.43.55",
+    "t": "Adds support for the Bring Your Own Storage(BYOS) feature in AgentCore Browser and Code Interpreter. Enables mounting S3Files and EFS File Systems via Access points."
+  },
+  {
+    "v": "1.43.52",
+    "t": "Add W3C trace context headers (traceparent, tracestate, baggage) and X-Amzn-Trace-Id to InvokeHarness request for end-to-end observability propagation. Add toolResultMetadata to the streaming content block delta for MCP tool result meta delivery without oversized SSE frames."
+  },
+  {
+    "v": "1.43.35",
+    "t": "Adds an optional extractionMode field to CreateEvent. SKIP retains the event in short-term memory but excludes it from long-term memory extraction."
+  },
+  {
+    "v": "1.43.32",
+    "t": "AgentCore Harness service will be Generally Available at NYS 2026 with this Treb release. Harness will support invoking specific endpoints via the qualifier parameter, AWS Skills for pre-built agent capabilities, and improved validation for skill git source URLs."
+  },
+  {
+    "v": "1.43.29",
+    "t": "Added tagging and CMK support across optimization, an explanation field in recommendation output, and an insights feature to identify failure patterns, extract user intents, and summarize execution behavior"
+  },
+  {
+    "v": "1.43.28",
+    "t": "Adds support to perform cross account data plane actions on an AgentCore Memory resource"
+  },
+  {
+    "v": "1.43.26",
+    "t": "Add RetryableConflictException (HTTP 409) to InvokeAgentRuntimeCommand and GetAgentCard to prevent orphaned VMs during concurrent session access. The SDK automatically retries this exception with backoff. Enforcement is not yet active and will be enabled in a future service update."
+  },
+  {
+    "v": "1.43.17",
+    "t": "Added Harness support for LiteLLM model configuration for third-party model providers. Added S3 and Git skill source types. Added Responses API format for OpenAI and Bedrock models. Added runtimeUserId and runtimeClientError to InvokeHarness."
+  },
+  {
+    "v": "1.43.11",
+    "t": "Add RetryableConflictException (HTTP 409) to InvokeAgentRuntime and StopRuntimeSession to prevent orphaned VMs during concurrent session access. The SDK automatically retries this exception with backoff. Enforcement is not yet active and will be enabled in a future service update."
+  },
+  {
+    "v": "1.43.6",
+    "t": "Launching AgentCore payments - a capability that provides secure, instant microtransaction payments for AI agents to access paid APIs, MCP servers, and content. It handles payment processing for x402 protocol, payment limits, and 3P wallet integrations with Coinbase CDP and Stripe (Privy)."
+  },
+  {
+    "v": "1.43.1",
+    "t": "AgentCore Identity now supports on-behalf-of token exchange OAuth2. AgentCore Memory now supports metadata for LongTerm Memory Records."
+  },
+  {
+    "v": "1.43.0",
+    "t": "Adds batch evaluation for running evaluators against multiple agent sessions with server-side orchestration, AI-powered recommendations for optimizing system prompts and tool descriptions, and AB testing with controlled traffic splitting and statistical significance reporting"
+  },
+  {
+    "v": "1.42.94",
+    "t": "Adds support for Amazon Bedrock AgentCore Harness data plane APIs, enabling customers to invoke managed agent loops and execute commands on live agent sessions with streaming responses."
+  },
+  {
+    "v": "1.42.90",
+    "t": "Introducing NamespacePath in AgentCore Memory to support hierarchical prefix based memory record retrieval."
+  },
+  {
+    "v": "1.42.87",
+    "t": "Introducing support for SearchRegistryRecords API on AgentCoreRegistry"
+  },
+  {
+    "v": "1.42.85",
+    "t": "This release includes support for 1) InvokeBrowser API, enabling OS-level control of AgentCore Browser Tool sessions through mouse actions, keyboard input, and screenshots. 2) Added documentation noting that empty sessions are automatically deleted after one day in the ListSessions API."
+  },
+  {
+    "v": "1.42.81",
+    "t": "Added the ability to filter out empty sessions when listing sessions. Customers can now retrieve only sessions that still contain events, eliminating the need to check each session individually. No changes required for existing integrations."
+  },
+  {
+    "v": "1.42.79",
+    "t": "Adds Ground Truth support for AgentCore Evaluations (Evaluate)"
+  },
+  {
+    "v": "1.42.78",
+    "t": "Adding AgentCore Code Interpreter Node.js Runtime Support with an optional runtime field"
+  },
+  {
+    "v": "1.42.72",
+    "t": "This release includes SDK support for the following new features on AgentCore Built In Tools.  1. Enterprise Policies for AgentCore Browser Tool. 2. Root CA Configuration Support for AgentCore Browser Tool and Code Interpreter. 3. API changes to AgentCore Browser Profile APIs"
+  },
+  {
+    "v": "1.42.69",
+    "t": "Provide support to perform deterministic operations on agent runtime through shell command executions via the new InvokeAgentRuntimeCommand API"
+  },
+  {
+    "v": "1.42.46",
+    "t": "Added AgentCore browser proxy configuration support, allowing routing of browser traffic through HTTP and HTTPS proxy servers with authentication and bypass rules."
+  },
+  {
+    "v": "1.42.43",
+    "t": "Support Browser profile persistence (cookies and local storage) across sessions for AgentCore Browser."
+  },
+  {
+    "v": "1.42.32",
+    "t": "Supports custom browser extensions for AgentCore Browser and increased message payloads up to 100KB per message in an Event for AgentCore Memory"
+  },
+  {
+    "v": "1.42.1",
+    "t": "Support for AgentCore Evaluations and Episodic memory strategy for AgentCore Memory."
+  },
+  {
+    "v": "1.41.1",
+    "t": "Bedrock AgentCore Memory release for redriving memory extraction jobs (StartMemoryExtractionJob and ListMemoryExtractionJob)"
+  },
+  {
+    "v": "1.40.58",
+    "t": "Fixing the service documentation name"
+  },
+  {
+    "v": "1.40.51",
+    "t": "Updated InvokeAgentRuntime API to accept account id optionally and added CompleteResourceTokenAuth API."
+  },
+  {
+    "v": "1.40.50",
+    "t": "Bedrock AgentCore release for Runtime, and Memory."
+  },
+  {
+    "v": "1.40.46",
+    "t": "Add support for batch memory management, agent card retrieval and session termination"
+  },
+  {
+    "v": "1.40.2",
+    "t": "Remove superfluous field from API"
+  },
+  {
+    "v": "1.39.7",
+    "t": "Initial release of Amazon Bedrock AgentCore SDK including Runtime, Built-In Tools, Memory, Gateway and Identity."
+  }
+]

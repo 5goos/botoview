@@ -1,0 +1,22 @@
+[
+  {
+    "v": "1.43.101",
+    "t": "Multi language support with code switching, custom template sectionHeader now allows underscores."
+  },
+  {
+    "v": "1.43.37",
+    "t": "Expand input validation to support Unicode characters and markdown table syntax."
+  },
+  {
+    "v": "1.43.27",
+    "t": "Add support for MedicalScribeBinaryAudioEvent in the Medical Scribe streaming input. This new event type lets you send audio as a raw binary payload instead of a base64-encoded value"
+  },
+  {
+    "v": "1.42.96",
+    "t": "Corrected CreateWebAppConfiguration documentation. Adding slash as an allowed character for the Ambient documentation agent to allow pronoun specifications."
+  },
+  {
+    "v": "1.42.62",
+    "t": "Connect-Health SDK is AWS's unified SDK for the Amazon Connect Health offering. It allows healthcare developers to integrate purpose-built agents - such as patient insights, ambient documentation, and medical coding - into their existing applications, including EHRs, telehealth, and revenue cycle."
+  }
+]

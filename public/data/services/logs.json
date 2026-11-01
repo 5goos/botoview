@@ -1,0 +1,334 @@
+[
+  {
+    "v": "1.43.123",
+    "t": "Adds support for account-level retention policies in Amazon CloudWatch Logs. Customers can now use PutAccountPolicy with the new RETENTION POLICY type to set default log retention across all log groups in an account. Includes dry-run mode to preview the impact of policy changes before applying them."
+  },
+  {
+    "v": "1.43.115",
+    "t": "Amazon CloudWatch Logs now supports filtering DescribeDeliverySources by resourceArns, DescribeDeliveryDestinations by names, and DescribeDeliveries by deliverySourceNames."
+  },
+  {
+    "v": "1.43.106",
+    "t": "Amazon CloudWatch Logs now supports an optional roleArn parameter on PutDeliveryDestination for X-Ray trace delivery destinations, specifying the IAM role to assume when delivering traces."
+  },
+  {
+    "v": "1.43.82",
+    "t": "Added resultCount to QueryStatistics in GetQueryResults. This field returns the total number of output rows in the final result set, helping customers programmatically determine whether a query produced results after all operations including post-aggregation filters."
+  },
+  {
+    "v": "1.43.66",
+    "t": "This release adds index category support to the CloudWatch Logs DescribeFieldIndexes API. Customers can filter and identify DEFAULT, CUSTOM, AUTO, and INACTIVE field indexes."
+  },
+  {
+    "v": "1.43.62",
+    "t": "Amazon CloudWatch Logs now lets you create and update lookup tables directly from CloudWatch Logs query results by passing a queryId, and configure a lookup table as a scheduled query destination so it refreshes automatically with the latest query results on each run."
+  },
+  {
+    "v": "1.43.41",
+    "t": "Added PutStorageTierPolicy and GetStorageTierPolicy APIs to Amazon CloudWatch Logs. Customers can now configure account-level Intelligent Tiering to automatically optimize log storage costs by moving infrequently accessed data to lower-cost storage tiers."
+  },
+  {
+    "v": "1.43.35",
+    "t": "CloudWatch Logs Updates - New APIs introduced to support syslog ingestion to a log group. For more information, see CloudWatch Logs API documentation."
+  },
+  {
+    "v": "1.43.33",
+    "t": "Added optional startFromHead parameter to FilterLogEvents enabling descending timestamp order (newest first) when set to false. Default true preserves existing ascending order. Reverse sorting requires a startTime on or after Jan 1, 2024."
+  },
+  {
+    "v": "1.43.30",
+    "t": "Added endTimeOffset parameter to Scheduled Queries APIs (Create, Update, Get) enabling bounded time window configuration. Introduced scheduleType filter (CUSTOMER MANAGED, AWS MANAGED) for ListScheduledQueries and exposed it in Get and Update responses."
+  },
+  {
+    "v": "1.43.9",
+    "t": "Updating the max limit for start query api parameter."
+  },
+  {
+    "v": "1.43.3",
+    "t": "Adding an additional optional deliverySourceConfiguration field to PutDeliverySource API. This enables customers to pass service-specific configurations through IngestionHub such as tracing enablement or sampling rates that will be propagated to the source resource."
+  },
+  {
+    "v": "1.43.2",
+    "t": "Adds support for filtering log groups by tags in the ListLogGroups API via the new logGroupTags parameter."
+  },
+  {
+    "v": "1.42.97",
+    "t": "Adds support for selecting all logs sources and types in a single association."
+  },
+  {
+    "v": "1.42.96",
+    "t": "Adding nextToken and maxItems to the GetQueryResults API."
+  },
+  {
+    "v": "1.42.90",
+    "t": "Endpoint update for CloudWatch Logs Streaming APIs."
+  },
+  {
+    "v": "1.42.83",
+    "t": "Added queryDuration, bytesScanned, and userIdentity fields to the QueryInfo response object returned by DescribeQueries. Customers can now view detailed query cost information including who ran the query, how long it took, and the volume of data scanned."
+  },
+  {
+    "v": "1.42.82",
+    "t": "We are pleased to announce that our logs transformation csv processor now has a destination field, allowing you to specify under which parent node parsed columns be placed under."
+  },
+  {
+    "v": "1.42.79",
+    "t": "Adds Lookup Tables to CloudWatch Logs for log enrichment using CSV key-value data with KMS encryption support."
+  },
+  {
+    "v": "1.42.77",
+    "t": "This release adds parameter support to saved queries in CloudWatch Logs Insights. Define reusable query templates with named placeholders, invoke them using start query. Available in Console, CLI and SDK"
+  },
+  {
+    "v": "1.42.60",
+    "t": "CloudWatch Logs updates- Added support for the PutBearerTokenAuthentication API to enable or disable bearer token authentication on a log group. For more information, see CloudWatch Logs API documentation."
+  },
+  {
+    "v": "1.42.10",
+    "t": "This release allows you to import your historical CloudTrail Lake data into CloudWatch with a few steps, enabling you to easily consolidate operational, security, and compliance data in one place."
+  },
+  {
+    "v": "1.42.1",
+    "t": "CloudWatch Logs adds managed S3 Tables integration to access logs using other analytical tools, as well as facets and field indexing to simplify log analytics in CloudWatch Logs Insights."
+  },
+  {
+    "v": "1.41.3",
+    "t": "New CloudWatch Logs feature - LogGroup Deletion Protection, a capability that allows customers to safeguard their critical CloudWatch log groups from accidental or unintended deletion."
+  },
+  {
+    "v": "1.41.0",
+    "t": "Adding support for ocsf version 1.5, add optional parameter MappingVersion"
+  },
+  {
+    "v": "1.40.76",
+    "t": "CloudWatch Logs updates: Added capability to setup a recurring schedule for log insights queries. Logs introduced Scheduled Queries (managed through Create/Update/Get/Delete/List/History Scheduled Query APIs). For more information, see CloudWatch Logs API documentation."
+  },
+  {
+    "v": "1.40.64",
+    "t": "Update endpoint ruleset parameters casing"
+  },
+  {
+    "v": "1.40.32",
+    "t": "Cloudwatch Logs added support for 2 new API parameters in metric and subscription filter APIs to filter log events based on system field values and emit system field values as dimensions and send them to customer destination as additional metadata."
+  },
+  {
+    "v": "1.39.9",
+    "t": "CloudWatchLogs launches GetLogObject API with streaming support for efficient log data retrieval. Logs added support for new AccountPolicy type METRIC_EXTRACTION_POLICY. For more information, see CloudWatch Logs API documentation"
+  },
+  {
+    "v": "1.39.7",
+    "t": "CloudWatch Logs updates: Added X-Ray tracing for Amazon Bedrock Agent resources. Logs introduced Log Group level resource policies (managed through Put/Delete/Describe Resource Policy APIs). For more information, see CloudWatch Logs API documentation."
+  },
+  {
+    "v": "1.39.0",
+    "t": "Increase minimum length of queryId parameter to 1 character."
+  },
+  {
+    "v": "1.38.39",
+    "t": "Added CloudWatch Logs Transformer support for converting CloudTrail, VPC Flow, EKS Audit, AWS WAF and Route53 Resolver logs to OCSF v1.1 format."
+  },
+  {
+    "v": "1.38.16",
+    "t": "This release adds a new API \"ListLogGroups\" and an improvement in API \"DescribeLogGroups\""
+  },
+  {
+    "v": "1.38.13",
+    "t": "We are pleased to announce limit increases to our grok processor logs transformation feature. Now you can define 20 Grok patterns in their configurations, with an expanded total pattern matching limit of 512 characters."
+  },
+  {
+    "v": "1.38.6",
+    "t": "CloudWatch Logs supports \"DELIVERY\" log class. This log class is used only for delivering AWS Lambda logs to Amazon S3 or Amazon Data Firehose."
+  },
+  {
+    "v": "1.37.12",
+    "t": "Updated CreateLogAnomalyDetector to accept only kms key arn"
+  },
+  {
+    "v": "1.36.3",
+    "t": "Documentation-only update to address doc errors"
+  },
+  {
+    "v": "1.35.81",
+    "t": "Limit PutIntegration IntegrationName and ListIntegrations IntegrationNamePrefix parameters to 50 characters"
+  },
+  {
+    "v": "1.35.72",
+    "t": "Adds PutIntegration, GetIntegration, ListIntegrations and DeleteIntegration APIs. Adds QueryLanguage support to StartQuery, GetQueryResults, DescribeQueries, DescribeQueryDefinitions, and PutQueryDefinition APIs."
+  },
+  {
+    "v": "1.35.67",
+    "t": "Adds \"Create field indexes to improve query performance and reduce scan volume\" and \"Transform logs during ingestion\". Updates documentation for \"PutLogEvents with Entity\"."
+  },
+  {
+    "v": "1.35.54",
+    "t": "This release introduces an improvement in PutLogEvents"
+  },
+  {
+    "v": "1.35.51",
+    "t": "Added support for new optional baseline parameter in the UpdateAnomaly API. For UpdateAnomaly requests with baseline set to True, The anomaly behavior is then treated as baseline behavior. However, more severe occurrences of this behavior will still be reported as anomalies."
+  },
+  {
+    "v": "1.35.49",
+    "t": "Adding inferred token name for dynamic tokens in Anomalies."
+  },
+  {
+    "v": "1.35.12",
+    "t": "Update to support new APIs for delivery of logs from AWS services."
+  },
+  {
+    "v": "1.35.10",
+    "t": "This release introduces a new optional parameter: Entity, in PutLogEvents request"
+  },
+  {
+    "v": "1.34.151",
+    "t": "Add v2 smoke tests and smithy smokeTests trait for SDK testing."
+  },
+  {
+    "v": "1.34.66",
+    "t": "Update LogSamples field in Anomaly model to be a list of LogEvent"
+  },
+  {
+    "v": "1.34.36",
+    "t": "This release adds a new field, logGroupArn, to the response of the logs:DescribeLogGroups action."
+  },
+  {
+    "v": "1.34.16",
+    "t": "Add support for account level subscription filter policies to PutAccountPolicy, DescribeAccountPolicies, and DeleteAccountPolicy APIs. Additionally, PutAccountPolicy has been modified with new optional \"selectionCriteria\" parameter for resource selection."
+  },
+  {
+    "v": "1.33.13",
+    "t": "This release introduces the StartLiveTail API to tail ingested logs in near real time."
+  },
+  {
+    "v": "1.32.7",
+    "t": "Added APIs to Create, Update, Get, List and Delete LogAnomalyDetectors and List and Update Anomalies in Detector. Added LogGroupClass attribute for LogGroups to classify loggroup as Standard loggroup with all capabilities or InfrequentAccess loggroup with limited capabilities."
+  },
+  {
+    "v": "1.31.83",
+    "t": "Update to support new APIs for delivery of logs from AWS services."
+  },
+  {
+    "v": "1.31.52",
+    "t": "Add ClientToken to QueryDefinition CFN Handler in CWL"
+  },
+  {
+    "v": "1.31.1",
+    "t": "Add CMK encryption support for CloudWatch Logs Insights query result data"
+  },
+  {
+    "v": "1.29.149",
+    "t": "This change adds support for account level data protection policies using 3 new APIs, PutAccountPolicy, DeleteAccountPolicy and DescribeAccountPolicy. DescribeLogGroup API has been modified to indicate if account level policy is applied to the LogGroup via \"inheritedProperties\" list in the response."
+  },
+  {
+    "v": "1.29.53",
+    "t": "Bug fix - Removed the regex pattern validation from CoralModel to avoid potential security issue."
+  },
+  {
+    "v": "1.29.49",
+    "t": "Bug fix: logGroupName is now not a required field in GetLogEvents, FilterLogEvents, GetLogGroupFields, and DescribeLogStreams APIs as logGroupIdentifier can be provided instead"
+  },
+  {
+    "v": "1.29.43",
+    "t": "Update to remove sequenceToken as a required field in PutLogEvents calls."
+  },
+  {
+    "v": "1.29.27",
+    "t": "Doc-only update for CloudWatch Logs, for Tagging Permissions clarifications"
+  },
+  {
+    "v": "1.29.17",
+    "t": "Updates to support CloudWatch Logs data protection and CloudWatch cross-account observability"
+  },
+  {
+    "v": "1.29.3",
+    "t": "Doc-only update for bug fixes and support of export to buckets encrypted with SSE-KMS"
+  },
+  {
+    "v": "1.28.5",
+    "t": "SDK release to support tagging for destinations and log groups with TagResource. Also supports tag on create with PutDestination."
+  },
+  {
+    "v": "1.26.5",
+    "t": "Doc-only update to publish the new valid values for log retention"
+  },
+  {
+    "v": "1.23.22",
+    "t": "This release adds AWS Organizations support as condition key in destination policy for cross account Subscriptions in CloudWatch Logs."
+  },
+  {
+    "v": "1.21.23",
+    "t": "Documentation-only update for CloudWatch Logs"
+  },
+  {
+    "v": "1.20.79",
+    "t": "This release provides dimensions and unit support for metric filters."
+  },
+  {
+    "v": "1.17.48",
+    "t": "Update logs client to latest version"
+  },
+  {
+    "v": "1.16.5",
+    "t": "Update logs client to latest version"
+  },
+  {
+    "v": "1.13.50",
+    "t": "Update logs client to latest version"
+  },
+  {
+    "v": "1.13.19",
+    "t": "Update logs client to latest version"
+  },
+  {
+    "v": "1.12.197",
+    "t": "Update logs client to latest version"
+  },
+  {
+    "v": "1.12.163",
+    "t": "Update logs client to latest version"
+  },
+  {
+    "v": "1.12.114",
+    "t": "Update logs client to latest version"
+  },
+  {
+    "v": "1.12.85",
+    "t": "Update logs client to latest version"
+  },
+  {
+    "v": "1.12.53",
+    "t": "Update logs client to latest version"
+  },
+  {
+    "v": "1.12.0",
+    "t": "Update logs client to latest version"
+  },
+  {
+    "v": "1.10.72",
+    "t": "Update logs client to latest version"
+  },
+  {
+    "v": "1.7.16",
+    "t": "Update logs client to latest version"
+  },
+  {
+    "v": "1.7.7",
+    "t": "Update logs client to latest version"
+  },
+  {
+    "v": "1.5.51",
+    "t": "Update logs client to latest version"
+  },
+  {
+    "v": "1.4.86",
+    "t": "Update logs client to latest version"
+  },
+  {
+    "v": "1.4.71",
+    "t": "Update logs client to latest version"
+  },
+  {
+    "v": "1.4.42",
+    "t": "Update logs client to latest version"
+  }
+]

@@ -1,0 +1,18 @@
+[
+  {
+    "v": "1.43.55",
+    "t": "This release adds Smithy RPC v2 CBOR as an additional protocol alongside the existing AWS JSON 1.0. The SDK will prioritize its most performant protocol."
+  },
+  {
+    "v": "1.40.55",
+    "t": "Update endpoint ruleset parameters casing"
+  },
+  {
+    "v": "1.40.35",
+    "t": "Model whitespace change - no client difference"
+  },
+  {
+    "v": "1.29.46",
+    "t": "Introducing Amazon Kendra Intelligent Ranking, a new set of Kendra APIs that leverages Kendra semantic ranking capabilities to improve the quality of search results from other search services (i.e. OpenSearch, ElasticSearch, Solr)."
+  }
+]

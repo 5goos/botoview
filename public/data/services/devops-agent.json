@@ -1,0 +1,62 @@
+[
+  {
+    "v": "1.43.117",
+    "t": "Adds support for Microsoft Teams as a notification service. Associations can now be created and updated with a Microsoft Teams team and channel configuration using the DevOps Agent API and SDKs."
+  },
+  {
+    "v": "1.43.115",
+    "t": "Documentation update release for AWS service"
+  },
+  {
+    "v": "1.43.112",
+    "t": "Adds support for the includedData field in GetAgentSpace and ListAgentSpaces APIs"
+  },
+  {
+    "v": "1.43.110",
+    "t": "Adds release management associations with private network access to AWS DevOps Agent, and a releaseManagementAssociationId field on GitHub and GitLab associations. This helps release management agents (Release-readiness review and Release Testing) access customer resources that are behind a VPC."
+  },
+  {
+    "v": "1.43.84",
+    "t": "Adds support for Slack bidirectional communication configuration in AWS DevOps Agent agent spaces."
+  },
+  {
+    "v": "1.43.81",
+    "t": "AWS DevOps Agent now supports trigger filter groups for Release Readiness Review, letting you control when the capability auto-triggers based on webhook events and target branches."
+  },
+  {
+    "v": "1.43.80",
+    "t": "Adds the UpdateApprovalAction API for resolving agent action approvals in AWS DevOps Agent agent spaces."
+  },
+  {
+    "v": "1.43.32",
+    "t": "Adds support for Remote A2A (Agent-to-Agent) agent registration and management. Adds new Release Readiness Review and Release Testing capabilities. Adds support for Git managed skills in AWS DevOps Agent."
+  },
+  {
+    "v": "1.43.29",
+    "t": "Adds support for Trigger CRUD APIs (CreateTrigger, GetTrigger, UpdateTrigger, DeleteTrigger, ListTriggers) for managing schedule-based automation triggers in DevOps Agent agent spaces."
+  },
+  {
+    "v": "1.43.25",
+    "t": "Add Asset APIs for managing versioned assets and asset files in AWS DevOps Agent agent spaces."
+  },
+  {
+    "v": "1.43.11",
+    "t": "Added a new serviceType mcpserversigv4 service and association. This provides feature to register MCP sigv4 authorization based MCPs"
+  },
+  {
+    "v": "1.42.90",
+    "t": "Deprecate the userId from the Chat operations. This update also removes  support of AllowVendedLogDeliveryForResource API from AWS SDKs."
+  },
+  {
+    "v": "1.42.88",
+    "t": "Devops Agent now supports associate Splunk, Datadog and custom MCP server to an Agent Space."
+  },
+  {
+    "v": "1.42.80",
+    "t": "AWS DevOps Agent service General Availability release."
+  },
+  {
+    "v": "1.42.79",
+    "t": "AWS DevOps Agent General Availability."
+  }
+]

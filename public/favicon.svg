@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Upper Wing: Bright Amber / Sunlight Orange -->
+    <linearGradient id="amberWing" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f97316"/>
+      <stop offset="100%" stop-color="#fdba74"/>
+    </linearGradient>
+
+    <!-- Lower Wing: Vibrant Primary AWS Orange -->
+    <linearGradient id="orangeWing" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ea580c"/>
+      <stop offset="100%" stop-color="#f97316"/>
+    </linearGradient>
+
+    <!-- Left Spine: Deep Structural Bronze-Orange -->
+    <linearGradient id="spineGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fb923c"/>
+      <stop offset="50%" stop-color="#f97316"/>
+      <stop offset="100%" stop-color="#c2410c"/>
+    </linearGradient>
+
+    <!-- Center Viewfinder Focal Ray -->
+    <linearGradient id="viewRay" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fb923c" stop-opacity="0.9"/>
+      <stop offset="60%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#fed7aa"/>
+    </linearGradient>
+
+    <!-- Beacon Glow Filter -->
+    <filter id="beaconAura" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#ea580c" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <g transform="translate(7, 0)">
+    <!-- 1. Left Vertical Timeline Spine (Changelog Rail) -->
+    <rect x="76" y="88" width="60" height="336" rx="28" fill="url(#spineGrad)"/>
+
+    <!-- 2. Upper Release Tier (B Upper Loop with True Transparent Cutout) -->
+    <path fill-rule="evenodd" clip-rule="evenodd"
+          d="M 126 88 
+             L 264 88 
+             C 336 88, 388 132, 388 198 
+             C 388 248, 348 280, 292 286 
+             L 126 286 
+             Z
+             M 152 144 
+             L 254 144 
+             C 288 144, 314 162, 314 196 
+             C 314 228, 288 238, 254 238 
+             L 152 238 
+             Z" 
+          fill="url(#amberWing)"/>
+
+    <!-- 3. Lower Release Tier (B Lower Loop with True Transparent Cutout) -->
+    <path fill-rule="evenodd" clip-rule="evenodd"
+          d="M 126 264 
+             L 296 264 
+             C 368 264, 420 302, 420 362 
+             C 420 414, 372 424, 302 424 
+             L 126 424 
+             Z
+             M 152 312 
+             L 284 312 
+             C 322 312, 348 328, 348 358 
+             C 348 384, 322 388, 284 388 
+             L 152 388 
+             Z" 
+          fill="url(#orangeWing)"/>
+
+    <!-- 4. Dynamic Forward Viewfinder Horizon Blade ('V') -->
+    <polygon points="252,266 388,126 422,160 286,300" fill="url(#viewRay)"/>
+
+    <!-- 5. Active Release Beacon Node (Focal Lens) -->
+    <circle cx="396" cy="134" r="16" fill="#fed7aa" filter="url(#beaconAura)"/>
+    <circle cx="396" cy="134" r="8" fill="#ea580c"/>
+    <circle cx="396" cy="134" r="3.5" fill="#ffffff"/>
+  </g>
+</svg>

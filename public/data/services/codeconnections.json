@@ -1,0 +1,26 @@
+[
+  {
+    "v": "1.43.115",
+    "t": "Documentation update release for AWS service"
+  },
+  {
+    "v": "1.43.110",
+    "t": "This release adds Smithy RPC v2 CBOR as an additional protocol alongside the existing AWS JSON 1.0. The SDK will prioritize its most performant protocol."
+  },
+  {
+    "v": "1.40.61",
+    "t": "Update endpoint ruleset parameters casing"
+  },
+  {
+    "v": "1.40.2",
+    "t": "New integration with Azure DevOps provider type."
+  },
+  {
+    "v": "1.35.23",
+    "t": "This release adds the PullRequestComment field to CreateSyncConfiguration API input, UpdateSyncConfiguration API input, GetSyncConfiguration API output and ListSyncConfiguration API output"
+  },
+  {
+    "v": "1.34.74",
+    "t": "Duplicating the CodeStar Connections service into the new, rebranded AWS CodeConnections service."
+  }
+]

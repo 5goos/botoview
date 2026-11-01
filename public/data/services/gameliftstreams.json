@@ -1,0 +1,70 @@
+[
+  {
+    "v": "1.43.59",
+    "t": "Adds ListApplicationShaderCaches API to retrieve shader cache metadata for applications and adds stream URLs, which give end users temporary, unauthenticated access to a stream session in their browser. Includes CreateStreamUrl, GetStreamUrl, ListStreamUrls, and RevokeStreamUrl operations."
+  },
+  {
+    "v": "1.43.55",
+    "t": "GameLift Streams now supports configuring a custom aspect ratio per stream session to accommodate different player devices. Supported aspect ratios include landscape, portrait, and square - delivering a full-screen experience without letterboxing or cropping."
+  },
+  {
+    "v": "1.43.51",
+    "t": "Amazon GameLift Streams now supports assigning an IAM role to a stream session, enabling your application to securely access resources in your AWS account, such as Amazon S3 buckets and DynamoDB tables."
+  },
+  {
+    "v": "1.43.39",
+    "t": "Added CreateStreamSessionAdminShell API operation to enable customers to establish secure terminal connections to the live runtime environment of streaming sessions for troubleshooting purposes."
+  },
+  {
+    "v": "1.43.14",
+    "t": "Added new Gen6 stream classes based on the EC2 G6e instance family. These classes are designed for streaming high-fidelity, graphically demanding games and applications that benefit from additional GPU memory and performance."
+  },
+  {
+    "v": "1.42.97",
+    "t": "Adds Proton 10.0-4 to the list of runtime environment options available when creating an Amazon GameLift Streams application"
+  },
+  {
+    "v": "1.42.68",
+    "t": "Feature launch that enables customers to connect streaming sessions to their own VPCs running in AWS."
+  },
+  {
+    "v": "1.42.63",
+    "t": "Added new Gen6 stream classes based on the EC2 G6f instance family. These stream classes provide cost-optimized options for streaming well-optimized or lower-fidelity games on Windows environments."
+  },
+  {
+    "v": "1.42.12",
+    "t": "Added new stream group operation parameters for scale-on-demand capacity with automatic prewarming. Added new Gen6 stream classes based on the EC2 G6 instance family. Added new StartStreamSession parameter for exposure of real-time performance stats to clients."
+  },
+  {
+    "v": "1.40.61",
+    "t": "Add stream group expiration date and expired status"
+  },
+  {
+    "v": "1.40.59",
+    "t": "Add status reasons for TERMINATED stream sessions"
+  },
+  {
+    "v": "1.40.55",
+    "t": "Updates documentation to clarify valid application binaries for an Amazon GameLift Streams application and provide descriptions of stream session error status reasons"
+  },
+  {
+    "v": "1.40.15",
+    "t": "The default application in a stream group can now be changed at any time using UpdateStreamGroup to update the DefaultApplicationIdentifier."
+  },
+  {
+    "v": "1.40.5",
+    "t": "Adds Proton 9.0-2 to the list of runtime environment options available when creating an Amazon GameLift Streams application"
+  },
+  {
+    "v": "1.38.34",
+    "t": "Documentation updates for Amazon GameLift Streams to address formatting errors, correct resource ID examples, and update links to other guides"
+  },
+  {
+    "v": "1.37.20",
+    "t": "Minor updates to improve developer experience."
+  },
+  {
+    "v": "1.37.7",
+    "t": "New Service: Amazon GameLift Streams delivers low-latency game streaming from AWS global infrastructure to virtually any device with a browser at up to 1080p resolution and 60 fps."
+  }
+]

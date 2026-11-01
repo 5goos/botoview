@@ -1,0 +1,278 @@
+[
+  {
+    "v": "1.43.122",
+    "t": "Adds Session Endpoint Feature on AgentCore Runtime"
+  },
+  {
+    "v": "1.43.120",
+    "t": "Adds the ResetTokenVaultKeyMaterial API, which restores a token vault whose customer managed key was deleted by moving it to an AWS owned key. The reset permanently deletes the stored OAuth 2.0 tokens, users must consent again. Adds on-behalf-of token exchange client authentication override option."
+  },
+  {
+    "v": "1.43.118",
+    "t": "Adds model-based routing and fallback to AgentCore Gateway rules. Rules can match the requested model, route to a specific model, and fall back across inference targets with an optional circuit breaker. Adds multi-dimensional rating scales for AgentCore Evaluations LLM-as-a-Judge evaluators."
+  },
+  {
+    "v": "1.43.114",
+    "t": "This release supports scoping Amazon Bedrock AgentCore Gateway rate limits by request header or request body field."
+  },
+  {
+    "v": "1.43.112",
+    "t": "AgentCore Memory now supports configuring Long-Term Memory Time-to-Live (TTL) on Memory Strategies."
+  },
+  {
+    "v": "1.43.106",
+    "t": "This release adds support for private certificate authorities on Amazon Bedrock AgentCore Gateway targets. The new certificateConfigurations parameter on CreateGatewayTarget and UpdateGatewayTarget references a PEM-encoded CA certificate in Amazon S3 or AWS Secrets Manager."
+  },
+  {
+    "v": "1.43.104",
+    "t": "Amazon Bedrock AgentCore Gateway now supports returning the complete MCP tools list in a single response by disabling pagination for the tools list operation. This feature is available in limited preview."
+  },
+  {
+    "v": "1.43.103",
+    "t": "Amazon Bedrock AgentCore Payments now supports credential rotation for payment connectors, letting you rotate API and wallet secrets for Quick Create payment auths from the console. This release also adds Type and Creation type columns to the payment managers views."
+  },
+  {
+    "v": "1.43.99",
+    "t": "Amazon Bedrock AgentCore Harness now supports lifecycle hooks for invocations and tool calls, with Lambda, SNS, and EventBridge targets. This release also adds apiBase for custom OpenAI-compatible endpoints"
+  },
+  {
+    "v": "1.43.96",
+    "t": "Adds support for a new DELETE FAILED status for Bedrock AgentCore Runtimes and Bedrock AgentCore Runtime Endpoints."
+  },
+  {
+    "v": "1.43.95",
+    "t": "Amazon Bedrock AgentCore Runtime now supports specifying the platform version of an agent runtime through the new platformVersion field on CreateAgentRuntime, UpdateAgentRuntime, and GetAgentRuntime."
+  },
+  {
+    "v": "1.43.88",
+    "t": "AgentCore Identity adds Consent Portal APIs to manage portals that let end users grant OAuth authorization for agents to access resources. AgentCore Evaluation adds trace source selection by log group prefix, custom or source log group result destinations, and metrics namespace customization."
+  },
+  {
+    "v": "1.43.86",
+    "t": "Online evaluation configurations now support up to 25 evaluators. CloudWatch Logs data sources for online evaluation now support up to 10 log groups."
+  },
+  {
+    "v": "1.43.78",
+    "t": "Update Dataset schema to THIRDPARTYEVALUATIONV1"
+  },
+  {
+    "v": "1.43.75",
+    "t": "AgentCore Memory now supports Flexible Namespaces"
+  },
+  {
+    "v": "1.43.73",
+    "t": "Adds implementations of third-party evaluators, both managed-as-a-service and as templates within custom evaluators."
+  },
+  {
+    "v": "1.43.72",
+    "t": "Adds AgentCore Payments support for CMK, Marketplace Subscriptions and QuickCreate"
+  },
+  {
+    "v": "1.43.66",
+    "t": "Add support for Gateway rate limits and Runtime instances in Amazon Bedrock AgentCore. Customers can now configure rate limits scoped to control request rates, token consumption rates, and active connection rates. Customers can now create capacity providers to launch runtimes on their EC2 instances."
+  },
+  {
+    "v": "1.43.65",
+    "t": "Adding support for fine-grained access control for AgentCore Memory through managed AgentCore Gateway HTTP Connectors."
+  },
+  {
+    "v": "1.43.60",
+    "t": "Adds support for configuring models through the OpenResponses API for custom evaluators. CreateEvaluator and UpdateEvaluator now accept an OpenResponses model configuration for LLM-as-a-Judge evaluations."
+  },
+  {
+    "v": "1.43.58",
+    "t": "AgentCore Identity now supports Private Key JWT client authentication for OAuth 2.0 credential providers. Agents can authenticate to identity provider token endpoints with a JWT client assertion signed by a customer-managed AWS KMS asymmetric key, eliminating the need for client secrets."
+  },
+  {
+    "v": "1.43.55",
+    "t": "Adds support for the Bring Your Own Storage(BYOS) feature in AgentCore Browser and Code Interpreter. Enables mounting S3Files and EFS File Systems via Access points."
+  },
+  {
+    "v": "1.43.52",
+    "t": "This release adds support for specifying a connector version on Gateway targets to pin the connector's tool schema. It also introduces web-search connector version 1.2.0, which adds agent-side domain filtering, published date range filtering, and admin-side domain allowlisting."
+  },
+  {
+    "v": "1.43.49",
+    "t": "Fix HarnessEndpointArn pattern to match the actual service-emitted ARN format ('harness-endpoint' instead of 'endpoint'). Add additionalParams to Gemini model configuration for passing provider-specific parameters through to the model unchanged."
+  },
+  {
+    "v": "1.43.43",
+    "t": "AgentCore Gateway now supports mapping allowed scopes to separate advertised scopes on the inbound authorizer."
+  },
+  {
+    "v": "1.43.32",
+    "t": "AgentCore Gateway now supports inference targets to LLM providers (direct config or built-in connectors), HTTP passthrough targets with session stickiness, runtime target API schemas, AWS WAF web ACL association with configurable fail-open or fail-close modes, and interceptor payload filtering."
+  },
+  {
+    "v": "1.43.29",
+    "t": "Added tagging and CMK support for optimizations and an insights feature to identify failure patterns, extract user intents, and summarize execution behavior"
+  },
+  {
+    "v": "1.43.28",
+    "t": "Supports deterministic metadata for AgentCore Memory"
+  },
+  {
+    "v": "1.43.18",
+    "t": "Reference your own AWS Secrets Manager secrets when configuring credential providers, giving you control over encryption, rotation, and access policies instead of using service-managed secrets."
+  },
+  {
+    "v": "1.43.17",
+    "t": "Added Harness support for LiteLLM model configuration for third-party model providers. Added S3 and Git skill source types. Added Responses API format for OpenAI and Bedrock models. Added runtimeUserId parameter to InvokeHarness for end-user identification."
+  },
+  {
+    "v": "1.43.13",
+    "t": "Adds dataset management APIs for creating, versioning, and managing evaluation datasets."
+  },
+  {
+    "v": "1.43.7",
+    "t": "Adds support for read-only summary APIs for Policy Engine, Policy, and Policy Generation resources, enabling metadata retrieval without KMS decryption for AWS Config integration."
+  },
+  {
+    "v": "1.43.6",
+    "t": "Launching AgentCore payments - a capability that provides secure, instant microtransaction payments for AI agents to access paid APIs, MCP servers, and content. It handles payment processing for x402 protocol, payment limits, and 3P wallet integrations with Coinbase CDP and Stripe (Privy)."
+  },
+  {
+    "v": "1.43.5",
+    "t": "Adds support for bring-your-own file system in AgentCore Runtime. Developers can mount Amazon S3 Files and Amazon EFS access points directly into agent sessions using filesystemConfigurations."
+  },
+  {
+    "v": "1.43.3",
+    "t": "Amazon Bedrock AgentCore gateways now support MCP Sessions and response streaming from MCP targets. Session timeouts can be set between 15 minutes and 8 hours, and response streaming enables forwarding stream events sent by MCP targets to gateway users."
+  },
+  {
+    "v": "1.43.1",
+    "t": "AgentCore Identity now supports on-behalf-of token exchange OAuth2. AgentCore Memory now supports metadata for LongTerm Memory Records."
+  },
+  {
+    "v": "1.43.0",
+    "t": "Adds configuration bundles for versioned, immutable agent configuration snapshots with branch-based lineage"
+  },
+  {
+    "v": "1.42.96",
+    "t": "Added support for configuring identity providers and inbound authorizers within a private VPC for AWS Bedrock AgentCore, enabling secure network connection without public internet access"
+  },
+  {
+    "v": "1.42.94",
+    "t": "Adds support for Amazon Bedrock AgentCore Harness control plane APIs, enabling customers to create, manage, and configure managed agent loops with customizable models, tools, memory, and isolated execution environments."
+  },
+  {
+    "v": "1.42.92",
+    "t": "Supporting listingMode for AgentCore Gateway MCP server targets"
+  },
+  {
+    "v": "1.42.87",
+    "t": "Initial release for CRUDL in AgentCore Registry Service"
+  },
+  {
+    "v": "1.42.83",
+    "t": "Documentation Update for Adds support for three-legged (Authorization Code grant type) OAuth along with predefined MCP tool schema configuration for Amazon Bedrock AgentCore gateway MCP server targets."
+  },
+  {
+    "v": "1.42.82",
+    "t": "Adds support for three-legged (Authorization Code grant type) OAuth along with predefined MCP tool schema configuration for Amazon Bedrock AgentCore gateway MCP server targets."
+  },
+  {
+    "v": "1.42.81",
+    "t": "Adds support for VPC egress private endpoints for Amazon Bedrock AgentCore gateway targets, enabling private connectivity through managed VPC Lattice resources. Also adds IAM credential provider for gateway targets, enabling IAM-based authentication to target endpoints"
+  },
+  {
+    "v": "1.42.78",
+    "t": "Adds support for custom code-based evaluators using customer-managed Lambda functions."
+  },
+  {
+    "v": "1.42.75",
+    "t": "Adds SDK support for 1) Persist session state in AgentCore Runtime via filesystemConfigurations in CreateAgentRuntime, UpdateAgentRuntime, and GetAgentRuntime APIs, 2) Optional name-based filtering on AgentCore ListBrowserProfiles API."
+  },
+  {
+    "v": "1.42.72",
+    "t": "Adds support for the following new features. 1. Enterprise Policies support for AgentCore Browser Tool. 2. Root CA Configuration support for AgentCore Browser Tool and Code Interpreter."
+  },
+  {
+    "v": "1.42.70",
+    "t": "Deprecating namespaces field and adding namespaceTemplates."
+  },
+  {
+    "v": "1.42.69",
+    "t": "Supporting hosting of public ECR Container Images in AgentCore Runtime"
+  },
+  {
+    "v": "1.42.65",
+    "t": "Adding first class support for AG-UI protocol in AgentCore Runtime."
+  },
+  {
+    "v": "1.42.63",
+    "t": "Adds support for streaming memory records in AgentCore Memory"
+  },
+  {
+    "v": "1.42.60",
+    "t": "Support for AgentCore Policy GA"
+  },
+  {
+    "v": "1.42.43",
+    "t": "Support Browser profile persistence (cookies and local storage) across sessions for AgentCore Browser."
+  },
+  {
+    "v": "1.42.40",
+    "t": "Adds tagging support for AgentCore Evaluations (evaluator and online evaluation config)"
+  },
+  {
+    "v": "1.42.25",
+    "t": "Adds optional field \"view\" to GetMemory API input to give customers control over whether CMK encrypted data such as strategy decryption or override prompts is returned or not."
+  },
+  {
+    "v": "1.42.13",
+    "t": "Feature to support header exchanges between Bedrock AgentCore Gateway Targets and client, along with propagating query parameter to the configured targets."
+  },
+  {
+    "v": "1.42.10",
+    "t": "This release updates broken links for AgentCore Policy APIs in the AWS CLI and SDK resources."
+  },
+  {
+    "v": "1.42.1",
+    "t": "Supports AgentCore Evaluations, Policy, Episodic Memory Strategy, Resource Based Policy for Runtime and Gateway APIs, API Gateway Rest API Targets and enhances JWT authorizer."
+  },
+  {
+    "v": "1.41.2",
+    "t": "Support for agentcore gateway interceptor configurations and NONE authorizer type"
+  },
+  {
+    "v": "1.40.65",
+    "t": "Adds support for direct code deploy with CreateAgentRuntime and UpdateAgentRuntime"
+  },
+  {
+    "v": "1.40.63",
+    "t": "Web-Bot-Auth support for AgentCore Browser tool to help reduce captcha challenges."
+  },
+  {
+    "v": "1.40.58",
+    "t": "Fixing the service documentation name"
+  },
+  {
+    "v": "1.40.51",
+    "t": "Updated http status code in control plane apis of agentcore runtime, tools and identity. Additional included provider types for AgentCore Identity"
+  },
+  {
+    "v": "1.40.50",
+    "t": "Bedrock AgentCore release for Gateway, and Memory including Self-Managed Strategies support for Memory."
+  },
+  {
+    "v": "1.40.48",
+    "t": "Adding support for authorizer type AWS_IAM to AgentCore Control Gateway."
+  },
+  {
+    "v": "1.40.46",
+    "t": "Add support for VM lifecycle configuration parameters and A2A protocol"
+  },
+  {
+    "v": "1.40.42",
+    "t": "Tagging support for AgentCore Gateway"
+  },
+  {
+    "v": "1.40.35",
+    "t": "Add tagging and VPC support to AgentCore Runtime, Code Interpreter, and Browser resources. Add support for configuring request headers in Runtime. Fix AgentCore Runtime shape names."
+  },
+  {
+    "v": "1.39.7",
+    "t": "Initial release of Amazon Bedrock AgentCore SDK including Runtime, Built-In Tools, Memory, Gateway and Identity."
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "v": "1.43.57",
+    "t": "Adds optional headquarters location to StartProfileUpdateTask, letting partners record their headquarters as an ISO 3166 country and subdivision code on their profile. When headquarters is provided, both the country and subdivision codes are required."
+  },
+  {
+    "v": "1.43.54",
+    "t": "Adds Qualifications Association APIs that enable partners to associate a subsidiary account's qualifications with a primary account. Once associated, qualifications are shared across all connected accounts and scorecards are consolidated. Partners can start and track association and disassociation."
+  },
+  {
+    "v": "1.43.7",
+    "t": "Added ServiceQuotaExceededExceptions for Profile operations"
+  },
+  {
+    "v": "1.42.79",
+    "t": "KYB Supplemental Form enables partners who fail business verification to submit additional details and supporting documentation through a self-service form, triggering an automated re-verification without requiring manual intervention from support teams."
+  },
+  {
+    "v": "1.42.4",
+    "t": "Adding Verification API's to Partner Central Account SDK."
+  },
+  {
+    "v": "1.41.6",
+    "t": "Initial GA launch of Partner Central Account"
+  }
+]

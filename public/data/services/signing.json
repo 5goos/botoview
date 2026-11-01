@@ -1,0 +1,22 @@
+[
+  {
+    "v": "1.42.90",
+    "t": "Fix bug so that configured auth scheme preference is used when auth scheme is resolved from endpoints rulesets, or from operation-level auth trait. Auth scheme preference can be configured using the existing ``auth_scheme_preference`` client config option, the ``auth_scheme_preference`` shared config setting, or the existing ``AWS_AUTH_SCHEME_PREFERENCE`` environment variable."
+  },
+  {
+    "v": "1.36.7",
+    "t": "No longer sign transfer-encoding header for SigV4"
+  },
+  {
+    "v": "1.35.0",
+    "t": "Adds internal support for the new 'auth' trait to allow a priority list of auth types for a service or operation."
+  },
+  {
+    "v": "1.21.59",
+    "t": "SigV4QueryAuth and CrtSigV4QueryAuth now properly respect AWSRequest.params while signing boto/botocore`#2521 <https://github.com/boto/botocore/issues/2521>`__"
+  },
+  {
+    "v": "1.11.5",
+    "t": "Fix an issue where mixed endpoint casing could cause a SigV4 signature mismatch."
+  }
+]

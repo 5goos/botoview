@@ -1,0 +1,42 @@
+[
+  {
+    "v": "1.43.92",
+    "t": "AWS RTB Fabric now lets you control how traffic is routed to your responder gateway across Availability Zones. Set the new clientRoutingPolicy parameter  to keep traffic within the same Availability Zone or distribute traffic across all Availability Zones."
+  },
+  {
+    "v": "1.43.56",
+    "t": "The deprecated inboundLinksCount field has been removed from the GetResponderGateway API response. Customers who previously relied on this field should use linksRequestedCount instead."
+  },
+  {
+    "v": "1.43.11",
+    "t": "This release is to deprecate 'inboundLinksCount' field in GetResponderGateway response and introduce the new field 'linksRequestedCount' to replace it."
+  },
+  {
+    "v": "1.43.7",
+    "t": "Customers can now configure custom domain names for their RTB Fabric gateways. This enables partners to use their own branded domain for RTB traffic instead of the default rtbfabric endpoint"
+  },
+  {
+    "v": "1.42.88",
+    "t": "Adds optional health check configuration for Responder Gateways with ASG Managed Endpoints. When provided, RTB Fabric continuously probes customers' instance IPs and routes traffic only to healthy ones, reducing errors during deployments, scaling events, and instance failures."
+  },
+  {
+    "v": "1.42.85",
+    "t": "AWS RTB Fabric External Responder gateways now support HTTP in addition to HTTPS for inbound external links. Gateways can accept bid requests on port 80 or serve both protocols simultaneously via listener configuration, giving customers flexible transport options for their bidding infrastructure"
+  },
+  {
+    "v": "1.40.71",
+    "t": "Added LogSettings and LinkAttribute fields to external links"
+  },
+  {
+    "v": "1.40.63",
+    "t": "RTB Fabric documentation update."
+  },
+  {
+    "v": "1.40.59",
+    "t": "Add support for custom rate limits."
+  },
+  {
+    "v": "1.40.57",
+    "t": "Update for general availability of AWS RTB Fabric service."
+  }
+]

@@ -1,0 +1,46 @@
+[
+  {
+    "v": "1.43.62",
+    "t": "Launching feature for abandonment rate pacing control for outbound campaigns."
+  },
+  {
+    "v": "1.43.37",
+    "t": "Adding new attributes to PutProfileOutboundRequest API that will create an outbound request call for the customer's Web Notification outbound campaign."
+  },
+  {
+    "v": "1.43.7",
+    "t": "This release added support for Outbound Campaign timezone detection using all available contact methods"
+  },
+  {
+    "v": "1.42.91",
+    "t": "This release adds support for campaign entry limits configuration and hourly refresh frequency in Amazon Connect Outbound Campaigns."
+  },
+  {
+    "v": "1.42.45",
+    "t": "Add the missing event type for WhatsApp"
+  },
+  {
+    "v": "1.41.6",
+    "t": "This release added support for new WhatsApp channel and Journey type outbound campaign"
+  },
+  {
+    "v": "1.41.0",
+    "t": "This release added support for ring timer configuration for campaign calls."
+  },
+  {
+    "v": "1.40.57",
+    "t": "Updated Amazon Connect Outbound Campaigns V2 SDK to support Preview Outbound Mode"
+  },
+  {
+    "v": "1.38.36",
+    "t": "Added PutInstanceCommunicationLimits and GetInstanceCommunicationLimits APIs"
+  },
+  {
+    "v": "1.35.72",
+    "t": "Amazon Connect Outbound Campaigns V2 / Features : Adds support for Event-Triggered Campaigns."
+  },
+  {
+    "v": "1.35.63",
+    "t": "Added Amazon Connect Outbound Campaigns V2 SDK."
+  }
+]

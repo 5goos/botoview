@@ -1,0 +1,70 @@
+[
+  {
+    "v": "1.43.117",
+    "t": "Update the UpdateProfileWithAgent API to return a streaming response to provide more frequent updates on what the agent is doing."
+  },
+  {
+    "v": "1.43.83",
+    "t": "New HealthLake API, RestoreFHIRDatastore, providing the capability to restore active datastores to a point in time within the last 30 days or recover a deleted datastore from the delete snapshot."
+  },
+  {
+    "v": "1.43.67",
+    "t": "Adds provenanceEnabled to StartFHIRImportJob"
+  },
+  {
+    "v": "1.43.49",
+    "t": "AWS HealthLake now offers data transformation in Preview to convert CSV and C-CDA data to FHIR R4. Customers can maintain reusable mapping profiles, run sync or async jobs with provenance tracking and drift detection, and use an AI agent to build and edit mapping logic from natural language."
+  },
+  {
+    "v": "1.43.33",
+    "t": "Adding New Configurations to the FHIR Create Datastore. The new configurations include NLP Configuration, AnalyticsConfiguration, ProfileConfiguration"
+  },
+  {
+    "v": "1.43.28",
+    "t": "Adds the UpdateFHIRDatastore API and adds analytics, NLP, and profile configuration support to CreateFHIRDatastore and DescribeFHIRDatastore."
+  },
+  {
+    "v": "1.40.58",
+    "t": "Update endpoint ruleset parameters casing"
+  },
+  {
+    "v": "1.40.20",
+    "t": "Add ValidationLevel parameter to StartFHIRImportJob API, allowing users to specify a FHIR validation level for their asynchronous import jobs."
+  },
+  {
+    "v": "1.40.16",
+    "t": "Remove incorrect endpoint tests"
+  },
+  {
+    "v": "1.36.6",
+    "t": "Added new authorization strategy value 'SMART_ON_FHIR' for CreateFHIRDatastore API to support Smart App 2.0"
+  },
+  {
+    "v": "1.34.84",
+    "t": "Added new CREATE_FAILED status for data stores. Added new errorCause to DescribeFHIRDatastore API and ListFHIRDatastores API response for additional insights into data store creation and deletion workflows."
+  },
+  {
+    "v": "1.34.43",
+    "t": "This release adds a new response parameter, JobProgressReport, to the DescribeFHIRImportJob and ListFHIRImportJobs API operation. JobProgressReport provides details on the progress of the import job on the server."
+  },
+  {
+    "v": "1.31.12",
+    "t": "Updating the HealthLake service documentation."
+  },
+  {
+    "v": "1.29.144",
+    "t": "This release adds a new request parameter to the CreateFHIRDatastore API operation. IdentityProviderConfiguration specifies how you want to authenticate incoming requests to your Healthlake Data Store."
+  },
+  {
+    "v": "1.20.112",
+    "t": "General availability for Amazon HealthLake. StartFHIRImportJob and StartFHIRExportJob APIs now require AWS KMS parameter. For more information, see the Amazon HealthLake Documentation https://docs.aws.amazon.com/healthlake/index.html."
+  },
+  {
+    "v": "1.19.48",
+    "t": "Update healthlake client to latest version"
+  },
+  {
+    "v": "1.19.32",
+    "t": "Update healthlake client to latest version"
+  }
+]
