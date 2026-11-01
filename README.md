@@ -17,7 +17,6 @@
   - `Cmd` / `Ctrl` + `K`: Focus version search
   - `/`: Focus service directory search
   - `Esc`: Close open drawers and modals
-- **Modern Performance:** Built on [Astro](https://astro.build) with Tailwind CSS, Alpine.js, and deployed at the edge on Cloudflare.
 - **Dark Mode Support:** Seamless automatic dark/light theme switching based on system preferences.
 
 ---
