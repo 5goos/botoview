@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.43.124",
+    "t": "Adds DefaultAmiList to DescribePlatformVersion to return the default AMI for each processor architecture that a platform version supports."
+  },
+  {
     "v": "1.43.96",
     "t": "Adds support to create and manage Elastic Beanstalk Cluster Environments."
   },

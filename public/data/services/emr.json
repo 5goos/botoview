@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.43.124",
+    "t": "Added StepAdditionalInfo on DescribeStep and ListSteps to surface YARN application IDs for steps."
+  },
+  {
     "v": "1.43.50",
     "t": "Amazon EMR updates the Session object returned by GetSession API"
   },

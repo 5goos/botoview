@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.43.124",
+    "t": "Add Ubuntu 24.04, Ubuntu 26.04, RHEL 9, RHEL10, Rocky 9 and Rocky 10 to OperatingSystemName and documentation update for WorkspaceProperties Protocols."
+  },
+  {
     "v": "1.43.115",
     "t": "Adds optional imageValidationMode enum to ImportCustomWorkspaceImageRequest. This allows customers to opt-in to having prevalidation run in the service account instead of customer account."
   },

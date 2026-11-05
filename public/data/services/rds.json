@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.43.124",
+    "t": "Adding support for copying and tagging option groups with cross-Region DB snapshot copies, in the same account or across accounts."
+  },
+  {
     "v": "1.43.116",
     "t": "Amazon RDS now supports On-Demand Capacity Reservations for DB instances."
   },

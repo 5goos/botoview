@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.43.124",
+    "t": "Adding support to Environment Variables in MWAA Serverless"
+  },
+  {
     "v": "1.43.72",
     "t": "Adds support for Consuming code for MWAA Serverless"
   },

@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.43.124",
+    "t": "Release Software APIs- GetSoftwareV2, GetSoftwareStatisticsV2 and GetSoftwareResourcesV2 to list software packages with aggregated resource count, get aggregated software statistics, and find the resources that contain a specific software package."
+  },
+  {
     "v": "1.43.113",
     "t": "Adds and updates APIs to support criticality. This feature allows customers to create automation rules to assign criticality to resources matching a criteria. With this release, resources and exposure findings will include the criticality."
   },

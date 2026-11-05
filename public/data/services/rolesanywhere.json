@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.43.124",
+    "t": "Adds the crlDpRevocationEnabled field to enable automatic revocation checking using CRL distribution points in X.509 certificates."
+  },
+  {
     "v": "1.43.58",
     "t": "Increases certificate string length for trust anchor source data to support new adjustable trust anchor limits."
   },

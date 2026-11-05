@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.43.124",
+    "t": "Amazon Lookout for Equipment reached end of support on October 7, 2026. All Lookout for Equipment APIs are now marked as deprecated."
+  },
+  {
     "v": "1.40.54",
     "t": "Update endpoint ruleset parameters casing"
   },
