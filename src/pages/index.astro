@@ -10,7 +10,7 @@ import ServiceNav from '../components/ServiceNav.astro';
 <Layout title="BotoView — AWS Boto3 Changelog Explorer & Release Notes Tracker">
     <div class="flex h-screen w-full overflow-hidden bg-main text-[var(--text-secondary)] transition-all" 
          x-data="botoCore" 
-         @keydown.window.escape="showMobileServices = false; showMobileVersions = false; activeService = null">
+         @keydown.window="handleGlobalKeydown($event)">
         
         <div x-show="showMobileVersions" 
              x-cloak
@@ -43,16 +43,16 @@ import ServiceNav from '../components/ServiceNav.astro';
                 </div>
                 <h2 class="text-3xl font-black italic uppercase tracking-tighter mb-3">System Override</h2>
                 <p class="text-slate-500 dark:text-slate-400 mb-10 leading-relaxed text-sm mono" x-text="error"></p>
-                <button @click="location.reload()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-black py-4 px-8 rounded-2xl transition-all active:scale-95 shadow-lg shadow-orange-500/20 uppercase tracking-widest text-xs">Reboot Core</button>
+                <button @click="location.reload()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 px-8 rounded-2xl transition-all active:scale-95 shadow-lg shadow-indigo-500/25 uppercase tracking-widest text-xs">Reboot Core</button>
             </div>
         </div>
 
         <!-- Initial Boot Loader -->
-        <div x-show="loading" x-transition.opacity class="fixed inset-0 z-[140] flex flex-col items-center justify-center bg-white dark:bg-[#050505] transition-colors duration-700">
+        <div x-show="loading" x-transition.opacity class="fixed inset-0 z-[140] flex flex-col items-center justify-center bg-white dark:bg-[#080b11] transition-colors duration-700">
             <div class="relative w-20 h-20 mb-8">
-                <div class="absolute inset-0 border-4 border-orange-500/10 rounded-[24px]"></div>
-                <div class="absolute inset-0 border-4 border-t-orange-500 rounded-[24px] animate-spin"></div>
-                <img src="/favicon.svg" class="absolute inset-0 m-auto w-8 h-8 opacity-50 animate-pulse" alt="Loading" />
+                <div class="absolute inset-0 border-4 border-indigo-500/10 rounded-[24px]"></div>
+                <div class="absolute inset-0 border-4 border-t-indigo-600 dark:border-t-indigo-400 rounded-[24px] animate-spin"></div>
+                <img src="/favicon.svg" class="absolute inset-0 m-auto w-8 h-8 opacity-70 animate-pulse" alt="Loading" />
             </div>
         </div>
 
@@ -87,63 +87,79 @@ import ServiceNav from '../components/ServiceNav.astro';
                  class="relative w-screen max-w-lg bg-card border-l border-slate-200 dark:border-white/5 shadow-2xl flex flex-col h-full theme-transition">
                 
                 <!-- Drawer Header -->
-                <div class="px-6 py-6 border-b border-subtle bg-sidebar backdrop-blur-md">
-                    <div class="flex items-center justify-between mb-4">
+                <div class="px-4 py-4 sm:px-6 sm:py-6 border-b border-subtle bg-sidebar backdrop-blur-md">
+                    <div class="flex items-center justify-between mb-3 sm:mb-4">
                         <div class="flex items-center gap-2">
-                            <span class="w-1 h-1 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.6)] animate-pulse-slow"></span>
+                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.7)] animate-pulse-slow"></span>
                             <span class="text-[10px] mono text-slate-500 dark:text-slate-400 font-black uppercase tracking-[0.2em]">Service History</span>
                         </div>
-                        <button @click="activeService = null; updateUrl()" aria-label="Close service history drawer" class="p-1.5 bg-slate-100 dark:bg-white/10 rounded-lg text-slate-400 hover:text-orange-500 transition-all active:scale-90">
+                        <button @click="activeService = null; updateUrl()" aria-label="Close service history drawer" class="p-2 bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all active:scale-90 cursor-pointer">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
                         </button>
                     </div>
-                    <div class="flex flex-col gap-1 mb-6">
-                        <h2 class="text-xl font-black text-slate-900 dark:text-white italic uppercase tracking-tighter leading-none" x-text="activeService"></h2>
+                    <div class="flex flex-col gap-1.5 mb-4 sm:mb-6">
+                        <div class="flex items-center gap-2.5 sm:gap-3 flex-wrap">
+                            <h2 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white italic uppercase tracking-tighter leading-none" x-text="activeService"></h2>
+                            <template x-if="serviceHistory.length > 0">
+                                <span class="px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 text-[9px] mono font-bold" x-text="serviceHistory.length + ' updates'"></span>
+                            </template>
+                        </div>
                         <template x-if="serviceHistory.length > 0">
                             <span class="text-[9px] mono text-slate-400 dark:text-slate-500 uppercase font-bold tracking-widest">
-                                Last updated: <span class="text-orange-500" x-text="getVersionDate(serviceHistory[0].v)"></span>
+                                Last updated: <span class="text-indigo-600 dark:text-indigo-400 font-semibold" x-text="getVersionDate(serviceHistory[0].v)"></span>
                             </span>
                         </template>
                     </div>
                     
                     <div class="relative group/search">
                         <input type="text" id="serviceHistorySearch" x-model.debounce.200ms="serviceHistorySearch" aria-label="Search service history" placeholder="Filter history..." 
-                               class="w-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-xs focus:outline-none focus:ring-4 focus:ring-orange-500/5 focus:border-orange-500/30 transition-all text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 shadow-sm font-medium">
-                        <svg class="absolute left-3.5 top-2.5 w-4 h-4 text-slate-400 dark:text-slate-600 group-focus-within/search:text-orange-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                               class="w-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl py-2 sm:py-2.5 pl-10 pr-9 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/40 transition-all text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 shadow-sm font-medium">
+                        <svg class="absolute left-3.5 top-2.5 w-4 h-4 text-slate-400 dark:text-slate-500 group-focus-within/search:text-indigo-500 transition-colors pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        <button x-show="serviceHistorySearch" @click="serviceHistorySearch = ''" aria-label="Clear filter" class="absolute right-3 top-2 sm:top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-0.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
                     </div>
                 </div>
 
                 <!-- History List -->
-                <div class="flex-1 overflow-y-auto p-6 md:p-8 custom-scroll bg-inherit">
+                <div class="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 custom-scroll bg-inherit">
                     <div class="relative">
-                        <div class="absolute left-[19px] top-0 bottom-0 w-[1px] bg-slate-200 dark:bg-white/10"></div>
+                        <div class="absolute left-[14px] sm:left-[19px] top-0 bottom-0 w-[1px] bg-slate-200 dark:bg-white/10"></div>
                         
-                        <div class="space-y-6">
+                        <div class="space-y-4 sm:space-y-6">
                             <!-- Loading State -->
                             <template x-if="serviceHistoryLoading">
-                                <div class="space-y-6 animate-pulse">
+                                <div class="space-y-4 sm:space-y-6 animate-pulse">
                                     <template x-for="i in 5">
-                                        <div class="relative pl-12">
-                                            <div class="absolute left-[14px] top-2 w-2.5 h-2.5 rounded-full bg-slate-200 dark:bg-white/10"></div>
-                                            <div class="h-24 bg-slate-50 dark:bg-white/[0.03] rounded-[20px] border border-slate-200 dark:border-white/5"></div>
+                                        <div class="relative pl-9 sm:pl-12">
+                                            <div class="absolute left-[9px] sm:left-[14px] top-2 w-2.5 h-2.5 rounded-full bg-slate-200 dark:bg-white/10"></div>
+                                            <div class="h-24 bg-slate-50 dark:bg-white/[0.03] rounded-2xl sm:rounded-[20px] border border-slate-200 dark:border-white/5"></div>
                                         </div>
                                     </template>
                                 </div>
                             </template>
 
                             <template x-for="log in filteredServiceHistory" :key="log.v + log.t">
-                                <div x-show="!serviceHistoryLoading" class="relative pl-12 group/history">
-                                    <div class="absolute left-[14px] top-2 w-2.5 h-2.5 rounded-full bg-white dark:bg-black border-2 border-slate-300 dark:border-white/20 shadow-sm z-10 transition-colors group-hover/history:border-orange-500"></div>
+                                <div x-show="!serviceHistoryLoading" class="relative pl-9 sm:pl-12 group/history">
+                                    <div class="absolute left-[9px] sm:left-[14px] top-2 w-2.5 h-2.5 rounded-full bg-white dark:bg-[#080b11] border-2 border-slate-300 dark:border-white/20 shadow-sm z-10 transition-colors group-hover/history:border-indigo-500"></div>
                                     
-                                    <div class="flex flex-col gap-2.5 p-5 bg-slate-50/50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/5 rounded-[20px] hover:bg-white dark:hover:bg-white/[0.06] hover:border-orange-500/20 transition-all duration-300 overflow-hidden shadow-sm hover:shadow-md">
+                                    <div class="flex flex-col gap-2 p-4 sm:p-5 bg-white dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/5 rounded-2xl sm:rounded-[20px] hover:bg-slate-50/50 dark:hover:bg-white/[0.06] hover:border-indigo-500/30 transition-all duration-300 overflow-hidden shadow-xs hover:shadow-md">
                                         <div class="flex items-center justify-between">
-                                            <button @click="selectVersion(log.v); activeService = null; updateUrl()" 
-                                                    :aria-label="'Select release version ' + log.v"
-                                                    class="px-2.5 py-1 bg-white dark:bg-white/10 border border-slate-200 dark:border-white/10 rounded-md mono text-[9px] font-black text-orange-600 dark:text-orange-400 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-all active:scale-95 shadow-sm" 
-                                                    x-html="highlight(log.v, serviceHistorySearch)"></button>
-                                            <span x-show="getVersionDate(log.v)" x-text="getVersionDate(log.v)" x-cloak class="text-[8px] mono text-slate-400 dark:text-slate-600 uppercase tracking-widest font-bold"></span>
+                                            <div class="flex items-center gap-2">
+                                                <button @click="selectVersion(log.v); activeService = null; updateUrl()" 
+                                                        :aria-label="'Select release version ' + log.v"
+                                                        class="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-500/20 dark:border-indigo-500/30 rounded-md mono text-[9px] font-black text-indigo-700 dark:text-indigo-300 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all active:scale-95 shadow-xs cursor-pointer" 
+                                                        x-html="highlight(log.v, serviceHistorySearch)"></button>
+                                                <button @click="copyToClipboard(activeService.toUpperCase() + ': ' + log.t + ' (' + log.v + ')')" 
+                                                        title="Copy update text"
+                                                        aria-label="Copy update text"
+                                                        class="opacity-70 sm:opacity-0 sm:group-hover/history:opacity-100 p-1.5 rounded-md text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-white/10 transition-all active:scale-90 cursor-pointer">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                                </button>
+                                            </div>
+                                            <span x-show="getVersionDate(log.v)" x-text="getVersionDate(log.v)" x-cloak class="text-[8px] mono text-slate-400 dark:text-slate-500 uppercase tracking-widest font-bold"></span>
                                         </div>
-                                        <p class="text-slate-600 dark:text-slate-300 text-[13px] md:text-[14px] leading-[1.6] font-medium tracking-tight group-hover/history:text-slate-900 dark:group-hover/history:text-white transition-colors break-words" x-html="highlight(log.t, serviceHistorySearch)"></p>
+                                        <p class="text-slate-600 dark:text-slate-300 text-[12.5px] sm:text-[13px] md:text-[14px] leading-relaxed font-medium tracking-tight group-hover/history:text-slate-900 dark:group-hover/history:text-white transition-colors break-words" x-html="formatDescription(log.t, serviceHistorySearch)"></p>
                                     </div>
                                 </div>
                             </template>
@@ -183,25 +199,184 @@ import ServiceNav from '../components/ServiceNav.astro';
             serviceHistoryLoading: false,
             showMobileServices: false,
             showMobileVersions: false,
+            showBackToTop: false,
             error: null,
             loading: true,
             versionCache: {},
             copyStatus: false,
+            copiedItemIndex: null,
+            showPipCopied: false,
+            isDarkMode: false,
             stats: {
                 avgReleasesPerWeek: 0,
                 recentChangesCount: 0
+            },
+
+            toggleTheme() {
+                this.isDarkMode = !this.isDarkMode;
+                document.documentElement.classList.toggle('dark', this.isDarkMode);
+                try {
+                    localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
+                } catch(e) {}
+                const themeColor = this.isDarkMode ? '#080b11' : '#f8fafc';
+                const metaTheme = document.querySelector('meta[name="theme-color"]');
+                if (metaTheme) metaTheme.setAttribute('content', themeColor);
             },
 
             isMobile(breakpoint = 768) {
                 return window.matchMedia(`(max-width: ${breakpoint-1}px)`).matches;
             },
 
+            escapeHtml(str) {
+                if (!str) return '';
+                return String(str)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+            },
+
             highlight(text, search) {
-                if (!search || !text) return text;
+                if (!text) return '';
+                let escaped = this.escapeHtml(text);
+                if (!search || !search.trim()) return escaped;
                 const s = search.trim();
-                if (!s) return text;
                 const regex = new RegExp(`(${s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-                return text.replace(regex, '<mark class="search-highlight">$1</mark>');
+                return escaped.replace(regex, '<mark class="search-highlight">$1</mark>');
+            },
+
+            formatDescription(text, search) {
+                if (!text) return '';
+                let formatted = this.escapeHtml(text);
+
+                // 1. Convert RST GitHub Issue/PR links:
+                // e.g. `fixes #3255 <https://github.com/boto/botocore/issues/3255>`__
+                // or `issue 849 <https://github.com/boto/botocore/pull/849>`__
+                formatted = formatted.replace(
+                    /`([^`]+?)\s*&lt;(https?:\/\/[^&>]+?)&gt;`_+/g,
+                    '<a href="$2" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-0.5 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold underline decoration-indigo-400/40 hover:decoration-indigo-500 transition-colors">$1<svg class="w-2.5 h-2.5 opacity-70 inline ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg></a>'
+                );
+
+                // 2. Convert double backticks: ``code``
+                formatted = formatted.replace(
+                    /``([^`]+?)``/g,
+                    '<code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-white/10 text-[11px] mono text-indigo-700 dark:text-indigo-300 border border-slate-200/60 dark:border-white/10 font-medium">$1</code>'
+                );
+
+                // 3. Convert single backticks: `code`
+                formatted = formatted.replace(
+                    /`([^`]+?)`/g,
+                    '<code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-white/10 text-[11px] mono text-indigo-700 dark:text-indigo-300 border border-slate-200/60 dark:border-white/10 font-medium">$1</code>'
+                );
+
+                // 4. Convert standalone URLs:
+                formatted = formatted.replace(
+                    /(^|[^"'])(https?:\/\/[a-zA-Z0-9\-\._~:\/\?#\[\]@!$&'()*+,;=%]+)/g,
+                    '$1<a href="$2" target="_blank" rel="noopener noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:underline font-medium break-all">$2</a>'
+                );
+
+                // 5. Safe highlight matching search query
+                if (search && search.trim()) {
+                    const s = search.trim();
+                    const escapedSearch = s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    const regex = new RegExp(`(?![^<]*>)(${escapedSearch})`, 'gi');
+                    formatted = formatted.replace(regex, '<mark class="search-highlight">$1</mark>');
+                }
+
+                return formatted;
+            },
+
+            async copyItem(item, index) {
+                try {
+                    const text = `${item.category.toUpperCase()}: ${item.description} (${this.selectedVersion})`;
+                    await navigator.clipboard.writeText(text);
+                    this.copiedItemIndex = index;
+                    setTimeout(() => {
+                        if (this.copiedItemIndex === index) this.copiedItemIndex = null;
+                    }, 2000);
+                } catch (e) {}
+            },
+
+            get versionCounts() {
+                let features = 0;
+                let fixes = 0;
+                for (const i of this.currentVersionData) {
+                    if (i.type && i.type.toLowerCase().includes('fix')) {
+                        fixes++;
+                    } else {
+                        features++;
+                    }
+                }
+                return {
+                    total: this.currentVersionData.length,
+                    features,
+                    fixes
+                };
+            },
+
+            get currentVersionServices() {
+                const s = new Set();
+                for (const c of this.currentVersionData) {
+                    if (c && c.category) s.add(c.category.toLowerCase().trim());
+                }
+                return s;
+            },
+
+            get adjacentVersions() {
+                if (!this.versions.length || !this.selectedVersion) return { newer: null, older: null };
+                const idx = this.versions.findIndex(v => v.id === this.selectedVersion);
+                if (idx === -1) return { newer: null, older: null };
+                return {
+                    newer: idx > 0 ? this.versions[idx - 1].id : null,
+                    older: idx < this.versions.length - 1 ? this.versions[idx + 1].id : null
+                };
+            },
+
+            handleGlobalKeydown(e) {
+                if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName) || e.target.isContentEditable) {
+                    if (e.key === 'Escape') {
+                        e.target.blur();
+                    }
+                    return;
+                }
+
+                if (e.key === 'Escape') {
+                    this.showMobileServices = false;
+                    this.showMobileVersions = false;
+                    this.activeService = null;
+                    this.updateUrl(false);
+                    return;
+                }
+
+                if (e.key === 't' || e.key === 'T') {
+                    e.preventDefault();
+                    this.toggleTheme();
+                    return;
+                }
+
+                if (e.key === 'j' || e.key === 'ArrowDown') {
+                    if (this.adjacentVersions.older) {
+                        e.preventDefault();
+                        this.selectVersion(this.adjacentVersions.older, true);
+                    }
+                    return;
+                }
+
+                if (e.key === 'k' || e.key === 'ArrowUp') {
+                    if (this.adjacentVersions.newer) {
+                        e.preventDefault();
+                        this.selectVersion(this.adjacentVersions.newer, true);
+                    }
+                    return;
+                }
+
+                if (e.key === '/') {
+                    e.preventDefault();
+                    const searchInput = document.getElementById('serviceSearch');
+                    if (searchInput) searchInput.focus();
+                    return;
+                }
             },
 
             get selectedDate() {
@@ -229,6 +404,20 @@ import ServiceNav from '../components/ServiceNav.astro';
                 return `${Math.floor(diffDays / 365)}y ago`;
             },
 
+            formatDate(dateStr) {
+                if (!dateStr) return '';
+                try {
+                    const parts = dateStr.split('-');
+                    if (parts.length === 3) {
+                        const date = new Date(Date.UTC(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2])));
+                        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+                    }
+                    return dateStr;
+                } catch (e) {
+                    return dateStr;
+                }
+            },
+
             getMonthYear(dateStr) {
                 if (!dateStr) return 'Unknown Date';
                 const date = new Date(dateStr);
@@ -236,16 +425,16 @@ import ServiceNav from '../components/ServiceNav.astro';
             },
 
             getServiceColorClass(serviceName) {
-                if (!serviceName) return 'bg-slate-500/10 text-slate-500 border-slate-500/20';
+                if (!serviceName) return 'bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-500/20';
                 const classes = [
-                    'bg-rose-500/10 text-rose-500 border-rose-500/20',
-                    'bg-blue-500/10 text-blue-500 border-blue-500/20',
-                    'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
-                    'bg-amber-500/10 text-amber-500 border-amber-500/20',
-                    'bg-purple-500/10 text-purple-500 border-purple-500/20',
-                    'bg-cyan-500/10 text-cyan-500 border-cyan-500/20',
-                    'bg-indigo-500/10 text-indigo-500 border-indigo-500/20',
-                    'bg-fuchsia-500/10 text-fuchsia-500 border-fuchsia-500/20'
+                    'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/25',
+                    'bg-sky-500/10 text-sky-700 dark:text-sky-300 border-sky-500/25',
+                    'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/25',
+                    'bg-violet-500/10 text-violet-700 dark:text-violet-300 border-violet-500/25',
+                    'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/25',
+                    'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/25',
+                    'bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border-cyan-500/25',
+                    'bg-teal-500/10 text-teal-700 dark:text-teal-300 border-teal-500/25'
                 ];
                 let hash = 0;
                 for (let i = 0; i < serviceName.length; i++) {
@@ -287,6 +476,7 @@ import ServiceNav from '../components/ServiceNav.astro';
             },
 
             async init() {
+                this.isDarkMode = document.documentElement.classList.contains('dark');
                 try {
                     const res = await fetch('/data/track.json');
                     if (!res.ok) throw new Error('Primary track data missing');
@@ -301,14 +491,25 @@ import ServiceNav from '../components/ServiceNav.astro';
                     const sParam = params.get('s');
 
                     if (vParam && this.versions.find(v => v.id === vParam)) {
-                        await this.selectVersion(vParam);
+                        await this.selectVersion(vParam, false);
                     } else if (this.versions.length > 0) {
-                        await this.selectVersion(this.versions[0].id);
+                        await this.selectVersion(this.versions[0].id, false);
                     }
 
                     if (sParam && this.allServices.includes(sParam)) {
-                        this.openService(sParam);
+                        this.openService(sParam, false);
                     }
+
+                    // Native browser Back/Forward popstate navigation
+                    window.addEventListener('popstate', (e) => {
+                        const curParams = new URLSearchParams(window.location.search);
+                        const v = curParams.get('v') || (this.versions[0] ? this.versions[0].id : null);
+                        const s = curParams.get('s');
+                        if (v && v !== this.selectedVersion) {
+                            this.selectVersion(v, false);
+                        }
+                        this.activeService = s || null;
+                    });
                 } catch (e) {
                     this.error = e.message;
                 } finally {
@@ -332,7 +533,7 @@ import ServiceNav from '../components/ServiceNav.astro';
                 this.stats.recentChangesCount = this.versions.filter(v => new Date(v.date) >= thirtyDaysAgo).length;
             },
 
-            updateUrl() {
+            updateUrl(push = false) {
                 const params = new URLSearchParams();
                 if (this.selectedVersion && this.versions[0] && this.selectedVersion !== this.versions[0].id) {
                     params.set('v', this.selectedVersion);
@@ -341,20 +542,43 @@ import ServiceNav from '../components/ServiceNav.astro';
                     params.set('s', this.activeService);
                 }
                 const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname;
-                window.history.replaceState({}, '', newUrl);
+                if (push) {
+                    window.history.pushState({ v: this.selectedVersion, s: this.activeService }, '', newUrl);
+                } else {
+                    window.history.replaceState({ v: this.selectedVersion, s: this.activeService }, '', newUrl);
+                }
             },
 
-            async selectVersion(id) {
+            prefetchAdjacent(currentIndex) {
+                if (currentIndex === -1) return;
+                if (currentIndex > 0 && this.versions[currentIndex - 1]) {
+                    this.prefetchVersion(this.versions[currentIndex - 1].id);
+                }
+                if (currentIndex < this.versions.length - 1 && this.versions[currentIndex + 1]) {
+                    this.prefetchVersion(this.versions[currentIndex + 1].id);
+                }
+            },
+
+            async selectVersion(id, push = true) {
+                if (this.isMobile(1024)) this.showMobileVersions = false;
                 if (this.selectedVersion === id && this.currentVersionData.length > 0) return;
                 
                 const prevVersion = this.selectedVersion;
                 this.selectedVersion = id;
-                this.updateUrl();
+
+                // Expand railLimit if needed so selected version is rendered in DOM
+                const idx = this.versions.findIndex(v => v.id === id);
+                if (idx !== -1 && idx >= this.railLimit) {
+                    this.railLimit = idx + 20;
+                }
+
+                this.updateUrl(push);
 
                 if (this.versionCache[id]) {
                     this.currentVersionData = this.versionCache[id];
                     document.title = `BotoView — Release ${id} | AWS Boto3 Changelog & Release Notes`;
                     this.syncIndicator(id);
+                    this.prefetchAdjacent(idx);
                     return;
                 }
 
@@ -371,6 +595,7 @@ import ServiceNav from '../components/ServiceNav.astro';
                     if (this.selectedVersion === id) {
                         this.currentVersionData = data;
                         this.syncIndicator(id, true);
+                        this.prefetchAdjacent(idx);
                     }
                 } catch (e) { 
                     this.error = `Connection lost: ${id}`;
@@ -378,14 +603,13 @@ import ServiceNav from '../components/ServiceNav.astro';
                     if (prevVersion && this.versionCache[prevVersion]) {
                         this.currentVersionData = this.versionCache[prevVersion];
                     }
-                    this.updateUrl();
+                    this.updateUrl(false);
                 }
             },
 
             syncIndicator(id, scroll = true) {
                 if (scroll) {
-                    // Scroll main content back to top
-                    const mainContent = document.querySelector('.custom-scroll');
+                    const mainContent = document.getElementById('mainScrollArea');
                     if (mainContent) mainContent.scrollTo({ top: 0, behavior: 'instant' });
                 }
 
@@ -394,17 +618,21 @@ import ServiceNav from '../components/ServiceNav.astro';
                         const active = document.querySelector(`button[data-version="${id}"]`);
                         const indicatorContainer = document.querySelector('.glow-container');
                         
-                        if (active && indicatorContainer) {
-                            indicatorContainer.style.setProperty('--glow-top', active.offsetTop + 'px');
-                            indicatorContainer.style.setProperty('--glow-height', active.offsetHeight + 'px');
+                        if (active) {
+                            if (indicatorContainer) {
+                                indicatorContainer.style.setProperty('--glow-top', active.offsetTop + 'px');
+                                indicatorContainer.style.setProperty('--glow-height', active.offsetHeight + 'px');
+                            }
+                            active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
                         }
                     });
                 });
             },
 
-            async openService(svc) {
+            async openService(svc, push = true) {
+                if (this.isMobile(768)) this.showMobileServices = false;
                 this.activeService = svc;
-                this.updateUrl();
+                this.updateUrl(push);
                 this.serviceHistory = [];
                 this.serviceHistoryLoading = true;
                 this.serviceHistorySearch = '';

@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://www.botoview.5goos.com/sitemap-index.xml
+Sitemap: https://botoview.5goos.com/sitemap-index.xml

@@ -8,7 +8,6 @@ import sitemap from '@astrojs/sitemap';
 import alpinejs from '@astrojs/alpinejs';
 import partytown from '@astrojs/partytown';
 
-// https://astro.build/config
 export default defineConfig({
   site: 'https://botoview.5goos.com',
   build: {

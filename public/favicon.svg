@@ -1,79 +1,88 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" fill="none">
   <defs>
-    <!-- Upper Wing: Bright Amber / Sunlight Orange -->
-    <linearGradient id="amberWing" x1="0%" y1="100%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#f97316"/>
-      <stop offset="100%" stop-color="#fdba74"/>
+    <!-- Radiant Cyber-Boto Body Gradient -->
+    <linearGradient id="botoBody" x1="15%" y1="85%" x2="85%" y2="15%">
+      <stop offset="0%" stop-color="#3730a3"/>
+      <stop offset="25%" stop-color="#4f46e5"/>
+      <stop offset="55%" stop-color="#6366f1"/>
+      <stop offset="85%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#7dd3fc"/>
     </linearGradient>
 
-    <!-- Lower Wing: Vibrant Primary AWS Orange -->
-    <linearGradient id="orangeWing" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ea580c"/>
-      <stop offset="100%" stop-color="#f97316"/>
+    <!-- Hydrofoil Fin & Fluke Gradient -->
+    <linearGradient id="botoAccent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#818cf8"/>
+      <stop offset="60%" stop-color="#4f46e5"/>
+      <stop offset="100%" stop-color="#312e81"/>
     </linearGradient>
 
-    <!-- Left Spine: Deep Structural Bronze-Orange -->
-    <linearGradient id="spineGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#fb923c"/>
-      <stop offset="50%" stop-color="#f97316"/>
-      <stop offset="100%" stop-color="#c2410c"/>
+    <!-- Timeline Horizon Wave Beam -->
+    <linearGradient id="timelineHorizon" x1="0%" y1="50%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#6366f1" stop-opacity="0.1"/>
+      <stop offset="50%" stop-color="#6366f1" stop-opacity="0.6"/>
+      <stop offset="85%" stop-color="#38bdf8" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#ffffff"/>
     </linearGradient>
 
-    <!-- Center Viewfinder Focal Ray -->
-    <linearGradient id="viewRay" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#fb923c" stop-opacity="0.9"/>
-      <stop offset="60%" stop-color="#ffffff"/>
-      <stop offset="100%" stop-color="#fed7aa"/>
-    </linearGradient>
+    <!-- Beacon Aperture Glow -->
+    <filter id="eyeGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#38bdf8" flood-opacity="1"/>
+    </filter>
 
-    <!-- Beacon Glow Filter -->
-    <filter id="beaconAura" x="-40%" y="-40%" width="180%" height="180%">
-      <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#ea580c" flood-opacity="0.6"/>
+    <!-- Dynamic Elevation Glow -->
+    <filter id="botoElevation" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#4f46e5" flood-opacity="0.42"/>
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#38bdf8" flood-opacity="0.28"/>
     </filter>
   </defs>
 
-  <g transform="translate(7, 0)">
-    <!-- 1. Left Vertical Timeline Spine (Changelog Rail) -->
-    <rect x="76" y="88" width="60" height="336" rx="28" fill="url(#spineGrad)"/>
-
-    <!-- 2. Upper Release Tier (B Upper Loop with True Transparent Cutout) -->
-    <path fill-rule="evenodd" clip-rule="evenodd"
-          d="M 126 88 
-             L 264 88 
-             C 336 88, 388 132, 388 198 
-             C 388 248, 348 280, 292 286 
-             L 126 286 
-             Z
-             M 152 144 
-             L 254 144 
-             C 288 144, 314 162, 314 196 
-             C 314 228, 288 238, 254 238 
-             L 152 238 
+  <g filter="url(#botoElevation)">
+    <!-- 1. Timeline Horizon Wave (The 'View' Horizon Vector) -->
+    <path d="M 64 380
+             C 152 384, 230 366, 314 312
+             C 380 270, 426 216, 452 172
+             C 424 228, 364 292, 284 336
+             C 204 380, 136 390, 64 380
              Z" 
-          fill="url(#amberWing)"/>
+          fill="url(#timelineHorizon)"/>
 
-    <!-- 3. Lower Release Tier (B Lower Loop with True Transparent Cutout) -->
-    <path fill-rule="evenodd" clip-rule="evenodd"
-          d="M 126 264 
-             L 296 264 
-             C 368 264, 420 302, 420 362 
-             C 420 414, 372 424, 302 424 
-             L 126 424 
-             Z
-             M 152 312 
-             L 284 312 
-             C 322 312, 348 328, 348 358 
-             C 348 384, 322 388, 284 388 
-             L 152 388 
+    <!-- 2. Cyber-Boto Body (Streamlined Aerodynamic Leap) -->
+    <path d="M 94 378
+             C 106 342, 138 278, 192 206
+             C 246 134, 310 88, 386 92
+             C 438 96, 460 134, 462 164
+             C 464 198, 436 238, 388 280
+             C 334 326, 260 358, 188 376
+             C 146 386, 114 386, 94 378
              Z" 
-          fill="url(#orangeWing)"/>
+          fill="url(#botoBody)"/>
 
-    <!-- 4. Dynamic Forward Viewfinder Horizon Blade ('V') -->
-    <polygon points="252,266 388,126 422,160 286,300" fill="url(#viewRay)"/>
+    <!-- 3. Dorsal Fin (Streamlined Crest on Back) -->
+    <path d="M 288 108
+             C 318 64, 350 42, 372 38
+             C 368 68, 352 98, 330 118
+             Z" 
+          fill="url(#botoAccent)"/>
 
-    <!-- 5. Active Release Beacon Node (Focal Lens) -->
-    <circle cx="396" cy="134" r="16" fill="#fed7aa" filter="url(#beaconAura)"/>
-    <circle cx="396" cy="134" r="8" fill="#ea580c"/>
-    <circle cx="396" cy="134" r="3.5" fill="#ffffff"/>
+    <!-- 4. Pectoral Fin (Hydrofoil Flipper pointing forward) -->
+    <path d="M 296 292
+             C 336 312, 376 348, 392 382
+             C 360 374, 324 348, 296 320
+             Z" 
+          fill="url(#botoAccent)"/>
+
+    <!-- 5. Tail Flukes (Aerodynamic Split Hydrofoil) -->
+    <path d="M 94 378
+             C 76 352, 54 336, 40 332
+             C 54 362, 72 388, 84 402
+             C 70 422, 54 444, 42 456
+             C 66 446, 88 420, 100 398
+             Z" 
+          fill="url(#botoAccent)"/>
+
+    <!-- 6. Optical Viewfinder Lens (The 'View' Eye) -->
+    <circle cx="420" cy="154" r="13" fill="#ffffff" filter="url(#eyeGlow)"/>
+    <circle cx="420" cy="154" r="6.5" fill="#0284c7"/>
+    <circle cx="418" cy="152" r="2.5" fill="#ffffff"/>
   </g>
 </svg>
