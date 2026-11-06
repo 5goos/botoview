@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.43.125",
+    "t": "Fixed the ImageDeleted and ImageVersionDeleted waiters to succeed on the ResourceNotFound error returned by DescribeImage and DescribeImageVersion"
+  },
+  {
     "v": "1.43.123",
     "t": "Create endpoints with AcceleratorPartitionLayouts on ProductionVariant and deploy inference components with AcceleratorPartitionType in ComputeResourceRequirements to divide accelerators into hardware-isolated NVIDIA MIG partitions, running multiple models per GPU. P4d, P5, G7, G7e."
   },

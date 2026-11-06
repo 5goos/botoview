@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.43.125",
+    "t": "Amazon QuickSight adds APIs to view account service role settings and switch to or replace a customer-managed IAM role."
+  },
+  {
     "v": "1.43.117",
     "t": "Adds support for SharePoint and OneDrive two-legged OAuth certificate credentials and Google Workspace service account credentials when creating data sources"
   },

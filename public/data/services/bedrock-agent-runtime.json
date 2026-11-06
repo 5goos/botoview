@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.43.125",
+    "t": "Amazon Bedrock Managed Knowledge Base now supports an optional mediaId parameter in GetDocumentContent that you can use to retrieve images embedded in source documents."
+  },
+  {
     "v": "1.43.123",
     "t": "Adds the CodeExecution step and codeExecution action to AgenticRetrieveStream trace events, showing when the agent runs code and which documents it reads."
   },

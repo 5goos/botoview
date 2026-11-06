@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.43.125",
+    "t": "This release adds a LastModifiedRegion field to GetApplication and ListApplications so customers can see which Region an application was last modified in."
+  },
+  {
     "v": "1.43.113",
     "t": "This release adds the Connect JWT authentication type and the AudienceOverride field to AuthConfig, letting A2A server applications authenticate with JWTs issued by Amazon Connect."
   },

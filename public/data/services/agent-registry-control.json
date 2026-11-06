@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.43.125",
+    "t": "Adds support for OAuth2 Authorization Server Metadata (RFC 8414) discovery URLs in custom JWT authorizer."
+  },
+  {
     "v": "1.43.113",
     "t": "AWS Agent Registry is improving recently launched custom metadata schema feature to make shared attributes easier to manage."
   },

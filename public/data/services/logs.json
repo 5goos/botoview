@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.43.125",
+    "t": "Adds account-level retention policies with dry run preview and the Essentials log group class to Amazon CloudWatch Logs"
+  },
+  {
     "v": "1.43.123",
     "t": "Adds support for account-level retention policies in Amazon CloudWatch Logs. Customers can now use PutAccountPolicy with the new RETENTION POLICY type to set default log retention across all log groups in an account. Includes dry-run mode to preview the impact of policy changes before applying them."
   },

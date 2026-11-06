@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.43.125",
+    "t": "AWS WAF customers who monetize AI traffic on Web ACLs can now configure payments through connected accounts (Stripe)."
+  },
+  {
     "v": "1.43.122",
     "t": "AWS WAF customers using Targeted Bot Control, ATP, or ACFP managed rule groups can now enable automatic Challenge JavaScript SDK injection. When enabled, Amazon CloudFront injects the script tag into HTML responses on your behalf, removing the need for manual integration."
   },

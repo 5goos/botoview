@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.43.125",
+    "t": "Adds support for real-time agent assistance and self-service with Amazon Connect Global Resiliency, including cross-Region replication of supported AI agent resources and configurations."
+  },
+  {
     "v": "1.43.103",
     "t": "Release shapes for the proactive agentic recommendations and the multi-knowledge base search features. Increases the maximum length of QuickResponseContent."
   },

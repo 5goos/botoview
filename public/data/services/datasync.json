@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.43.125",
+    "t": "Adds support for federated identity on Azure Blob Storage and object storage locations, enabling DataSync to authenticate to Azure and Google Cloud Storage using Workload Identity Federation (WIF) over OpenID Connect (OIDC) instead of stored long-lived credentials."
+  },
+  {
     "v": "1.43.113",
     "t": "AWS DataSync Enhanced mode now supports FSx for OpenZFS, NFS 4.2, and object metadata controls"
   },
