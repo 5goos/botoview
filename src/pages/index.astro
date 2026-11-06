@@ -43,16 +43,16 @@ import ServiceNav from '../components/ServiceNav.astro';
                 </div>
                 <h2 class="text-3xl font-black italic uppercase tracking-tighter mb-3">System Override</h2>
                 <p class="text-slate-500 dark:text-slate-400 mb-10 leading-relaxed text-sm mono" x-text="error"></p>
-                <button @click="location.reload()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-black py-4 px-8 rounded-2xl transition-all active:scale-95 shadow-lg shadow-orange-500/20 uppercase tracking-widest text-xs">Reboot Core</button>
+                <button @click="location.reload()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 px-8 rounded-2xl transition-all active:scale-95 shadow-lg shadow-indigo-500/25 uppercase tracking-widest text-xs">Reboot Core</button>
             </div>
         </div>
 
         <!-- Initial Boot Loader -->
-        <div x-show="loading" x-transition.opacity class="fixed inset-0 z-[140] flex flex-col items-center justify-center bg-white dark:bg-[#050505] transition-colors duration-700">
+        <div x-show="loading" x-transition.opacity class="fixed inset-0 z-[140] flex flex-col items-center justify-center bg-white dark:bg-[#080b11] transition-colors duration-700">
             <div class="relative w-20 h-20 mb-8">
-                <div class="absolute inset-0 border-4 border-orange-500/10 rounded-[24px]"></div>
-                <div class="absolute inset-0 border-4 border-t-orange-500 rounded-[24px] animate-spin"></div>
-                <img src="/favicon.svg" class="absolute inset-0 m-auto w-8 h-8 opacity-50 animate-pulse" alt="Loading" />
+                <div class="absolute inset-0 border-4 border-indigo-500/10 rounded-[24px]"></div>
+                <div class="absolute inset-0 border-4 border-t-indigo-600 dark:border-t-indigo-400 rounded-[24px] animate-spin"></div>
+                <img src="/favicon.svg" class="absolute inset-0 m-auto w-8 h-8 opacity-70 animate-pulse" alt="Loading" />
             </div>
         </div>
 
@@ -90,10 +90,10 @@ import ServiceNav from '../components/ServiceNav.astro';
                 <div class="px-6 py-6 border-b border-subtle bg-sidebar backdrop-blur-md">
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center gap-2">
-                            <span class="w-1 h-1 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.6)] animate-pulse-slow"></span>
+                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.7)] animate-pulse-slow"></span>
                             <span class="text-[10px] mono text-slate-500 dark:text-slate-400 font-black uppercase tracking-[0.2em]">Service History</span>
                         </div>
-                        <button @click="activeService = null; updateUrl()" aria-label="Close service history drawer" class="p-1.5 bg-slate-100 dark:bg-white/10 rounded-lg text-slate-400 hover:text-orange-500 transition-all active:scale-90">
+                        <button @click="activeService = null; updateUrl()" aria-label="Close service history drawer" class="p-1.5 bg-slate-100 dark:bg-white/10 rounded-lg text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all active:scale-90">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
                         </button>
                     </div>
@@ -101,15 +101,15 @@ import ServiceNav from '../components/ServiceNav.astro';
                         <h2 class="text-xl font-black text-slate-900 dark:text-white italic uppercase tracking-tighter leading-none" x-text="activeService"></h2>
                         <template x-if="serviceHistory.length > 0">
                             <span class="text-[9px] mono text-slate-400 dark:text-slate-500 uppercase font-bold tracking-widest">
-                                Last updated: <span class="text-orange-500" x-text="getVersionDate(serviceHistory[0].v)"></span>
+                                Last updated: <span class="text-indigo-600 dark:text-indigo-400 font-semibold" x-text="getVersionDate(serviceHistory[0].v)"></span>
                             </span>
                         </template>
                     </div>
                     
                     <div class="relative group/search">
                         <input type="text" id="serviceHistorySearch" x-model.debounce.200ms="serviceHistorySearch" aria-label="Search service history" placeholder="Filter history..." 
-                               class="w-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-xs focus:outline-none focus:ring-4 focus:ring-orange-500/5 focus:border-orange-500/30 transition-all text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 shadow-sm font-medium">
-                        <svg class="absolute left-3.5 top-2.5 w-4 h-4 text-slate-400 dark:text-slate-600 group-focus-within/search:text-orange-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                               class="w-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/40 transition-all text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 shadow-sm font-medium">
+                        <svg class="absolute left-3.5 top-2.5 w-4 h-4 text-slate-400 dark:text-slate-500 group-focus-within/search:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     </div>
                 </div>
 
@@ -133,15 +133,15 @@ import ServiceNav from '../components/ServiceNav.astro';
 
                             <template x-for="log in filteredServiceHistory" :key="log.v + log.t">
                                 <div x-show="!serviceHistoryLoading" class="relative pl-12 group/history">
-                                    <div class="absolute left-[14px] top-2 w-2.5 h-2.5 rounded-full bg-white dark:bg-black border-2 border-slate-300 dark:border-white/20 shadow-sm z-10 transition-colors group-hover/history:border-orange-500"></div>
+                                    <div class="absolute left-[14px] top-2 w-2.5 h-2.5 rounded-full bg-white dark:bg-[#080b11] border-2 border-slate-300 dark:border-white/20 shadow-sm z-10 transition-colors group-hover/history:border-indigo-500"></div>
                                     
-                                    <div class="flex flex-col gap-2.5 p-5 bg-slate-50/50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/5 rounded-[20px] hover:bg-white dark:hover:bg-white/[0.06] hover:border-orange-500/20 transition-all duration-300 overflow-hidden shadow-sm hover:shadow-md">
+                                    <div class="flex flex-col gap-2.5 p-5 bg-white dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/5 rounded-[20px] hover:bg-slate-50/50 dark:hover:bg-white/[0.06] hover:border-indigo-500/30 transition-all duration-300 overflow-hidden shadow-sm hover:shadow-md">
                                         <div class="flex items-center justify-between">
                                             <button @click="selectVersion(log.v); activeService = null; updateUrl()" 
                                                     :aria-label="'Select release version ' + log.v"
-                                                    class="px-2.5 py-1 bg-white dark:bg-white/10 border border-slate-200 dark:border-white/10 rounded-md mono text-[9px] font-black text-orange-600 dark:text-orange-400 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-all active:scale-95 shadow-sm" 
+                                                    class="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-500/20 dark:border-indigo-500/30 rounded-md mono text-[9px] font-black text-indigo-700 dark:text-indigo-300 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all active:scale-95 shadow-sm" 
                                                     x-html="highlight(log.v, serviceHistorySearch)"></button>
-                                            <span x-show="getVersionDate(log.v)" x-text="getVersionDate(log.v)" x-cloak class="text-[8px] mono text-slate-400 dark:text-slate-600 uppercase tracking-widest font-bold"></span>
+                                            <span x-show="getVersionDate(log.v)" x-text="getVersionDate(log.v)" x-cloak class="text-[8px] mono text-slate-400 dark:text-slate-500 uppercase tracking-widest font-bold"></span>
                                         </div>
                                         <p class="text-slate-600 dark:text-slate-300 text-[13px] md:text-[14px] leading-[1.6] font-medium tracking-tight group-hover/history:text-slate-900 dark:group-hover/history:text-white transition-colors break-words" x-html="highlight(log.t, serviceHistorySearch)"></p>
                                     </div>
@@ -187,9 +187,21 @@ import ServiceNav from '../components/ServiceNav.astro';
             loading: true,
             versionCache: {},
             copyStatus: false,
+            isDarkMode: false,
             stats: {
                 avgReleasesPerWeek: 0,
                 recentChangesCount: 0
+            },
+
+            toggleTheme() {
+                this.isDarkMode = !this.isDarkMode;
+                document.documentElement.classList.toggle('dark', this.isDarkMode);
+                try {
+                    localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
+                } catch(e) {}
+                const themeColor = this.isDarkMode ? '#080b11' : '#f8fafc';
+                const metaTheme = document.querySelector('meta[name="theme-color"]');
+                if (metaTheme) metaTheme.setAttribute('content', themeColor);
             },
 
             isMobile(breakpoint = 768) {
@@ -236,16 +248,16 @@ import ServiceNav from '../components/ServiceNav.astro';
             },
 
             getServiceColorClass(serviceName) {
-                if (!serviceName) return 'bg-slate-500/10 text-slate-500 border-slate-500/20';
+                if (!serviceName) return 'bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-500/20';
                 const classes = [
-                    'bg-rose-500/10 text-rose-500 border-rose-500/20',
-                    'bg-blue-500/10 text-blue-500 border-blue-500/20',
-                    'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
-                    'bg-amber-500/10 text-amber-500 border-amber-500/20',
-                    'bg-purple-500/10 text-purple-500 border-purple-500/20',
-                    'bg-cyan-500/10 text-cyan-500 border-cyan-500/20',
-                    'bg-indigo-500/10 text-indigo-500 border-indigo-500/20',
-                    'bg-fuchsia-500/10 text-fuchsia-500 border-fuchsia-500/20'
+                    'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/25',
+                    'bg-sky-500/10 text-sky-700 dark:text-sky-300 border-sky-500/25',
+                    'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/25',
+                    'bg-violet-500/10 text-violet-700 dark:text-violet-300 border-violet-500/25',
+                    'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/25',
+                    'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/25',
+                    'bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border-cyan-500/25',
+                    'bg-teal-500/10 text-teal-700 dark:text-teal-300 border-teal-500/25'
                 ];
                 let hash = 0;
                 for (let i = 0; i < serviceName.length; i++) {
@@ -287,6 +299,7 @@ import ServiceNav from '../components/ServiceNav.astro';
             },
 
             async init() {
+                this.isDarkMode = document.documentElement.classList.contains('dark');
                 try {
                     const res = await fetch('/data/track.json');
                     if (!res.ok) throw new Error('Primary track data missing');

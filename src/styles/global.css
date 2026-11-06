@@ -2,31 +2,54 @@
 
 @variant dark (&:where(.dark, .dark *));
 
-/* Design Tokens */
+/* Design Tokens — Senior UI/UX Theme System */
 :root {
-    --bg-main: #ffffff;
-    --bg-sidebar: #fcfcfd;
+    --bg-main: #f8fafc;
+    --bg-sidebar: #ffffff;
     --bg-card: #ffffff;
+    --bg-surface-elevated: #f1f5f9;
     
     --text-primary: #0f172a;
     --text-secondary: #475569;
+    --text-muted: #94a3b8;
     
-    --border-subtle: rgba(0, 0, 0, 0.04);
-    --accent-orange: #f97316;
+    --border-subtle: rgba(15, 23, 42, 0.08);
+    --border-hover: rgba(99, 102, 241, 0.35);
+    
+    /* Hero Accent: Electric Indigo & Celestial Sky */
+    --accent-primary: #4f46e5;
+    --accent-primary-hover: #4338ca;
+    --accent-light: rgba(79, 70, 229, 0.08);
+    --accent-glow: rgba(79, 70, 229, 0.25);
+    
+    --search-highlight-bg: rgba(79, 70, 229, 0.12);
+    --search-highlight-text: #4338ca;
 }
 
 .dark {
-    --bg-main: #0a0a0a;
-    --bg-sidebar: #121212;
-    --bg-card: #181818;
+    --bg-main: #080b11;
+    --bg-sidebar: #0d121d;
+    --bg-card: #121824;
+    --bg-surface-elevated: #1a2234;
     
     --text-primary: #f8fafc;
-    --text-secondary: #cbd5e1;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
     
-    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-subtle: rgba(255, 255, 255, 0.07);
+    --border-hover: rgba(99, 102, 241, 0.45);
+    
+    /* Hero Accent: Electric Iris Glow */
+    --accent-primary: #6366f1;
+    --accent-primary-hover: #818cf8;
+    --accent-light: rgba(99, 102, 241, 0.14);
+    --accent-glow: rgba(99, 102, 241, 0.4);
+    
+    --search-highlight-bg: rgba(99, 102, 241, 0.25);
+    --search-highlight-text: #a5b4fc;
 }
 
-/* Clean, flat background without noise filter */
+/* Clean, flat background with smooth scrolling */
 html {
     scroll-behavior: smooth;
 }
@@ -36,7 +59,7 @@ body {
     background-color: var(--bg-main);
     color: var(--text-secondary);
     -webkit-font-smoothing: antialiased;
-    transition: background-color 0.5s ease, color 0.5s ease;
+    transition: background-color 0.4s ease, color 0.4s ease;
     overflow: hidden;
 }
 
@@ -44,8 +67,8 @@ body {
 
 /* Interactive Highlights */
 :focus-visible {
-    outline: 2px solid var(--accent-orange);
-    outline-offset: 4px;
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 3px;
 }
 
 /* Custom Production Scrollbar - More refined */
@@ -58,7 +81,7 @@ body {
     background-clip: content-box;
 }
 .dark .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); }
-.custom-scroll::-webkit-scrollbar-thumb:hover { background: var(--accent-orange) !important; }
+.custom-scroll::-webkit-scrollbar-thumb:hover { background: var(--accent-primary) !important; }
 
 /* Edge Fade Mask */
 .scroll-mask {
@@ -79,16 +102,11 @@ body {
 [x-cloak] { display: none !important; }
 
 .search-highlight {
-    background: rgba(249, 115, 22, 0.15);
-    color: var(--accent-orange);
+    background: var(--search-highlight-bg);
+    color: var(--search-highlight-text);
     border-radius: 4px;
-    padding: 0 2px;
+    padding: 0 3px;
     font-weight: 600;
-}
-
-.dark .search-highlight {
-    background: rgba(249, 115, 22, 0.25);
-    color: #fb923c;
 }
 
 @keyframes slideUp {
@@ -98,13 +116,13 @@ body {
 
 @keyframes pulseSlow {
     0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.3; transform: scale(0.8); }
+    50% { opacity: 0.35; transform: scale(0.85); }
 }
 
 .animate-slide-up {
-    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-pulse-slow {
-    animation: pulseSlow 3s ease-in-out infinite;
+    animation: pulseSlow 2.5s ease-in-out infinite;
 }

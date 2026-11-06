@@ -1,34 +1,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <!-- Upper Wing: Bright Amber / Sunlight Orange -->
+    <!-- Upper Wing: Electric Iris & Celestial Sky -->
     <linearGradient id="amberWing" x1="0%" y1="100%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#f97316"/>
-      <stop offset="100%" stop-color="#fdba74"/>
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
     </linearGradient>
 
-    <!-- Lower Wing: Vibrant Primary AWS Orange -->
-    <linearGradient id="orangeWing" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ea580c"/>
-      <stop offset="100%" stop-color="#f97316"/>
+    <!-- Lower Wing: Vibrant Royal Indigo & Cobalt -->
+    <linearGradient id="cobaltWing" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4338ca"/>
+      <stop offset="100%" stop-color="#6366f1"/>
     </linearGradient>
 
-    <!-- Left Spine: Deep Structural Bronze-Orange -->
+    <!-- Left Spine: Deep Structural Luminescent Spine -->
     <linearGradient id="spineGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#fb923c"/>
-      <stop offset="50%" stop-color="#f97316"/>
-      <stop offset="100%" stop-color="#c2410c"/>
+      <stop offset="0%" stop-color="#818cf8"/>
+      <stop offset="50%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#3730a3"/>
     </linearGradient>
 
     <!-- Center Viewfinder Focal Ray -->
     <linearGradient id="viewRay" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#fb923c" stop-opacity="0.9"/>
+      <stop offset="0%" stop-color="#818cf8" stop-opacity="0.9"/>
       <stop offset="60%" stop-color="#ffffff"/>
-      <stop offset="100%" stop-color="#fed7aa"/>
+      <stop offset="100%" stop-color="#7dd3fc"/>
     </linearGradient>
 
     <!-- Beacon Glow Filter -->
     <filter id="beaconAura" x="-40%" y="-40%" width="180%" height="180%">
-      <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#ea580c" flood-opacity="0.6"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#6366f1" flood-opacity="0.75"/>
     </filter>
   </defs>
 
@@ -66,14 +66,14 @@
              C 348 384, 322 388, 284 388 
              L 152 388 
              Z" 
-          fill="url(#orangeWing)"/>
+          fill="url(#cobaltWing)"/>
 
     <!-- 4. Dynamic Forward Viewfinder Horizon Blade ('V') -->
     <polygon points="252,266 388,126 422,160 286,300" fill="url(#viewRay)"/>
 
     <!-- 5. Active Release Beacon Node (Focal Lens) -->
-    <circle cx="396" cy="134" r="16" fill="#fed7aa" filter="url(#beaconAura)"/>
-    <circle cx="396" cy="134" r="8" fill="#ea580c"/>
+    <circle cx="396" cy="134" r="16" fill="#c7d2fe" filter="url(#beaconAura)"/>
+    <circle cx="396" cy="134" r="8" fill="#4f46e5"/>
     <circle cx="396" cy="134" r="3.5" fill="#ffffff"/>
   </g>
 </svg>

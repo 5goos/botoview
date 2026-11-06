@@ -1,23 +1,23 @@
 <aside :class="{ 'translate-x-0': showMobileVersions, '-translate-x-full': !showMobileVersions }"
-       class="fixed lg:relative inset-y-0 left-0 -translate-x-full lg:translate-x-0 w-40 md:w-52 flex-shrink-0 border-r border-slate-200 dark:border-white/5 flex flex-col bg-sidebar z-[100] lg:z-20 transition-all duration-500 ease-in-out theme-transition">
+       class="fixed lg:relative inset-y-0 left-0 -translate-x-full lg:translate-x-0 w-40 md:w-52 flex-shrink-0 border-r border-slate-200/80 dark:border-white/5 flex flex-col bg-sidebar z-[100] lg:z-20 transition-all duration-500 ease-in-out theme-transition">
     
     <!-- Mobile Header -->
     <div class="lg:hidden flex items-center justify-between px-6 py-5 border-b border-subtle bg-card">
         <div class="flex items-center gap-2.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.6)]"></span>
             <span class="text-slate-900 dark:text-white font-black italic tracking-tighter uppercase text-[11px]">Releases</span>
         </div>
-        <button @click="showMobileVersions = false" aria-label="Close versions sidebar" class="p-2 bg-slate-100 dark:bg-white/5 rounded-xl text-slate-400 hover:text-orange-500 transition-all active:scale-90">
+        <button @click="showMobileVersions = false" aria-label="Close versions sidebar" class="p-2 bg-slate-100 dark:bg-white/5 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all active:scale-90">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
     </div>
 
     <!-- Brand Area -->
-    <div class="hidden lg:flex h-40 flex-col items-center justify-center flex-shrink-0 relative z-30 border-b border-slate-200 dark:border-white/5 group/brand bg-sidebar">
+    <div class="hidden lg:flex h-40 flex-col items-center justify-center flex-shrink-0 relative z-30 border-b border-slate-200/80 dark:border-white/5 group/brand bg-sidebar">
         <button @click="window.location.href = '/'" 
                 aria-label="Go to latest release"
-                class="w-14 h-14 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-[22px] flex items-center justify-center shadow-sm cursor-pointer hover:rotate-[10deg] hover:scale-105 transition-all duration-500 active:scale-95 relative overflow-hidden group">
-            <img src="/favicon.svg" width="32" height="32" alt="BotoView — AWS Boto3 Changelog Explorer & Release Notes Tracker" class="w-8 h-8 pointer-events-none relative z-10 opacity-90" />
+                class="w-14 h-14 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-[22px] flex items-center justify-center shadow-sm cursor-pointer hover:rotate-[8deg] hover:scale-105 hover:shadow-[0_0_24px_rgba(99,102,241,0.2)] transition-all duration-500 active:scale-95 relative overflow-hidden group">
+            <img src="/favicon.svg" width="32" height="32" alt="BotoView — AWS Boto3 Changelog Explorer & Release Notes Tracker" class="w-8 h-8 pointer-events-none relative z-10 opacity-95 group-hover:scale-110 transition-transform duration-300" />
         </button>
         <div class="flex flex-col items-center text-center mt-4 px-4">
             <span class="text-[12px] font-black italic uppercase tracking-tighter text-slate-900 dark:text-white leading-none">BotoView</span>
@@ -25,7 +25,7 @@
     </div>
 
     <!-- Search Section -->
-    <div class="p-5 border-b border-slate-200 dark:border-white/5 bg-sidebar" 
+    <div class="p-5 border-b border-slate-200/80 dark:border-white/5 bg-sidebar" 
          @keydown.window.prevent.ctrl.k="$refs.railSearch.focus()"
          @keydown.window.prevent.cmd.k="$refs.railSearch.focus()">
         <div class="relative group/search">
@@ -33,11 +33,11 @@
                    x-ref="railSearch"
                    @input="railLimit = 50"
                    placeholder="Jump to..." 
-                   class="w-full bg-slate-50 dark:bg-white/[0.03] border border-slate-200/50 dark:border-white/10 rounded-2xl py-2.5 pl-10 pr-10 text-[11px] lg:text-[10px] focus:outline-none focus:ring-1 focus:ring-orange-500/30 focus:border-orange-500/30 transition-all text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium">
-            <svg class="absolute left-3.5 top-[11px] lg:top-[9px] lg:left-3.5 w-3.5 h-3.5 lg:w-3 lg:h-3 text-slate-400 group-focus-within/search:text-orange-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-            <div class="absolute right-3 top-[10px] lg:top-[8px] hidden lg:flex items-center gap-1 opacity-20 group-focus-within/search:opacity-0 transition-opacity pointer-events-none">
-                <span class="text-[8px] mono border border-slate-400 rounded px-1">⌘</span>
-                <span class="text-[8px] mono border border-slate-400 rounded px-1">K</span>
+                   class="w-full bg-slate-50 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/10 rounded-2xl py-2.5 pl-10 pr-10 text-[11px] lg:text-[10px] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/40 transition-all text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium">
+            <svg class="absolute left-3.5 top-[11px] lg:top-[9px] lg:left-3.5 w-3.5 h-3.5 lg:w-3 lg:h-3 text-slate-400 group-focus-within/search:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            <div class="absolute right-3 top-[10px] lg:top-[8px] hidden lg:flex items-center gap-1 opacity-25 group-focus-within/search:opacity-0 transition-opacity pointer-events-none">
+                <span class="text-[8px] mono border border-slate-400 dark:border-slate-600 rounded px-1">⌘</span>
+                <span class="text-[8px] mono border border-slate-400 dark:border-slate-600 rounded px-1">K</span>
             </div>
         </div>
     </div>
@@ -47,14 +47,14 @@
         <div class="flex-1 overflow-y-auto hide-scrollbar relative z-20 px-4">
             <div class="flex flex-col gap-2 relative pt-6 pb-20 glow-container">
                 <!-- Clean Indicator -->
-                <div class="absolute -left-4 w-[2px] bg-orange-500 z-40 transition-all duration-300 rounded-r-full"
+                <div class="absolute -left-4 w-[2.5px] bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.8)] z-40 transition-all duration-300 rounded-r-full"
                      style="top: var(--glow-top, 0); height: var(--glow-height, 0);"
                      x-show="selectedVersion && !versionRailSearch"></div>
 
                 <template x-for="(group, gIndex) in groupedRailVersions" :key="group.label">
                     <div class="flex flex-col mb-6">
                         <!-- Group Header -->
-                        <div class="sticky -top-[1px] z-50 bg-sidebar -mx-4 px-4 py-3 flex items-center gap-3 border-b border-slate-200/40 dark:border-white/5 shadow-sm">
+                        <div class="sticky -top-[1px] z-50 bg-sidebar -mx-4 px-4 py-3 flex items-center gap-3 border-b border-slate-200/50 dark:border-white/5 shadow-sm">
                             <span class="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em] whitespace-nowrap" x-text="group.label"></span>
                             <div class="flex-1 h-[1px] bg-slate-100 dark:bg-white/5"></div>
                         </div>
@@ -65,15 +65,15 @@
                                         @mouseenter="prefetchVersion(v.id)"
                                         :aria-label="'Switch to release version ' + v.id"
                                         :data-version="v.id"
-                                        :class="selectedVersion === v.id ? 'bg-white dark:bg-orange-500/10 text-orange-500 shadow-sm ring-1 ring-black/5 dark:ring-orange-500/30' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-white/10'"
+                                        :class="selectedVersion === v.id ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 shadow-sm ring-1 ring-indigo-500/20 dark:ring-indigo-500/30 font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/60 dark:hover:bg-white/5'"
                                         class="relative w-full h-10 lg:h-9 px-3 rounded-xl flex items-center justify-between transition-all duration-200 group/item flex-shrink-0 z-30 active:scale-95">
                                     <div class="flex items-center gap-2">
                                         <span class="text-[11px] lg:text-[10px] mono font-black tracking-tight" x-text="v.id"></span>
                                         <template x-if="gIndex === 0 && vIndex === 0 && !versionRailSearch">
-                                            <span class="px-1.5 py-0.5 bg-orange-500/10 text-orange-500 text-[6px] font-black rounded uppercase tracking-widest border border-orange-500/20">Latest</span>
+                                            <span class="px-1.5 py-0.5 bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 text-[6px] font-black rounded uppercase tracking-widest border border-indigo-500/20 dark:border-indigo-500/30">Latest</span>
                                         </template>
                                     </div>
-                                    <svg x-show="selectedVersion === v.id" class="w-3 h-3 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg x-show="selectedVersion === v.id" class="w-3 h-3 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
                                     </svg>
                                 </button>
@@ -86,7 +86,7 @@
                 <template x-if="hasMoreVersions">
                     <button @click="loadMoreVersions()" 
                             aria-label="Load more releases"
-                            class="mt-4 w-full py-3 rounded-xl border border-slate-200 dark:border-white/5 bg-white/50 dark:bg-white/5 hover:border-orange-500/30 text-[9px] mono font-black text-slate-400 hover:text-orange-500 transition-all uppercase tracking-[0.2em] active:scale-95 shadow-sm">
+                            class="mt-4 w-full py-3 rounded-xl border border-slate-200/80 dark:border-white/5 bg-white/70 dark:bg-white/5 hover:border-indigo-500/30 text-[9px] mono font-black text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all uppercase tracking-[0.2em] active:scale-95 shadow-sm">
                         Load More Releases
                     </button>
                 </template>
@@ -99,8 +99,8 @@
     </div>
 
     <!-- Sidebar Footer Actions -->
-    <div class="p-3 border-t border-slate-200 dark:border-white/5 bg-card hidden md:block theme-transition relative overflow-hidden group/status">
-        <div class="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl p-2 shadow-sm hover:border-emerald-500/20 transition-all group flex items-center justify-between gap-2">
+    <div class="p-3 border-t border-slate-200/80 dark:border-white/5 bg-card hidden md:block theme-transition relative overflow-hidden group/status">
+        <div class="bg-white dark:bg-white/5 border border-slate-200/80 dark:border-white/10 rounded-xl p-2 shadow-sm hover:border-indigo-500/20 transition-all group flex items-center justify-between gap-2">
             <div class="flex flex-col">
                 <span class="text-[6px] mono text-slate-400 dark:text-slate-500 uppercase font-black">Releases / 30d</span>
                 <span class="text-xs font-black text-slate-900 dark:text-white italic tracking-tighter" x-text="stats.recentChangesCount"></span>
