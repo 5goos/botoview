@@ -1,7 +1,16 @@
 # BotoView — AWS Boto3 Changelog Explorer & Release Notes Tracker
 
-[![Website](https://img.shields.io/badge/website-botoview.5goos.com-orange.svg)](https://botoview.5goos.com)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+<p align="center">
+  <a href="https://botoview.5goos.com">
+    <img src="public/og-image.png" alt="BotoView — AWS Boto3 Changelog Explorer & Release Notes Tracker" width="100%" />
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://botoview.5goos.com"><img src="https://img.shields.io/badge/website-botoview.5goos.com-6366f1.svg?style=flat-square" alt="Website" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-38bdf8.svg?style=flat-square" alt="License: MIT" /></a>
+  <a href="https://pypi.org/project/boto3/"><img src="https://img.shields.io/badge/AWS%20SDK-Boto3%20%2F%20Botocore-4f46e5.svg?style=flat-square" alt="Boto3" /></a>
+</p>
 
 **BotoView** (`botoview`) is an interactive web application to track, filter, and explore **AWS Boto3 changelogs** and Botocore updates in real time. Designed for cloud engineers, Python developers, and DevOps practitioners seeking a lightning-fast **boto3 changelog** viewer and comprehensive **boto3 release notes** tracker.
 
