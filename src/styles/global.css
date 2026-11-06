@@ -2,7 +2,6 @@
 
 @variant dark (&:where(.dark, .dark *));
 
-/* Design Tokens — Senior UI/UX Theme System */
 :root {
     --bg-main: #f8fafc;
     --bg-sidebar: #ffffff;
@@ -16,7 +15,6 @@
     --border-subtle: rgba(15, 23, 42, 0.08);
     --border-hover: rgba(99, 102, 241, 0.35);
     
-    /* Hero Accent: Electric Indigo & Celestial Sky */
     --accent-primary: #4f46e5;
     --accent-primary-hover: #4338ca;
     --accent-light: rgba(79, 70, 229, 0.08);
@@ -49,7 +47,6 @@
     --search-highlight-text: #a5b4fc;
 }
 
-/* Clean, flat background with smooth scrolling */
 html {
     scroll-behavior: smooth;
 }
@@ -65,13 +62,11 @@ body {
 
 .mono { font-family: 'JetBrains Mono', monospace; }
 
-/* Interactive Highlights */
 :focus-visible {
     outline: 2px solid var(--accent-primary);
     outline-offset: 3px;
 }
 
-/* Custom Production Scrollbar - More refined */
 .custom-scroll::-webkit-scrollbar { width: 5px; }
 .custom-scroll::-webkit-scrollbar-track { background: transparent; }
 .custom-scroll::-webkit-scrollbar-thumb { 
@@ -83,7 +78,6 @@ body {
 .dark .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); }
 .custom-scroll::-webkit-scrollbar-thumb:hover { background: var(--accent-primary) !important; }
 
-/* Edge Fade Mask */
 .scroll-mask {
     mask-image: linear-gradient(to bottom, 
         transparent, 
@@ -93,11 +87,23 @@ body {
     );
 }
 
-/* Utility Mapping */
 .bg-main { background-color: var(--bg-main); }
 .bg-sidebar { background-color: var(--bg-sidebar); }
 .bg-card { background-color: var(--bg-card); }
+.bg-elevated { background-color: var(--bg-surface-elevated); }
 .border-subtle { border-color: var(--border-subtle); }
+
+.theme-transition {
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+}
+
+.hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;
+}
 
 [x-cloak] { display: none !important; }
 
@@ -125,4 +131,21 @@ body {
 
 .animate-pulse-slow {
     animation: pulseSlow 2.5s ease-in-out infinite;
+}
+
+.ambient-glow {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 1200px;
+    height: 380px;
+    background: radial-gradient(ellipse 65% 55% at 50% 0%, rgba(99, 102, 241, 0.07), transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.dark .ambient-glow {
+    background: radial-gradient(ellipse 65% 55% at 50% 0%, rgba(99, 102, 241, 0.14), transparent 70%);
 }

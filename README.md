@@ -86,4 +86,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-Crafted with care by [5goos](https://5goos.com).
+Crafted with care by [Naveen Thurimerla](https://www.thurimerla.com/).
