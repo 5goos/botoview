@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.43.126",
+    "t": "Add support for configuring searchability for metadata fields via UpdateKnowledgeBase request for Managed Knowledge Base. Once a field is marked as searchable it can be queried via query text and is factored into Managed Knowledge Base's ranking algorithm."
+  },
+  {
     "v": "1.43.115",
     "t": "Adds Retrieval Instructions for Amazon Bedrock Knowledge Bases. Create, get, update, delete, list, and version customer-authored instructions that guide how a knowledge base retrieves and answers, with content review before use."
   },

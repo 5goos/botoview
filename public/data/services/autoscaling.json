@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.43.126",
+    "t": "Amazon EC2 Auto Scaling now lets you exclude managed resources from describe API responses using the new optional IncludeManagedResources parameter. Set this parameter to false to exclude managed resources from the response. By default, managed resources are included."
+  },
+  {
     "v": "1.43.117",
     "t": "EC2 Auto Scaling now supports account settings, letting you manage account-level configuration for Auto Scaling."
   },

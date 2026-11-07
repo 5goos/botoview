@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.43.126",
+    "t": "Rules in Amazon Connect now support ending email contacts associated to a case based on case events."
+  },
+  {
     "v": "1.43.124",
     "t": "Adds support for retrieving associated cases in contact responses. The Contact object now includes a Cases field containing case IDs and reference numbers linked to the contact."
   },

@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.43.126",
+    "t": "Added support for Athena System Tables which writes Athena usage data to AWS S3 managed tables in Apache Iceberg format. Adds CreateSystemTableConfiguration, UpdateSystemTableConfiguration, DeleteSystemTableConfiguration, GetSystemTableConfiguration, and ListSystemTableStatuses."
+  },
+  {
     "v": "1.42.43",
     "t": "Reduces the minimum TargetDpus to create or update capacity reservations from 24 to 4."
   },

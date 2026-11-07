@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.43.126",
+    "t": "Adds support for using managed permission template parameters, discovering shared customer-managed permissions, and managing customer-managed permission deprecation."
+  },
+  {
     "v": "1.42.59",
     "t": "Resource owners can now specify ResourceShareConfiguration request parameter for CreateResourceShare API including RetainSharingOnAccountLeaveOrganization boolean parameter"
   },

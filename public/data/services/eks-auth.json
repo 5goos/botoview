@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.43.126",
+    "t": "Added workloadIdentityProviderArn to the AssumeRoleForPodIdentity API response."
+  },
+  {
     "v": "1.43.63",
     "t": "Added eksNodeName, instanceId, and zone optional parameters to the AssumeRoleForPodIdentity API."
   },
