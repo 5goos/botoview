@@ -146,12 +146,6 @@ flowchart TD
     end
 ```
 
-### Why Data Sharding?
-Instead of forcing the browser to download a 30+ megabyte monolithic changelog payload:
-1. **Initial Shell:** The client downloads only `track.json` (~15 KB gzipped), containing release IDs, dates, and indexed services.
-2. **On-Demand Release Fetch:** When selecting a release (e.g. `1.34.160`), only `versions/1.34.160.json` (~2-5 KB) is loaded and cached.
-3. **On-Demand Service Dossier:** When opening a service drawer (e.g. `s3`), only `services/s3.json` is fetched and cached.
-
 ---
 
 <a id="quick-start"></a>
