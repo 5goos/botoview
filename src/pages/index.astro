@@ -207,6 +207,8 @@ import ServiceNav from '../components/ServiceNav.astro';
             copiedItemIndex: null,
             showPipCopied: false,
             isDarkMode: false,
+            _versionDateMap: null,
+            _serviceColorCache: {},
             stats: {
                 avgReleasesPerWeek: 0,
                 recentChangesCount: 0
@@ -250,33 +252,26 @@ import ServiceNav from '../components/ServiceNav.astro';
                 if (!text) return '';
                 let formatted = this.escapeHtml(text);
 
-                // 1. Convert RST GitHub Issue/PR links:
-                // e.g. `fixes #3255 <https://github.com/boto/botocore/issues/3255>`__
-                // or `issue 849 <https://github.com/boto/botocore/pull/849>`__
                 formatted = formatted.replace(
                     /`([^`]+?)\s*&lt;(https?:\/\/[^&>]+?)&gt;`_+/g,
                     '<a href="$2" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-0.5 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold underline decoration-indigo-400/40 hover:decoration-indigo-500 transition-colors">$1<svg class="w-2.5 h-2.5 opacity-70 inline ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg></a>'
                 );
 
-                // 2. Convert double backticks: ``code``
                 formatted = formatted.replace(
                     /``([^`]+?)``/g,
                     '<code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-white/10 text-[11px] mono text-indigo-700 dark:text-indigo-300 border border-slate-200/60 dark:border-white/10 font-medium">$1</code>'
                 );
 
-                // 3. Convert single backticks: `code`
                 formatted = formatted.replace(
                     /`([^`]+?)`/g,
                     '<code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-white/10 text-[11px] mono text-indigo-700 dark:text-indigo-300 border border-slate-200/60 dark:border-white/10 font-medium">$1</code>'
                 );
 
-                // 4. Convert standalone URLs:
                 formatted = formatted.replace(
                     /(^|[^"'])(https?:\/\/[a-zA-Z0-9\-\._~:\/\?#\[\]@!$&'()*+,;=%]+)/g,
                     '$1<a href="$2" target="_blank" rel="noopener noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:underline font-medium break-all">$2</a>'
                 );
 
-                // 5. Safe highlight matching search query
                 if (search && search.trim()) {
                     const s = search.trim();
                     const escapedSearch = s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -380,13 +375,12 @@ import ServiceNav from '../components/ServiceNav.astro';
             },
 
             get selectedDate() {
-                const v = this.versions.find(v => v.id === this.selectedVersion);
-                return v ? v.date : '';
+                return this.getVersionDate(this.selectedVersion);
             },
 
             getVersionDate(id) {
-                const v = this.versions.find(v => v.id === id);
-                return v ? v.date : '';
+                if (!id || !this._versionDateMap) return '';
+                return this._versionDateMap.get(id) || '';
             },
 
             getRelativeDate(dateStr) {
@@ -426,6 +420,7 @@ import ServiceNav from '../components/ServiceNav.astro';
 
             getServiceColorClass(serviceName) {
                 if (!serviceName) return 'bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-500/20';
+                if (this._serviceColorCache[serviceName]) return this._serviceColorCache[serviceName];
                 const classes = [
                     'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/25',
                     'bg-sky-500/10 text-sky-700 dark:text-sky-300 border-sky-500/25',
@@ -440,7 +435,9 @@ import ServiceNav from '../components/ServiceNav.astro';
                 for (let i = 0; i < serviceName.length; i++) {
                     hash = serviceName.charCodeAt(i) + ((hash << 5) - hash);
                 }
-                return classes[Math.abs(hash) % classes.length];
+                const result = classes[Math.abs(hash) % classes.length];
+                this._serviceColorCache[serviceName] = result;
+                return result;
             },
 
             async copyToClipboard(text) {
@@ -484,6 +481,11 @@ import ServiceNav from '../components/ServiceNav.astro';
                     this.versions = data.versions;
                     this.allServices = data.allServices;
 
+                    this._versionDateMap = new Map();
+                    for (const v of this.versions) {
+                        this._versionDateMap.set(v.id, v.date || '');
+                    }
+
                     this.calculateStats();
 
                     const params = new URLSearchParams(window.location.search);
@@ -500,8 +502,7 @@ import ServiceNav from '../components/ServiceNav.astro';
                         this.openService(sParam, false);
                     }
 
-                    // Native browser Back/Forward popstate navigation
-                    window.addEventListener('popstate', (e) => {
+                    window.addEventListener('popstate', () => {
                         const curParams = new URLSearchParams(window.location.search);
                         const v = curParams.get('v') || (this.versions[0] ? this.versions[0].id : null);
                         const s = curParams.get('s');
@@ -666,13 +667,17 @@ import ServiceNav from '../components/ServiceNav.astro';
                 return this.allServices.filter(svc => svc.toLowerCase().includes(s));
             },
 
-            get filteredRailVersions() {
+            _getFilteredVersionsBase() {
                 const s = this.versionRailSearch.toLowerCase();
-                const base = s ? this.versions.filter(v => {
+                if (!s) return this.versions;
+                return this.versions.filter(v => {
                     const monthYear = this.getMonthYear(v.date).toLowerCase();
                     return v.id.includes(s) || monthYear.includes(s);
-                }) : this.versions;
-                return base.slice(0, this.railLimit);
+                });
+            },
+
+            get filteredRailVersions() {
+                return this._getFilteredVersionsBase().slice(0, this.railLimit);
             },
 
             get groupedRailVersions() {
@@ -693,12 +698,7 @@ import ServiceNav from '../components/ServiceNav.astro';
             },
 
             get hasMoreVersions() {
-                const s = this.versionRailSearch.toLowerCase();
-                const total = s ? this.versions.filter(v => {
-                    const monthYear = this.getMonthYear(v.date).toLowerCase();
-                    return v.id.includes(s) || monthYear.includes(s);
-                }).length : this.versions.length;
-                return this.railLimit < total;
+                return this.railLimit < this._getFilteredVersionsBase().length;
             },
 
             loadMoreVersions() {
@@ -714,14 +714,17 @@ import ServiceNav from '../components/ServiceNav.astro';
             get filteredVersionData() {
                 let data = this.currentVersionData;
                 if (this.activeFilter === 'feature') {
-                    data = data.filter(i => !i.type.includes('fix'));
+                    data = data.filter(i => !(i.type && i.type.includes('fix')));
                 } else if (this.activeFilter === 'fix') {
-                    data = data.filter(i => i.type.includes('fix'));
+                    data = data.filter(i => i.type && i.type.includes('fix'));
                 }
 
                 if (!this.versionSearch) return data;
                 const s = this.versionSearch.toLowerCase();
-                return data.filter(i => i.category.includes(s) || i.description.toLowerCase().includes(s));
+                return data.filter(i => 
+                    (i.category && i.category.includes(s)) || 
+                    (i.description && i.description.toLowerCase().includes(s))
+                );
             }
         }));
     });

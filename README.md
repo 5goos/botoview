@@ -21,7 +21,7 @@
     <img src="https://img.shields.io/badge/Tailwind_CSS-v4-06b6d4?style=flat-square&logo=tailwindcss&logoColor=white" alt="Tailwind CSS v4" />
     <img src="https://img.shields.io/badge/Alpine.js-v3-8bc0d0?style=flat-square&logo=alpinedotjs&logoColor=white" alt="Alpine.js" />
     <img src="https://img.shields.io/badge/Python-3.9+-3776ab?style=flat-square&logo=python&logoColor=white" alt="Python 3.9+" />
-    <img src="https://img.shields.io/badge/AWS%20SDK-Boto3%20%2F%20Botocore-232f3e?style=flat-square&logo=amazonwebservices&logoColor=white" alt="Boto3 / Botocore" />
+    <img src="https://img.shields.io/badge/Cloudflare-Pages-f38020?style=flat-square&logo=cloudflare&logoColor=white" alt="Cloudflare Pages" />
   </p>
 
   <p align="center">
@@ -44,12 +44,14 @@
 ---
 
 <a id="why-botoview"></a>
-## 💡 Why BotoView?
 
-AWS releases updates for **Boto3** and **Botocore** nearly every single business day across hundreds of cloud services (Amazon S3, Bedrock, Lambda, DynamoDB, SageMaker, EC2, and 300+ more).
+## Why BotoView?
 
-- ❌ **The Old Way:** Sifting through monolithic `CHANGELOG.rst` files or raw Git logs with thousands of commits to figure out *when* a service API changed, *what* broke between versions, or *which* patch added a critical feature.
-- ✅ **The BotoView Way:** A sub-millisecond, client-side changelog explorer that decomposes releases by service, categorizes updates (Features, Fixes, API changes), provides full historical service dossiers, and lets you navigate everything with intuitive keyboard shortcuts.
+AWS releases updates for **Boto3** and **Botocore** nearly every single business day across hundreds of cloud services — S3, Bedrock, Lambda, DynamoDB, SageMaker, EC2, and 300+ more.
+
+**The problem:** Sifting through monolithic `CHANGELOG.rst` files or raw Git logs with thousands of commits to figure out _when_ a service API changed, _what_ broke between versions, or _which_ patch added a critical feature.
+
+**BotoView solves this** with a sub-millisecond, client-side changelog explorer that decomposes releases by service, categorizes updates (Features, Fixes, API changes), provides full historical service dossiers, and lets you navigate everything with intuitive keyboard shortcuts.
 
 > [!TIP]
 > Try the live app at **[botoview.5goos.com](https://botoview.5goos.com)** — no login required, zero latency, always up to date.
@@ -57,13 +59,14 @@ AWS releases updates for **Boto3** and **Botocore** nearly every single business
 ---
 
 <a id="key-features"></a>
-## 🚀 Key Features
+
+## Key Features
 
 <table>
   <tr>
     <td width="50%">
       <h3>🎯 Service-Level Filtering</h3>
-      <p>Isolate changes for any AWS service (e.g. <code>bedrock</code>, <code>s3</code>, <code>dynamodb</code>, <code>lambda</code>). Slide open a comprehensive historical timeline showing every single update for that service across all releases.</p>
+      <p>Isolate changes for any AWS service (e.g. <code>bedrock</code>, <code>s3</code>, <code>dynamodb</code>, <code>lambda</code>). Open a comprehensive historical timeline showing every single update for that service across all releases.</p>
     </td>
     <td width="50%">
       <h3>⚡ Real-Time Instant Search</h3>
@@ -73,21 +76,21 @@ AWS releases updates for **Boto3** and **Botocore** nearly every single business
   <tr>
     <td width="50%">
       <h3>🏷️ Categorized Release Notes</h3>
-      <p>Easily toggle between <strong>All Changes</strong>, <strong>Features</strong>, and <strong>Bug Fixes</strong> with live change counters. Quickly distinguish between API modifications, enhancements, and patches.</p>
+      <p>Toggle between <strong>All Changes</strong>, <strong>Features</strong>, and <strong>Bug Fixes</strong> with live change counters. Quickly distinguish between API modifications, enhancements, and patches.</p>
     </td>
     <td width="50%">
       <h3>⌨️ Vim-Style Keyboard Navigation</h3>
-      <p>Engineered for power users. Traverse releases with <code>j</code> / <code>k</code>, focus searches with <code>⌘K</code> or <code>/</code>, and toggle themes with <code>t</code> without ever leaving your keyboard.</p>
+      <p>Engineered for power users. Traverse releases with <code>j</code> / <code>k</code>, focus search with <code>⌘K</code> or <code>/</code>, and toggle themes with <code>t</code> — all without leaving your keyboard.</p>
     </td>
   </tr>
   <tr>
     <td width="50%">
       <h3>📋 Developer Productivity Helpers</h3>
-      <p>One-click copy for exact release version tags, changelog snippets, and pre-formatted <code>pip install boto3==x.y.z</code> commands ready to paste into your terminal or requirements file.</p>
+      <p>One-click copy for exact release version tags, changelog snippets, and pre-formatted <code>pip install boto3==x.y.z</code> commands ready to paste into your terminal.</p>
     </td>
     <td width="50%">
       <h3>🌓 Adaptive Dark & Light Modes</h3>
-      <p>Beautiful, high-contrast user interface styled with Tailwind CSS v4. Seamlessly adapts to your system color scheme or toggle manually at any time.</p>
+      <p>High-contrast interface styled with Tailwind CSS v4. Seamlessly adapts to your system color scheme or toggle manually at any time.</p>
     </td>
   </tr>
   <tr>
@@ -105,25 +108,27 @@ AWS releases updates for **Boto3** and **Botocore** nearly every single business
 ---
 
 <a id="keyboard-shortcuts"></a>
-## ⌨️ Keyboard Shortcuts
+
+## Keyboard Shortcuts
 
 BotoView is designed to be fully navigable without touching your mouse:
 
 | Shortcut | Key | Action | Scope |
 |:---|:---:|:---|:---:|
-| **Quick Jump to Release** | <kbd>⌘</kbd> + <kbd>K</kbd> or <kbd>Ctrl</kbd> + <kbd>K</kbd> | Focus release version jump-to search bar | Global |
+| **Quick Jump** | <kbd>⌘</kbd> + <kbd>K</kbd> / <kbd>Ctrl</kbd> + <kbd>K</kbd> | Focus version search bar | Global |
 | **Search Services** | <kbd>/</kbd> | Focus the AWS services directory filter | Global |
-| **Next Older Release** | <kbd>j</kbd> or <kbd>↓</kbd> | Switch view to the immediately older release | Main View |
-| **Next Newer Release** | <kbd>k</kbd> or <kbd>↑</kbd> | Switch view to the immediately newer release | Main View |
-| **Toggle Color Theme** | <kbd>t</kbd> | Switch between Dark Mode and Light Mode | Global |
-| **Dismiss & Close** | <kbd>Esc</kbd> | Close service drawers, dismiss search inputs & modals | Global |
+| **Older Release** | <kbd>j</kbd> or <kbd>↓</kbd> | Navigate to the next older release | Main View |
+| **Newer Release** | <kbd>k</kbd> or <kbd>↑</kbd> | Navigate to the next newer release | Main View |
+| **Toggle Theme** | <kbd>t</kbd> | Switch between dark and light mode | Global |
+| **Dismiss** | <kbd>Esc</kbd> | Close drawers, dismiss search inputs | Global |
 
 ---
 
 <a id="architecture"></a>
-## 🏗️ Architecture & Data Pipeline
 
-BotoView utilizes a static-first, sharded-data architecture that eliminates the need for expensive databases, guarantees zero cold starts, and serves release notes at the edge.
+## Architecture & Data Pipeline
+
+BotoView uses a static-first, sharded-data architecture that eliminates the need for databases, guarantees zero cold starts, and serves release notes at the edge.
 
 ```mermaid
 flowchart TD
@@ -149,53 +154,46 @@ flowchart TD
 ---
 
 <a id="quick-start"></a>
-## 💻 Quick Start
+
+## Quick Start
 
 ### Prerequisites
 
-- **[Node.js](https://nodejs.org/)** >= 22.12.0
-- **[npm](https://npmjs.com/)** >= 10.0.0
-- **[Python](https://www.python.org/)** 3.9+ *(only required if executing the data sync pipeline locally)*
+| Tool | Version | Required For |
+|:---|:---|:---|
+| [Node.js](https://nodejs.org/) | ≥ 22.12.0 | Frontend build & dev server |
+| [npm](https://npmjs.com/) | ≥ 10.0.0 | Dependency management |
+| [Python](https://www.python.org/) | 3.9+ | Data sync pipeline (optional) |
 
 ### Installation
 
 ```bash
-# 1. Clone the repository
 git clone https://github.com/5goos/botoview.git
 cd botoview
-
-# 2. Install JavaScript dependencies
 npm install
 ```
 
-### Running Locally
+### Development
 
 ```bash
-# Start the Astro development server
 npm run dev
 ```
 
-Open [http://localhost:4321](http://localhost:4321) in your browser to view the application with hot module reloading.
+Open [http://localhost:4321](http://localhost:4321) — hot module reloading is enabled.
 
-### Building for Production
+### Production Build
 
 ```bash
-# Build the optimized static application
 npm run build
-
-# Preview locally with Cloudflare Wrangler
-npm run preview
+npm run preview    # Preview locally with Cloudflare Wrangler
 ```
 
-### Running the Data Sync Pipeline
+### Data Sync Pipeline
 
-To pull the latest releases from the official Botocore repository and PyPI locally:
+Pull the latest releases from the official Botocore repository and PyPI:
 
 ```bash
-# Install Python dependencies
 pip install requests
-
-# Execute the sync job
 python3 scripts/sync_boto_changes.py
 ```
 
@@ -203,55 +201,62 @@ This updates `public/data/track.json`, generates individual version files in `pu
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```text
 botoview/
-├── .github/
-│   └── workflows/
-│       ├── codeql.yml             # CodeQL security analysis
-│       └── daily_sync.yml         # Scheduled daily sync cron job
+├── .github/workflows/
+│   ├── codeql.yml                 # CodeQL security analysis
+│   └── daily_sync.yml             # Scheduled daily data sync
 ├── public/
-│   ├── data/                      # Sharded changelog data
-│   │   ├── services/              # Individual service histories (e.g., s3.json)
-│   │   ├── versions/              # Individual release data (e.g., 1.34.0.json)
+│   ├── data/
+│   │   ├── services/              # Per-service history (e.g., s3.json)
+│   │   ├── versions/              # Per-release data (e.g., 1.34.0.json)
 │   │   └── track.json             # Master index of releases & services
-│   ├── favicon.svg                # Application icon
-│   └── og-image.png               # Social preview / OpenGraph banner
+│   ├── favicon.svg                # Application icon (SVG)
+│   ├── favicon.png                # Application icon (PNG)
+│   ├── favicon.ico                # Application icon (ICO)
+│   ├── apple-touch-icon.png       # iOS home screen icon
+│   ├── og-image.png               # Social preview / OpenGraph banner
+│   └── robots.txt                 # Crawler directives
 ├── scripts/
-│   └── sync_boto_changes.py       # Python pipeline for Botocore & PyPI extraction
+│   └── sync_boto_changes.py       # Python pipeline for data extraction
 ├── src/
 │   ├── components/
-│   │   ├── LeftRail.astro         # Releases navigation sidebar & jump-to search
-│   │   ├── MainView.astro         # Changelog body, filters, and header actions
-│   │   └── ServiceNav.astro       # AWS service directory & filter panel
+│   │   ├── LeftRail.astro         # Releases sidebar & version search
+│   │   ├── MainView.astro         # Changelog body, filters, & footer
+│   │   └── ServiceNav.astro       # AWS service directory panel
 │   ├── layouts/
-│   │   └── Layout.astro           # Base HTML shell, SEO meta tags, and OpenGraph
+│   │   └── Layout.astro           # HTML shell, SEO meta, & OpenGraph
 │   ├── pages/
-│   │   └── index.astro            # Core page & Alpine.js state controller
+│   │   └── index.astro            # Core page & Alpine.js state
 │   └── styles/
-│       └── global.css             # Tailwind CSS v4 styling & theme tokens
+│       └── global.css             # Tailwind v4 config & theme tokens
 ├── astro.config.mjs               # Astro framework configuration
-├── package.json                   # Dependencies & build scripts
-└── wrangler.jsonc                 # Cloudflare Pages / Workers deployment config
+├── package.json                   # Dependencies & scripts
+└── wrangler.jsonc                 # Cloudflare deployment config
 ```
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-- **Framework:** [Astro](https://astro.build/) (Static Site Generation / Edge Prerendered)
-- **Reactivity & State:** [Alpine.js](https://alpinejs.dev/) (Lightweight, declarative client-side state)
-- **Styling:** [Tailwind CSS v4](https://tailwindcss.com/) (Modern CSS engine with color schemes and utility classes)
-- **Edge Deployment:** [Cloudflare Pages & Workers](https://pages.cloudflare.com/)
-- **Data Ingestion:** Python 3, PyPI REST API & Git
+| Layer | Technology | Purpose |
+|:---|:---|:---|
+| **Framework** | [Astro 7](https://astro.build/) | Static site generation with edge prerendering |
+| **Reactivity** | [Alpine.js 3](https://alpinejs.dev/) | Lightweight declarative client-side state |
+| **Styling** | [Tailwind CSS v4](https://tailwindcss.com/) | Utility-first CSS with dark mode support |
+| **Deployment** | [Cloudflare Pages](https://pages.cloudflare.com/) | Global edge delivery with Workers |
+| **Data Pipeline** | Python 3 + PyPI API | Automated daily changelog ingestion |
+| **CI/CD** | GitHub Actions | Scheduled sync & CodeQL security scanning |
 
 ---
 
 <a id="contributing"></a>
-## 🤝 Contributing
 
-Contributions, bug reports, and feature suggestions are very welcome!
+## Contributing
+
+Contributions, bug reports, and feature suggestions are welcome!
 
 1. **Fork** the repository
 2. **Create** your feature branch (`git checkout -b feature/amazing-feature`)
@@ -263,13 +268,13 @@ Please ensure your code builds cleanly (`npm run build`) before opening a PR.
 
 ---
 
-## 🌟 Show Your Support
+## Show Your Support
 
-If you find **BotoView** helpful for staying on top of AWS updates, please consider giving the repository a **Star** ⭐! It helps others discover the tool.
+If you find **BotoView** helpful for staying on top of AWS updates, please consider giving the repository a **Star** ⭐
 
 ---
 
-## 📄 License
+## License
 
 Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for more information.
 
