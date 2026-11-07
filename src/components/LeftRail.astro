@@ -1,7 +1,6 @@
 <aside :class="{ 'translate-x-0': showMobileVersions, '-translate-x-full': !showMobileVersions }"
        class="fixed lg:relative inset-y-0 left-0 -translate-x-full lg:translate-x-0 w-72 sm:w-80 lg:w-60 xl:w-64 max-w-[85vw] flex-shrink-0 border-r border-slate-200/80 dark:border-white/5 flex flex-col bg-sidebar z-[100] lg:z-20 transition-all duration-500 ease-in-out theme-transition shadow-2xl lg:shadow-none">
-    
-    <!-- Mobile Header -->
+
     <div class="lg:hidden flex items-center justify-between px-5 py-4 border-b border-subtle bg-card">
         <div class="flex items-center gap-2.5">
             <img src="/favicon.svg" width="22" height="22" alt="BotoView logo" class="w-5 h-5 flex-shrink-0 drop-shadow-xs" />
@@ -15,12 +14,11 @@
         </button>
     </div>
 
-    <!-- Brand Area -->
-    <div class="hidden lg:flex h-40 flex-col items-center justify-center flex-shrink-0 relative z-30 border-b border-slate-200/80 dark:border-white/5 group/brand bg-sidebar">
-        <button @click="window.location.href = '/'" 
+    <div class="hidden lg:flex h-40 flex-col items-center justify-center flex-shrink-0 relative z-30 border-b border-slate-200/80 dark:border-white/5 bg-sidebar">
+        <button @click="window.location.href = '/'"
                 aria-label="Go to latest release"
-                class="w-14 h-14 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-[22px] flex items-center justify-center shadow-sm cursor-pointer hover:rotate-[8deg] hover:scale-105 hover:shadow-[0_0_24px_rgba(99,102,241,0.2)] transition-all duration-500 active:scale-95 relative overflow-hidden group">
-            <img src="/favicon.svg" width="32" height="32" alt="BotoView — AWS Boto3 Changelog Explorer & Release Notes Tracker" class="w-8 h-8 pointer-events-none relative z-10 opacity-95 group-hover:scale-110 transition-transform duration-300" />
+                class="w-13 h-13 bg-white dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 rounded-[20px] flex items-center justify-center shadow-sm cursor-pointer hover:rotate-[6deg] hover:scale-105 hover:shadow-[0_0_20px_rgba(99,102,241,0.18)] transition-all duration-500 active:scale-95 relative overflow-hidden group">
+            <img src="/favicon.svg" width="30" height="30" alt="BotoView — AWS Boto3 Changelog Explorer & Release Notes Tracker" class="w-7 h-7 pointer-events-none relative z-10 opacity-90 group-hover:scale-110 transition-transform duration-300" />
         </button>
         <div class="flex flex-col items-center text-center mt-3 px-4">
             <span class="text-[12px] font-black italic uppercase tracking-tighter text-slate-900 dark:text-white leading-none">BotoView</span>
@@ -28,15 +26,14 @@
         </div>
     </div>
 
-    <!-- Search Section -->
-    <div class="p-5 border-b border-slate-200/80 dark:border-white/5 bg-sidebar" 
+    <div class="p-5 border-b border-slate-200/80 dark:border-white/5 bg-sidebar"
          @keydown.window.prevent.ctrl.k="$refs.railSearch.focus()"
          @keydown.window.prevent.cmd.k="$refs.railSearch.focus()">
         <div class="relative group/search">
-            <input type="text" id="versionRailSearch" name="versionRailSearch" aria-label="Search versions" x-model.debounce.200ms="versionRailSearch" 
+            <input type="text" id="versionRailSearch" name="versionRailSearch" aria-label="Search versions" x-model.debounce.200ms="versionRailSearch"
                    x-ref="railSearch"
                    @input="railLimit = 50"
-                   placeholder="Jump to..." 
+                   placeholder="Jump to..."
                    class="w-full bg-slate-50 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/10 rounded-2xl py-2.5 pl-10 pr-10 text-[11px] lg:text-[10px] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/40 transition-all text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium">
             <svg class="absolute left-3.5 top-[11px] lg:top-[9px] lg:left-3.5 w-3.5 h-3.5 lg:w-3 lg:h-3 text-slate-400 group-focus-within/search:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             <div class="absolute right-3 top-[10px] lg:top-[8px] flex items-center">
@@ -50,19 +47,16 @@
             </div>
         </div>
     </div>
-    
-    <!-- Version Rail -->
+
     <div class="flex-1 w-full relative group/rail overflow-hidden flex flex-col bg-sidebar">
         <div class="flex-1 overflow-y-auto hide-scrollbar relative z-20 px-4">
             <div class="flex flex-col gap-2 relative pt-6 pb-20 glow-container">
-                <!-- Clean Indicator -->
                 <div class="absolute -left-4 w-[2.5px] bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.8)] z-40 transition-all duration-300 rounded-r-full"
                      style="top: var(--glow-top, 0); height: var(--glow-height, 0);"
                      x-show="selectedVersion && !versionRailSearch"></div>
 
                 <template x-for="(group, gIndex) in groupedRailVersions" :key="group.label">
                     <div class="flex flex-col mb-6">
-                        <!-- Group Header -->
                         <div class="sticky -top-[1px] z-50 bg-sidebar -mx-4 px-4 py-3 flex items-center gap-3 border-b border-slate-200/50 dark:border-white/5 shadow-sm">
                             <span class="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em] whitespace-nowrap" x-text="group.label"></span>
                             <div class="flex-1 h-[1px] bg-slate-100 dark:bg-white/5"></div>
@@ -70,7 +64,7 @@
 
                         <div class="flex flex-col gap-1 mt-3">
                             <template x-for="(v, vIndex) in group.versions" :key="v.id">
-                                <button @click="selectVersion(v.id, true); if(isMobile(1024)) showMobileVersions = false;" 
+                                <button @click="selectVersion(v.id, true); if(isMobile(1024)) showMobileVersions = false;"
                                         @mouseenter="prefetchVersion(v.id)"
                                         :aria-label="'Switch to release version ' + v.id"
                                         :data-version="v.id"
@@ -94,9 +88,8 @@
                     </div>
                 </template>
 
-                <!-- Load More -->
                 <template x-if="hasMoreVersions">
-                    <button @click="loadMoreVersions()" 
+                    <button @click="loadMoreVersions()"
                             aria-label="Load more releases"
                             class="mt-4 w-full py-3 rounded-xl border border-slate-200/80 dark:border-white/5 bg-white/70 dark:bg-white/5 hover:border-indigo-500/30 text-[9px] mono font-black text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all uppercase tracking-[0.2em] active:scale-95 shadow-sm cursor-pointer">
                         Load More Releases
@@ -104,14 +97,12 @@
                 </template>
             </div>
         </div>
-        
-        <!-- Edge Fades -->
+
         <div class="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-sidebar to-transparent z-40 pointer-events-none"></div>
         <div class="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-sidebar to-transparent z-40 pointer-events-none"></div>
     </div>
 
-    <!-- Sidebar Footer Actions -->
-    <div class="p-3 border-t border-slate-200/80 dark:border-white/5 bg-card theme-transition relative overflow-hidden group/status">
+    <div class="p-3 border-t border-slate-200/80 dark:border-white/5 bg-card theme-transition relative overflow-hidden">
         <div class="bg-white dark:bg-white/5 border border-slate-200/80 dark:border-white/10 rounded-xl p-2.5 shadow-sm hover:border-indigo-500/20 transition-all group flex items-center justify-between gap-2">
             <div class="flex flex-col">
                 <span class="text-[7px] mono text-slate-400 dark:text-slate-500 uppercase font-black">Releases / 30d</span>
@@ -124,15 +115,6 @@
                 <span class="text-[7px] mono text-slate-400 dark:text-slate-500 uppercase font-black">Avg / Week</span>
                 <span class="text-xs font-black text-slate-900 dark:text-white italic tracking-tighter" x-text="stats.avgReleasesPerWeek"></span>
             </div>
-        </div>
-
-        <!-- Power User Shortcuts -->
-        <div class="hidden lg:flex mt-2 items-center justify-center gap-1.5 text-[8px] mono text-slate-400 dark:text-slate-500 select-none">
-            <span class="flex items-center gap-0.5"><kbd class="px-1 py-0.2 rounded bg-slate-100 dark:bg-white/10 border border-slate-200 dark:border-white/10 font-bold">J</kbd><kbd class="px-1 py-0.2 rounded bg-slate-100 dark:bg-white/10 border border-slate-200 dark:border-white/10 font-bold">K</kbd> nav</span>
-            <span>•</span>
-            <span class="flex items-center gap-0.5"><kbd class="px-1 py-0.2 rounded bg-slate-100 dark:bg-white/10 border border-slate-200 dark:border-white/10 font-bold">T</kbd> theme</span>
-            <span>•</span>
-            <span class="flex items-center gap-0.5"><kbd class="px-1 py-0.2 rounded bg-slate-100 dark:bg-white/10 border border-slate-200 dark:border-white/10 font-bold">/</kbd> dir</span>
         </div>
     </div>
 </aside>
