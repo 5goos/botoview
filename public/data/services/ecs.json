@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.43.127",
+    "t": "Amazon ECS Managed Instances now supports isolated and confidential tasks, which run in AWS Nitro Sandboxes. Configure them with trustedExecutionConfiguration in task definitions and nitroEnclavesEnabled in capacity providers."
+  },
+  {
     "v": "1.43.124",
     "t": "Amazon ECS Managed Instances now supports the json-file log driver in task definitions. Daemon task definition volumes also support logDriverVolumeConfiguration, letting managed daemons read those logs."
   },

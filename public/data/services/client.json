@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.43.127",
+    "t": "Derive client class names from the ``serviceId`` model field instead of ``serviceAbbreviation`` or ``serviceFullName``. Existing class names are unchanged."
+  },
+  {
     "v": "1.21.18",
     "t": "Improve client performance by caching _alias_event_name on EventAliaser"
   }
