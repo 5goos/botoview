@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.0",
+    "t": "Adds the NONE insights type to disable insights generation for a run, a testPackageArn field in run details, and a new artifact type for device connect command logs."
+  },
+  {
     "v": "1.43.78",
     "t": "Added support to CreateRemoveAccessSession for selecting a server version on the mobile WebDriver endpoint."
   },

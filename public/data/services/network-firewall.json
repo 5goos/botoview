@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.0",
+    "t": "Firewall Policy V2 for Network Firewall"
+  },
+  {
     "v": "1.43.117",
     "t": "Adds support for Network Firewall Resolved IP validation."
   },

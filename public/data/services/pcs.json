@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.0",
+    "t": "Added support for configuring AMIs, Amazon EC2 security groups, SSH key pairs, and launch template modes when creating or updating AWS PCS compute node groups."
+  },
+  {
     "v": "1.43.112",
     "t": "Adding scheduler version to RegisterComputeNodeGroup API. A compute node uses this value to run the matching scheduler version."
   },

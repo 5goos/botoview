@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.0",
+    "t": "Amazon Connect now returns Contact Lens conversational analytics configuration in the DescribeContact API. Customers can retrieve a contact's analytics, redaction, summarization, and sentiment settings, consistent with the configuration already available in contact trace records and contact events."
+  },
+  {
     "v": "1.43.126",
     "t": "Rules in Amazon Connect now support ending email contacts associated to a case based on case events."
   },

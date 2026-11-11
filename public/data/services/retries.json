@@ -1,5 +1,13 @@
 [
   {
+    "v": "1.44.0",
+    "t": "Retry an HTTP 429 as a throttling error in standard and adaptive modes when the error code does not match a modeled error."
+  },
+  {
+    "v": "1.44.0",
+    "t": "The standard retry mode is now the default. It uses 3 attempts (4 for DynamoDB), 50 ms base backoff for transient errors (25 ms for DynamoDB) and 1 s for throttling errors, and no longer reads the ``AWS_NEW_RETRIES_2026`` environment variable."
+  },
+  {
     "v": "1.43.127",
     "t": "Fixed a KeyError raised by the handler that adds the amz-sdk-invocation-id header when a request-created handler ran on a request that was not sent through the endpoint, such as a request built directly in a test."
   },

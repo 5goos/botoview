@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.0",
+    "t": "Inconsequential changes to model formatting"
+  },
+  {
     "v": "1.43.13",
     "t": "Support hard deleting policy store aliases. Users can now delete an alias and immediately reassign it to a different policy store without waiting for the soft-delete retention period."
   },
