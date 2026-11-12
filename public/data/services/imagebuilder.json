@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.1",
+    "t": "Update list operations to support wildcard name filtering and page sizes up to 100 results via MaxResults"
+  },
+  {
     "v": "1.43.122",
     "t": "This release adds support for on-demand AMI scanning with Amazon Inspector."
   },

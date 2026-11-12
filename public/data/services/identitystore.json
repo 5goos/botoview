@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.1",
+    "t": "Updated ApiRestrictSourceVpcs in NetworkConfiguration to accept VPC ARNs in addition to VPC IDs."
+  },
+  {
     "v": "1.43.105",
     "t": "Add support for network access controls to restrict Identity Store API and SCIM access to trusted networks, optimistic locking for users and groups via resource revisions, and resource ARNs as identifiers in requests."
   },

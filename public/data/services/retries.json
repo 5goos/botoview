@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.1",
+    "t": "Restore the deprecated ``NEW_RETRIES_ENABLED`` constant in ``botocore.configprovider`` and ``botocore.retries.standard`` so that code which imported it keeps importing. It is always ``True`` and will be removed in a future version."
+  },
+  {
     "v": "1.44.0",
     "t": "Retry an HTTP 429 as a throttling error in standard and adaptive modes when the error code does not match a modeled error."
   },

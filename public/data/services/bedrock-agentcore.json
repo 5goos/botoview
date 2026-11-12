@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.1",
+    "t": "Support SigV4 request signing (cryptographically signed) in the Bedrock AgentCore Harness MCP connector tool."
+  },
+  {
     "v": "1.43.127",
     "t": "Adds the InvokeWebSearch API, which searches the web using the AWS-managed web search and returns ranked results with a text extract from each page. Results can be filtered by domain and by publication time."
   },

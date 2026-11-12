@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.1",
+    "t": "This release adds support for Enhanced Snapshots in Amazon Managed Service for Apache Flink, enabling application state to be managed as a standalone resource that customers can export, import, and reuse across applications."
+  },
+  {
     "v": "1.43.51",
     "t": "Support for Flink 2.3 in Managed Service for Apache Flink"
   },
