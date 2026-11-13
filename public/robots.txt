@@ -1,4 +1,20 @@
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Brave
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
 User-agent: *
 Allow: /
 
+Sitemap: https://botoview.5goos.com/sitemap.xml
 Sitemap: https://botoview.5goos.com/sitemap-index.xml

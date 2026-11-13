@@ -156,3 +156,12 @@ vite.config.ts.timestamp-*
 !.dev.vars.example
 
 botocore_repo/
+
+# Security & Private Keys
+*.pem
+*.key
+
+# Python cache & artifacts
+__pycache__/
+*.py[cod]
+*$py.class

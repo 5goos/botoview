@@ -1,120 +1,212 @@
+---
+import trackData from '../../public/data/track.json';
+const topVersions = (trackData?.versions || []).slice(0, 30);
+const topServices = (trackData?.allServices || []).slice(0, 30);
+---
 <aside :class="{ 'translate-x-0': showMobileVersions, '-translate-x-full': !showMobileVersions }"
-       class="fixed lg:relative inset-y-0 left-0 -translate-x-full lg:translate-x-0 w-72 sm:w-80 lg:w-60 xl:w-64 max-w-[85vw] flex-shrink-0 border-r border-slate-200/80 dark:border-white/5 flex flex-col bg-sidebar z-[100] lg:z-20 transition-all duration-500 ease-in-out theme-transition shadow-2xl lg:shadow-none">
+       class="fixed lg:relative inset-y-0 left-0 -translate-x-full lg:translate-x-0 w-72 sm:w-80 lg:w-64 xl:w-72 max-w-[85vw] flex-shrink-0 flex flex-col bg-white dark:bg-[#07090e] lg:bg-transparent dark:lg:bg-transparent shadow-2xl shadow-slate-900/10 dark:shadow-black/60 lg:shadow-none z-[100] lg:z-20 transition-transform duration-300 ease-in-out select-none"
+       aria-label="Navigation Sidebar">
 
-    <div class="lg:hidden flex items-center justify-between px-5 py-4 border-b border-subtle bg-card">
-        <div class="flex items-center gap-2.5">
-            <img src="/favicon.svg" width="22" height="22" alt="BotoView logo" class="w-5 h-5 flex-shrink-0 drop-shadow-xs" />
-            <div class="flex flex-col">
-                <span class="text-slate-900 dark:text-white font-black italic tracking-tighter uppercase text-xs leading-none">BotoView</span>
-                <span class="text-[8px] mono text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5 font-bold" x-text="versions.length + ' releases'"></span>
+    <div class="h-12 flex items-center justify-between px-4 flex-shrink-0">
+        <a href="/" 
+           @click.prevent="viewMode = 'release'; selectVersion(versions[0]?.id || selectedVersion); if(isMobile(1024)) showMobileVersions = false;"
+           class="flex items-center gap-2.5 group cursor-pointer" 
+           aria-label="BotoView Home — Latest AWS Boto3 Releases">
+            <img src="/favicon.svg" width="22" height="22" alt="BotoView logo" class="w-5.5 h-5.5 group-hover:scale-105 transition-transform" />
+            <div class="flex items-baseline gap-1.5">
+                <span class="text-sm font-bold tracking-tight text-slate-900 dark:text-white">BotoView</span>
+                <span class="text-[9px] mono uppercase font-semibold text-indigo-600 dark:text-indigo-400 tracking-wider">Boto3</span>
             </div>
-        </div>
-        <button @click="showMobileVersions = false" aria-label="Close versions sidebar" class="p-2 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all active:scale-90 cursor-pointer">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </a>
+
+        <button @click="showMobileVersions = false" 
+                aria-label="Close sidebar" 
+                class="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-white/10 transition-colors cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
     </div>
 
-    <div class="hidden lg:flex h-40 flex-col items-center justify-center flex-shrink-0 relative z-30 border-b border-slate-200/80 dark:border-white/5 bg-sidebar">
-        <button @click="window.location.href = '/'"
-                aria-label="Go to latest release"
-                class="w-13 h-13 bg-white dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 rounded-[20px] flex items-center justify-center shadow-sm cursor-pointer hover:rotate-[6deg] hover:scale-105 hover:shadow-[0_0_20px_rgba(99,102,241,0.18)] transition-all duration-500 active:scale-95 relative overflow-hidden group">
-            <img src="/favicon.svg" width="30" height="30" alt="BotoView — AWS Boto3 Changelog Explorer & Release Notes Tracker" class="w-7 h-7 pointer-events-none relative z-10 opacity-90 group-hover:scale-110 transition-transform duration-300" />
-        </button>
-        <div class="flex flex-col items-center text-center mt-3 px-4">
-            <span class="text-[12px] font-black italic uppercase tracking-tighter text-slate-900 dark:text-white leading-none">BotoView</span>
-            <span class="text-[8px] mono text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-1 font-semibold">Boto3 Explorer</span>
-        </div>
+    <div class="p-2.5 flex-shrink-0">
+        <nav class="flex items-center p-1 glass-segmented rounded-xl" aria-label="Sidebar Sections">
+            <button @click="switchSidebarTab('versions')"
+                    :class="sidebarTab === 'versions' 
+                        ? 'bg-white dark:bg-white/10 text-indigo-600 dark:text-indigo-400 font-semibold shadow-xs' 
+                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium'"
+                    class="flex-1 py-1.5 px-2 rounded-lg text-[11px] transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-98">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                <span>Releases</span>
+                <span class="text-[9px] mono px-1.5 py-0.2 rounded-full bg-slate-200/50 dark:bg-white/10 font-semibold" x-text="versions.length ? (versions.length > 999 ? (versions.length/1000).toFixed(1) + 'k' : versions.length) : '...'"></span>
+            </button>
+            <button @click="switchSidebarTab('services')"
+                    :class="sidebarTab === 'services' 
+                        ? 'bg-white dark:bg-white/10 text-indigo-600 dark:text-indigo-400 font-semibold shadow-xs' 
+                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium'"
+                    class="flex-1 py-1.5 px-2 rounded-lg text-[11px] transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-98">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                <span>Services</span>
+                <span class="text-[9px] mono px-1.5 py-0.2 rounded-full bg-slate-200/50 dark:bg-white/10 font-semibold" x-text="allServices.length || '573'"></span>
+            </button>
+        </nav>
     </div>
 
-    <div class="p-5 border-b border-slate-200/80 dark:border-white/5 bg-sidebar"
-         @keydown.window.prevent.ctrl.k="$refs.railSearch.focus()"
-         @keydown.window.prevent.cmd.k="$refs.railSearch.focus()">
-        <div class="relative group/search">
-            <input type="text" id="versionRailSearch" name="versionRailSearch" aria-label="Search versions" x-model.debounce.200ms="versionRailSearch"
-                   x-ref="railSearch"
-                   @input="railLimit = 50"
-                   placeholder="Jump to..."
-                   class="w-full bg-slate-50 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/10 rounded-2xl py-2.5 pl-10 pr-10 text-[11px] lg:text-[10px] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/40 transition-all text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium">
-            <svg class="absolute left-3.5 top-[11px] lg:top-[9px] lg:left-3.5 w-3.5 h-3.5 lg:w-3 lg:h-3 text-slate-400 group-focus-within/search:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-            <div class="absolute right-3 top-[10px] lg:top-[8px] flex items-center">
-                <button x-show="versionRailSearch" @click="versionRailSearch = ''; railLimit = 50" aria-label="Clear version search" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+    <div x-show="sidebarTab === 'versions'" class="flex-1 flex flex-col min-h-0">
+        <div class="px-2.5 pb-2 flex-shrink-0">
+            <div class="relative group/search">
+                <input type="text" id="versionRailSearch" name="versionRailSearch" aria-label="Search releases" 
+                       x-model.debounce.150ms="versionRailSearch"
+                       x-ref="railSearch"
+                       @input="railLimit = 50"
+                       placeholder="Filter releases (e.g. 1.43, Nov)..."
+                       class="w-full glass-input rounded-xl py-1.5 pl-8 pr-7 text-[11px] focus:outline-none transition-all text-slate-900 dark:text-white placeholder:text-slate-400 font-medium">
+                <svg class="absolute left-2.5 top-[8px] w-3.5 h-3.5 text-slate-400 group-focus-within/search:text-indigo-500 transition-colors pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                <button x-show="versionRailSearch" @click="versionRailSearch = ''; railLimit = 50" aria-label="Clear version search" class="absolute right-2 top-[7px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 cursor-pointer">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
-                <div x-show="!versionRailSearch" class="hidden lg:flex items-center gap-1 opacity-25 group-focus-within/search:opacity-0 transition-opacity pointer-events-none">
-                    <span class="text-[8px] mono border border-slate-400 dark:border-slate-600 rounded px-1">⌘</span>
-                    <span class="text-[8px] mono border border-slate-400 dark:border-slate-600 rounded px-1">K</span>
-                </div>
             </div>
         </div>
-    </div>
 
-    <div class="flex-1 w-full relative group/rail overflow-hidden flex flex-col bg-sidebar">
-        <div class="flex-1 overflow-y-auto hide-scrollbar relative z-20 px-4">
-            <div class="flex flex-col gap-2 relative pt-6 pb-20 glow-container">
-                <div class="absolute -left-4 w-[2.5px] bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.8)] z-40 transition-all duration-300 rounded-r-full"
-                     style="top: var(--glow-top, 0); height: var(--glow-height, 0);"
-                     x-show="selectedVersion && !versionRailSearch"></div>
-
+        <div class="flex-1 overflow-y-auto px-2 py-1 custom-scroll">
+            <div class="space-y-3 relative">
                 <template x-for="(group, gIndex) in groupedRailVersions" :key="group.label">
-                    <div class="flex flex-col mb-6">
-                        <div class="sticky -top-[1px] z-50 bg-sidebar -mx-4 px-4 py-3 flex items-center gap-3 border-b border-slate-200/50 dark:border-white/5 shadow-sm">
-                            <span class="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em] whitespace-nowrap" x-text="group.label"></span>
-                            <div class="flex-1 h-[1px] bg-slate-100 dark:bg-white/5"></div>
+                    <div>
+                        <div class="px-2.5 pt-2 pb-1 flex items-center justify-between text-[10px] mono uppercase font-bold text-slate-400 dark:text-slate-500 select-none">
+                            <span x-text="group.label"></span>
+                            <span class="text-[9px] opacity-60 font-semibold" x-text="group.versions.length + ' releases'"></span>
                         </div>
 
-                        <div class="flex flex-col gap-1 mt-3">
+                        <div class="space-y-0.5">
                             <template x-for="(v, vIndex) in group.versions" :key="v.id">
-                                <button @click="selectVersion(v.id, true); if(isMobile(1024)) showMobileVersions = false;"
-                                        @mouseenter="prefetchVersion(v.id)"
-                                        :aria-label="'Switch to release version ' + v.id"
-                                        :data-version="v.id"
-                                        :class="selectedVersion === v.id ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 shadow-sm ring-1 ring-indigo-500/20 dark:ring-indigo-500/30 font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/60 dark:hover:bg-white/5'"
-                                        class="relative w-full h-11 lg:h-9 px-3 rounded-xl flex items-center justify-between transition-all duration-200 group/item flex-shrink-0 z-30 active:scale-95 cursor-pointer">
-                                    <div class="flex items-center gap-1.5 min-w-0">
-                                        <span class="text-[12px] lg:text-[10px] mono font-black tracking-tight" x-text="v.id"></span>
+                                <a :href="'/releases/' + v.id"
+                                   @click.prevent="selectVersion(v.id, true); viewMode = 'release'; if(isMobile(1024)) showMobileVersions = false;"
+                                   @mouseenter="prefetchVersion(v.id)"
+                                   :data-version="v.id"
+                                   :class="selectedVersion === v.id && viewMode === 'release' 
+                                      ? 'bg-indigo-500/10 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 font-semibold border-l-2 border-indigo-500 shadow-2xs' 
+                                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/40 dark:hover:bg-white/[0.04]'"
+                                   class="w-full px-2.5 py-1.5 rounded-lg flex items-center justify-between transition-all group/item text-left active:scale-98 cursor-pointer">
+                                    <div class="flex items-center gap-2 min-w-0">
+                                        <div :class="selectedVersion === v.id && viewMode === 'release' ? 'bg-indigo-600 dark:bg-indigo-400 scale-110' : 'bg-slate-300 dark:bg-white/20 group-hover/item:bg-indigo-400'" 
+                                             class="w-1.5 h-1.5 rounded-full transition-all flex-shrink-0"></div>
+                                        <span class="text-xs mono font-semibold tracking-tight" x-text="'v' + v.id"></span>
                                         <template x-if="gIndex === 0 && vIndex === 0 && !versionRailSearch">
-                                            <span class="px-1.5 py-0.5 bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 text-[7px] font-black rounded uppercase tracking-wider border border-indigo-500/20 dark:border-indigo-500/30 flex-shrink-0 leading-none">Latest</span>
+                                            <span class="px-1.5 py-0.2 rounded-full text-[7.5px] mono font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 leading-none">Latest</span>
                                         </template>
                                     </div>
-                                    <div class="flex items-center gap-1.5 flex-shrink-0 ml-2">
-                                        <span x-text="v.date ? getRelativeDate(v.date) : ''" class="text-[9px] mono text-slate-400 dark:text-slate-500 font-medium whitespace-nowrap"></span>
-                                        <svg x-show="selectedVersion === v.id" class="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
-                                        </svg>
-                                    </div>
-                                </button>
+                                    <span class="text-[9.5px] mono text-slate-400 dark:text-slate-500 font-medium" x-text="v.date ? getRelativeDate(v.date) : ''"></span>
+                                </a>
                             </template>
                         </div>
                     </div>
                 </template>
 
                 <template x-if="hasMoreVersions">
-                    <button @click="loadMoreVersions()"
-                            aria-label="Load more releases"
-                            class="mt-4 w-full py-3 rounded-xl border border-slate-200/80 dark:border-white/5 bg-white/70 dark:bg-white/5 hover:border-indigo-500/30 text-[9px] mono font-black text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all uppercase tracking-[0.2em] active:scale-95 shadow-sm cursor-pointer">
-                        Load More Releases
-                    </button>
+                    <div class="pt-2 pb-6 px-1">
+                        <button @click="loadMoreVersions()"
+                                class="w-full py-2 rounded-xl bg-white/50 dark:bg-white/[0.02] hover:bg-indigo-50 dark:hover:bg-indigo-500/15 text-[10px] mono font-bold text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all uppercase tracking-wider active:scale-98 cursor-pointer">
+                            Load More Releases (+50)
+                        </button>
+                    </div>
                 </template>
             </div>
         </div>
-
-        <div class="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-sidebar to-transparent z-40 pointer-events-none"></div>
-        <div class="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-sidebar to-transparent z-40 pointer-events-none"></div>
     </div>
 
-    <div class="p-3 border-t border-slate-200/80 dark:border-white/5 bg-card theme-transition relative overflow-hidden">
-        <div class="bg-white dark:bg-white/5 border border-slate-200/80 dark:border-white/10 rounded-xl p-2.5 shadow-sm hover:border-indigo-500/20 transition-all group flex items-center justify-between gap-2">
-            <div class="flex flex-col">
-                <span class="text-[7px] mono text-slate-400 dark:text-slate-500 uppercase font-black">Releases / 30d</span>
-                <span class="text-xs font-black text-slate-900 dark:text-white italic tracking-tighter" x-text="stats.recentChangesCount"></span>
+    <div x-show="sidebarTab === 'services'" class="flex-1 flex flex-col min-h-0" x-cloak>
+        <div class="px-2.5 pb-2 flex-shrink-0 space-y-2">
+            <div class="relative group/ssearch">
+                <input type="text" id="serviceSearch" name="serviceSearch" aria-label="Search services"
+                       x-model.debounce.150ms="serviceSearch"
+                       placeholder="Filter 570+ services (e.g. s3, ec2)..."
+                       class="w-full glass-input rounded-xl py-1.5 pl-8 pr-7 text-[11px] focus:outline-none transition-all text-slate-900 dark:text-white placeholder:text-slate-400 font-medium">
+                <svg class="absolute left-2.5 top-[8px] w-3.5 h-3.5 text-slate-400 group-focus-within/ssearch:text-indigo-500 transition-colors pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                <button x-show="serviceSearch" @click="serviceSearch = ''" aria-label="Clear service search" class="absolute right-2 top-[7px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 cursor-pointer">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
             </div>
 
-            <div class="w-[1px] h-4 bg-slate-100 dark:bg-white/5"></div>
-
-            <div class="flex flex-col text-right">
-                <span class="text-[7px] mono text-slate-400 dark:text-slate-500 uppercase font-black">Avg / Week</span>
-                <span class="text-xs font-black text-slate-900 dark:text-white italic tracking-tighter" x-text="stats.avgReleasesPerWeek"></span>
+            <div class="flex items-center gap-1 p-0.5 glass-segmented rounded-lg">
+                <button @click="serviceSort = 'popular'"
+                        :class="serviceSort === 'popular' ? 'bg-white dark:bg-white/10 text-indigo-600 dark:text-indigo-400 font-semibold shadow-xs' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium'"
+                        class="flex-1 py-1 rounded-md text-[9px] mono uppercase transition-all flex items-center justify-center gap-1 cursor-pointer">
+                    <span>🔥 Active</span>
+                </button>
+                <button @click="serviceSort = 'alpha'"
+                        :class="serviceSort === 'alpha' ? 'bg-white dark:bg-white/10 text-indigo-600 dark:text-indigo-400 font-semibold shadow-xs' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium'"
+                        class="flex-1 py-1 rounded-md text-[9px] mono uppercase transition-all flex items-center justify-center gap-1 cursor-pointer">
+                    <span>🔤 A–Z</span>
+                </button>
             </div>
         </div>
+
+        <div class="flex-1 overflow-y-auto px-2 py-1 custom-scroll space-y-0.5">
+            <template x-for="service in filteredServices" :key="service">
+                <a :href="'/services/' + service.toLowerCase().trim()"
+                   @click.prevent="openService(service); if(isMobile(1024)) showMobileVersions = false;"
+                   @mouseenter="prefetchService(service)"
+                   :data-service="service.toLowerCase().trim()"
+                   :class="activeService === service && viewMode === 'service'
+                      ? 'bg-indigo-500/10 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 font-semibold border-l-2 border-indigo-500 shadow-2xs' 
+                      : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/40 dark:hover:bg-white/[0.04]'"
+                   class="w-full text-left px-2.5 py-1.5 rounded-lg transition-all flex items-center justify-between group active:scale-98 cursor-pointer">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <div class="w-6 h-6 rounded-md flex items-center justify-center mono text-[8.5px] font-black transition-all flex-shrink-0"
+                             :class="getServiceColorClass(service)"
+                             x-text="service.substring(0,2).toUpperCase()"></div>
+                        <div class="flex flex-col min-w-0">
+                            <span class="mono text-xs font-semibold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 uppercase truncate" x-html="highlight(service, serviceSearch)"></span>
+                            <div class="flex items-center gap-1.5 mt-0.5">
+                                <span class="text-[9px] mono text-slate-400 dark:text-slate-500" x-text="(serviceCounts[service] || 0) + ' updates'"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <svg class="w-3.5 h-3.5 text-slate-300 dark:text-slate-600 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-transform group-hover:translate-x-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </a>
+            </template>
+        </div>
+    </div>
+
+    <noscript>
+        <div class="p-3 text-xs space-y-4 overflow-y-auto max-h-[85vh] border-t border-black/[0.04] dark:border-white/[0.06]">
+            <div>
+                <p class="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-[10px] mono mb-1.5">AWS Boto3 Releases</p>
+                <ul class="space-y-1">
+                    {topVersions.map(v => (
+                        <li>
+                            <a href={`/releases/${v.id}`} class="text-indigo-600 dark:text-indigo-400 hover:underline mono text-[11px]">
+                                v{v.id} ({v.date})
+                            </a>
+                        </li>
+                    ))}
+                    <li class="pt-1">
+                        <a href="/releases" class="font-bold text-indigo-700 dark:text-indigo-300 hover:underline text-[11px] block">
+                            View All 2,300+ Releases &rarr;
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div>
+                <p class="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-[10px] mono mb-1.5">AWS Services</p>
+                <ul class="flex flex-wrap gap-1">
+                    {topServices.map(s => (
+                        <li>
+                            <a href={`/services/${s}`} class="px-2 py-0.5 rounded bg-slate-100 dark:bg-white/10 mono text-[9.5px] uppercase font-bold text-slate-700 dark:text-slate-300 hover:text-indigo-600">
+                                {s}
+                            </a>
+                        </li>
+                    ))}
+                    <li class="w-full pt-1">
+                        <a href="/services" class="font-bold text-indigo-700 dark:text-indigo-300 hover:underline text-[11px] block">
+                            View All 570+ Services &rarr;
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </noscript>
+
+    <div class="px-4 py-2.5 flex-shrink-0 flex items-center justify-between text-[10px] mono text-slate-400 dark:text-slate-500 font-medium">
+        <span x-text="versions.length ? (versions.length + ' releases') : 'Loading...'"></span>
+        <span>•</span>
+        <span x-text="(allServices.length || '573') + ' services'"></span>
     </div>
 </aside>

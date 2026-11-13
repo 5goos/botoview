@@ -160,12 +160,37 @@ class BotoSync:
         combined = new_versions + self.existing_versions
         combined.sort(key=lambda x: self.version_key(x["id"]), reverse=True)
 
+        service_counts = {}
+        for s in self.existing_services:
+            svc_data = self.load_json(SERVICES_DIR / f"{s}.json", default=[])
+            service_counts[s] = len(svc_data)
+
         self.save_json(TRACK_JSON, {
             "versions": combined,
-            "allServices": sorted(list(self.existing_services))
+            "allServices": sorted(list(self.existing_services)),
+            "serviceCounts": service_counts
         })
 
         logger.info(f"Sync complete. Added {len(new_versions)} versions.")
+
+        # Notify IndexNow of new versions and updated endpoints
+        if new_versions:
+            try:
+                import sys
+                script_dir = str(Path(__file__).resolve().parent)
+                if script_dir not in sys.path:
+                    sys.path.append(script_dir)
+                from ping_indexnow import submit_urls
+                urls_to_ping = [
+                    "https://botoview.5goos.com/",
+                    "https://botoview.5goos.com/releases",
+                    "https://botoview.5goos.com/services"
+                ]
+                for nv in new_versions[:50]:
+                    urls_to_ping.append(f"https://botoview.5goos.com/releases/{nv['id']}")
+                submit_urls(urls_to_ping)
+            except Exception as e:
+                logger.warning(f"IndexNow notification failed: {e}")
 
 if __name__ == "__main__":
     BotoSync().run()

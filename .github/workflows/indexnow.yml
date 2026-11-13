@@ -1,0 +1,54 @@
+name: IndexNow SEO Submission
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  submit-indexnow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6.0.2
+
+      - name: Set up Python
+        uses: actions/setup-python@v6.2.0
+        with:
+          python-version: "3.12"
+
+      - name: Verify Live Deployment & Submit IndexNow
+        env:
+          INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
+        run: |
+          if [ -z "$INDEXNOW_KEY" ]; then
+            echo "::error::INDEXNOW_KEY secret is not set in repository settings."
+            exit 1
+          fi
+
+          echo "Polling https://botoview.5goos.com/${INDEXNOW_KEY}.txt to ensure production deployment is live..."
+          MAX_ATTEMPTS=24
+          DELAY=10
+          IS_LIVE=false
+
+          for ((i=1; i<=MAX_ATTEMPTS; i++)); do
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -L "https://botoview.5goos.com/${INDEXNOW_KEY}.txt" || true)
+            if [ "$HTTP_CODE" = "200" ]; then
+              BODY=$(curl -s -L "https://botoview.5goos.com/${INDEXNOW_KEY}.txt" || true)
+              if [ "$BODY" = "$INDEXNOW_KEY" ]; then
+                echo "Verification endpoint is live and verified on attempt $i."
+                IS_LIVE=true
+                break
+              fi
+            fi
+            echo "Attempt $i/$MAX_ATTEMPTS: Endpoint returned HTTP $HTTP_CODE. Waiting ${DELAY}s..."
+            sleep $DELAY
+          done
+
+          if [ "$IS_LIVE" = false ]; then
+            echo "::warning::Verification endpoint did not return 200 within timeout. Proceeding with IndexNow ping..."
+          fi
+
+          python3 scripts/ping_indexnow.py

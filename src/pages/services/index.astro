@@ -1,0 +1,252 @@
+---
+export const prerender = true;
+
+import Layout from '../../layouts/Layout.astro';
+import { getServiceColorClass } from '../../utils/formatting';
+
+interface ServiceSummary {
+    id: string;
+    name: string;
+    count: number;
+    latestVersion?: string;
+}
+
+const serviceModules = import.meta.glob<Array<{ v: string; t: string }>>('../../../public/data/services/*.json', { eager: true, import: 'default' });
+
+const services: ServiceSummary[] = Object.entries(serviceModules).map(([pathKey, changes]) => {
+    const match = pathKey.match(/\/([^/]+)\.json$/);
+    const id = match ? match[1] : '';
+    const list = Array.isArray(changes) ? changes : [];
+    return {
+        id,
+        name: id.toUpperCase(),
+        count: list.length,
+        latestVersion: list[0]?.v || ''
+    };
+}).sort((a, b) => a.id.localeCompare(b.id));
+
+// Group services by starting character (A-Z)
+const groupedServices: Record<string, ServiceSummary[]> = {};
+for (const svc of services) {
+    if (!svc.id) continue;
+    const letter = svc.id[0].toUpperCase();
+    if (!groupedServices[letter]) {
+        groupedServices[letter] = [];
+    }
+    groupedServices[letter].push(svc);
+}
+
+const alphabet = Object.keys(groupedServices).sort();
+
+const popularKeys = ['s3', 'bedrock', 'dynamodb', 'lambda', 'ec2', 'iam', 'cloudwatch', 'sqs', 'sns', 'rds', 'secretsmanager', 'sagemaker', 'ecs', 'eks', 'kms'];
+const popularList = services.filter(s => popularKeys.includes(s.id));
+
+const pageTitle = "AWS Boto3 Services Directory — 570+ Services | BotoView";
+const pageDescription = "Explore changelogs, release notes, and updates across 570+ AWS services in Boto3. Filter by service, inspect breaking changes, and track Python SDK updates.";
+const canonicalUrl = "https://botoview.5goos.com/services";
+
+const breadcrumbSchema = {
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+        {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://botoview.5goos.com/"
+        },
+        {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Services",
+            "item": canonicalUrl
+        }
+    ]
+};
+
+const collectionSchema = {
+    "@type": "CollectionPage",
+    "@id": `${canonicalUrl}#collection`,
+    "name": "AWS Boto3 Services Directory",
+    "description": pageDescription,
+    "url": canonicalUrl,
+    "hasPart": services.slice(0, 30).map(s => ({
+        "@type": "TechArticle",
+        "name": `AWS Boto3 ${s.name} Changelog`,
+        "url": `https://botoview.5goos.com/services/${s.id}`
+    }))
+};
+---
+
+<Layout 
+    title={pageTitle} 
+    description={pageDescription} 
+    canonical={canonicalUrl}
+    bodyClass="min-h-screen w-full overflow-y-auto text-[var(--text-secondary)] transition-colors duration-500"
+    jsonLd={[breadcrumbSchema, collectionSchema]}
+>
+    <div class="min-h-screen flex flex-col bg-transparent" x-data="{ search: '' }">
+        <header class="h-12 flex items-center justify-between px-3.5 sm:px-8 glass-header sticky top-0 z-40">
+            <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+                <a href="/" class="flex items-center gap-2 group cursor-pointer flex-shrink-0" aria-label="BotoView Home">
+                    <img src="/favicon.svg" width="22" height="22" alt="BotoView logo" class="w-5 sm:w-6 h-5 sm:h-6 drop-shadow-xs group-hover:scale-105 transition-transform" />
+                    <span class="text-xs sm:text-sm font-black italic tracking-tighter uppercase text-slate-900 dark:text-white leading-none">BotoView</span>
+                </a>
+                <span class="text-slate-300 dark:text-white/10 hidden sm:inline">/</span>
+                <span class="text-xs mono font-black uppercase text-indigo-600 dark:text-indigo-400 truncate max-w-[140px] sm:max-w-none">
+                    Services Directory
+                </span>
+            </div>
+
+            <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                <a href="/" 
+                   class="inline-flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full text-xs font-bold transition-all active:scale-95 shadow-sm shadow-indigo-500/25 flex-shrink-0">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    <span class="hidden sm:inline">Timeline Explorer</span>
+                    <span class="sm:hidden text-[11px]">Timeline</span>
+                </a>
+                <button @click="document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light')" 
+                        aria-label="Toggle dark mode"
+                        class="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-white/10 transition-all cursor-pointer flex-shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </button>
+                <a href="https://github.com/5goos/botoview" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository" class="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-white/10 transition-all flex-shrink-0">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                </a>
+            </div>
+        </header>
+
+        <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12">
+            <div class="mb-10 text-center max-w-2xl mx-auto">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 text-xs mono font-bold uppercase tracking-wider mb-4">
+                    <span>{services.length} AWS Services Indexed</span>
+                </div>
+                <h1 class="text-3xl sm:text-4xl font-black italic uppercase tracking-tighter text-slate-900 dark:text-white leading-tight mb-3">
+                    AWS Boto3 Services Directory
+                </h1>
+                <p class="text-sm sm:text-base text-slate-600 dark:text-slate-400 font-medium leading-relaxed">
+                    Browse release notes and changelog history for every AWS service supported in Boto3. Filter updates, track new features, and inspect breaking changes.
+                </p>
+
+                <div class="relative mt-6 max-w-md mx-auto">
+                    <input type="text" 
+                           x-model="search" 
+                           placeholder="Filter 570+ services (e.g. s3, bedrock, lambda)..." 
+                           class="w-full bg-white/60 dark:bg-white/[0.04] border border-black/[0.04] dark:border-white/[0.06] backdrop-blur-md rounded-xl py-2 pl-9 pr-8 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-900 dark:text-white font-medium transition-all" />
+                    <svg class="absolute left-3 top-2.5 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <button x-show="search" @click="search = ''" class="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+            <section class="mb-12 p-6 rounded-3xl soft-card">
+                <h2 class="text-xs font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400 mb-4">
+                    Most Frequently Updated Services
+                </h2>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                    {popularList.map((svc) => (
+                        <a href={`/services/${svc.id}`} 
+                           class="p-3.5 rounded-2xl soft-card flex items-center justify-between group active:scale-[0.98]">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <div class={`w-8 h-8 rounded-xl flex items-center justify-center font-black mono text-xs ${getServiceColorClass(svc.id)}`}>
+                                    {svc.id.substring(0, 2).toUpperCase()}
+                                </div>
+                                <span class="font-bold text-xs text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 truncate">
+                                    {svc.name}
+                                </span>
+                            </div>
+                            <span class="text-[10px] mono font-bold text-slate-400 bg-slate-100/80 dark:bg-white/5 px-2 py-0.5 rounded-full">
+                                {svc.count}
+                            </span>
+                        </a>
+                    ))}
+                </div>
+            </section>
+
+            <div class="sticky top-20 z-30 mb-8 p-2 rounded-2xl soft-card flex items-center justify-between overflow-x-auto hide-scrollbar">
+                <span class="text-[10px] mono uppercase font-black text-slate-400 px-2 flex-shrink-0">Jump To:</span>
+                <div class="flex items-center gap-1">
+                    {alphabet.map((letter) => (
+                        <a href={`#letter-${letter}`} 
+                           class="w-7 h-7 rounded-lg flex items-center justify-center text-xs mono font-black text-slate-600 dark:text-slate-300 hover:bg-indigo-600 hover:text-white transition-all flex-shrink-0">
+                            {letter}
+                        </a>
+                    ))}
+                </div>
+            </div>
+
+            <div class="space-y-12 mb-16">
+                {alphabet.map((letter) => (
+                    <section id={`letter-${letter}`} class="scroll-mt-32">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-black mono text-sm">
+                                {letter}
+                            </span>
+                            <span class="text-xs mono uppercase text-slate-400 font-bold">
+                                {groupedServices[letter].length} Services
+                            </span>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                            {groupedServices[letter].map((svc) => (
+                                <div x-show={`!search || '${svc.id}'.includes(search.toLowerCase())`} 
+                                     class="p-3.5 rounded-2xl soft-card flex items-center justify-between group active:scale-[0.98]">
+                                    <a href={`/services/${svc.id}`} class="flex items-center gap-2.5 min-w-0 flex-1">
+                                        <div class={`w-7 h-7 rounded-xl flex items-center justify-center font-black mono text-[10px] flex-shrink-0 ${getServiceColorClass(svc.id)}`}>
+                                            {svc.id.substring(0, 2).toUpperCase()}
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <div class="font-bold text-xs text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 truncate">
+                                                {svc.name}
+                                            </div>
+                                            <div class="text-[9px] mono text-slate-400">
+                                                {svc.count} updates
+                                            </div>
+                                        </div>
+                                    </a>
+                                    <a href={`/?s=${svc.id}`} 
+                                       title="Open in interactive timeline" 
+                                       class="p-1.5 rounded-full text-slate-400 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-white/10 transition-all flex-shrink-0">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                    </a>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                ))}
+            </div>
+
+            <section class="p-8 rounded-3xl soft-card space-y-4 mb-16">
+                <h2 class="text-base font-black uppercase tracking-wider text-slate-900 dark:text-white">
+                    Understanding AWS Boto3 Service Updates & Changelogs
+                </h2>
+                <div class="space-y-3 text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
+                    <p>
+                        The AWS Python SDK (composed of <strong>Boto3</strong> and <strong>Botocore</strong>) updates almost daily to synchronize with new API operations, bug fixes, parameter changes, and region expansions introduced across Amazon Web Services.
+                    </p>
+                    <p>
+                        With over <strong>570 individual services</strong> under the AWS umbrella, tracking SDK changes at a service level allows engineering teams to identify deprecations, adopt new client methods (such as Bedrock AgentCore or S3 Express One Zone), and avoid runtime breaking changes.
+                    </p>
+                    <p>
+                        BotoView indexes every changelog JSON file directly from the official <code>boto/botocore</code> repository, cross-referencing release dates with PyPI timestamps to provide a complete, searchable history for every AWS service.
+                    </p>
+                </div>
+            </section>
+        </main>
+
+        <footer class="mt-auto py-10 px-4 sm:px-8 bg-sidebar">
+            <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
+                <div class="flex items-center gap-2">
+                    <img src="/favicon.svg" width="18" height="18" alt="BotoView" class="w-4 h-4 opacity-80" />
+                    <span class="font-bold text-slate-700 dark:text-slate-300">BotoView</span>
+                    <span class="text-slate-400">&copy; {new Date().getFullYear()}</span>
+                </div>
+                <div class="flex items-center gap-4 text-slate-500">
+                    <a href="/" class="hover:text-indigo-600 dark:hover:text-indigo-400">Timeline Explorer</a>
+                    <a href="/services" class="text-indigo-600 dark:text-indigo-400 font-bold">Services Directory</a>
+                    <a href="https://github.com/5goos/botoview" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 dark:hover:text-indigo-400">GitHub</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+</Layout>

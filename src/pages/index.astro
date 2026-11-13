@@ -4,11 +4,21 @@ export const prerender = true;
 import Layout from '../layouts/Layout.astro';
 import LeftRail from '../components/LeftRail.astro';
 import MainView from '../components/MainView.astro';
-import ServiceNav from '../components/ServiceNav.astro';
+import trackData from '../../public/data/track.json';
+
+const latestVersion = trackData?.versions?.[0] || { id: 'latest', date: '' };
+
+const versionModules = import.meta.glob<Array<{ category: string; description: string; type: string }>>('../../public/data/versions/*.json', { eager: true, import: 'default' });
+
+const latestKey = `../../public/data/versions/${latestVersion.id}.json`;
+const initialChanges = versionModules[latestKey] || [];
+const pageTitle = "BotoView — AWS Boto3 Changelog Explorer & Release Tracker";
+const pageDescription = "Explore and filter AWS Boto3 changelogs by service (S3, Bedrock, Lambda, EC2). Track SDK version updates, API changes, and release notes in real time.";
+const canonicalUrl = "https://botoview.5goos.com/";
 ---
 
-<Layout title="BotoView — AWS Boto3 Changelog Explorer & Release Notes Tracker">
-    <div class="flex h-screen w-full overflow-hidden bg-main text-[var(--text-secondary)] transition-all" 
+<Layout title={pageTitle} description={pageDescription} canonical={canonicalUrl}>
+    <div class="flex h-screen w-full overflow-hidden bg-transparent text-[var(--text-secondary)] transition-all" 
          x-data="botoCore" 
          @keydown.window="handleGlobalKeydown($event)">
         
@@ -20,189 +30,68 @@ import ServiceNav from '../components/ServiceNav.astro';
              x-transition:leave="transition-opacity ease-in duration-200"
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
-             class="fixed inset-0 bg-[#050505]/60 backdrop-blur-sm z-[90] lg:hidden" 
+             class="fixed inset-0 bg-slate-900/30 dark:bg-black/60 backdrop-blur-xs z-[90] lg:hidden" 
              @click="showMobileVersions = false"></div>
 
-        <div x-show="showMobileServices" 
-             x-cloak
-             x-transition:enter="transition-opacity ease-out duration-300"
-             x-transition:enter-start="opacity-0"
-             x-transition:enter-end="opacity-100"
-             x-transition:leave="transition-opacity ease-in duration-200"
-             x-transition:leave-start="opacity-100"
-             x-transition:leave-end="opacity-0"
-             class="fixed inset-0 bg-[#050505]/60 backdrop-blur-sm z-[90] md:hidden" 
-             @click="showMobileServices = false"></div>
-
-        <!-- Global Error State -->
         <div x-show="error" x-cloak x-transition.opacity class="fixed inset-0 z-[150] flex items-center justify-center p-6 bg-[#050505]/90 backdrop-blur-xl">
-            <div class="bg-white dark:bg-white/5 border border-red-500/20 text-slate-900 dark:text-white p-10 rounded-[32px] max-w-lg w-full text-center shadow-2xl relative overflow-hidden">
-                <div class="absolute inset-0 bg-gradient-to-b from-red-500/5 to-transparent pointer-events-none"></div>
-                <div class="w-20 h-20 bg-red-500/10 rounded-[24px] flex items-center justify-center mx-auto mb-8 border border-red-500/20">
-                    <svg class="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            <div class="bg-white dark:bg-[#0e131f] border border-red-500/20 text-slate-900 dark:text-white p-8 sm:p-10 rounded-[28px] max-w-lg w-full text-center shadow-2xl relative overflow-hidden">
+                <div class="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-red-500/20">
+                    <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                 </div>
-                <h2 class="text-3xl font-black italic uppercase tracking-tighter mb-3">System Override</h2>
-                <p class="text-slate-500 dark:text-slate-400 mb-10 leading-relaxed text-sm mono" x-text="error"></p>
-                <button @click="location.reload()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 px-8 rounded-2xl transition-all active:scale-95 shadow-lg shadow-indigo-500/25 uppercase tracking-widest text-xs">Reboot Core</button>
+                <h2 class="text-2xl font-black italic uppercase tracking-tight mb-2">Connection Override</h2>
+                <p class="text-slate-500 dark:text-slate-400 mb-8 leading-relaxed text-sm mono" x-text="error"></p>
+                <button @click="location.reload()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3.5 px-6 rounded-xl transition-all active:scale-95 shadow-md shadow-indigo-500/25 uppercase tracking-wider text-xs cursor-pointer">
+                    Reboot Application
+                </button>
             </div>
         </div>
 
-        <!-- Initial Boot Loader -->
-        <div x-show="loading" x-transition.opacity class="fixed inset-0 z-[140] flex flex-col items-center justify-center bg-white dark:bg-[#080b11] transition-colors duration-700">
-            <div class="relative w-20 h-20 mb-8">
-                <div class="absolute inset-0 border-4 border-indigo-500/10 rounded-[24px]"></div>
-                <div class="absolute inset-0 border-4 border-t-indigo-600 dark:border-t-indigo-400 rounded-[24px] animate-spin"></div>
-                <img src="/favicon.svg" class="absolute inset-0 m-auto w-8 h-8 opacity-70 animate-pulse" alt="Loading" />
+        <div x-show="loading" x-cloak style="display: none;" class="fixed inset-0 z-[140] flex flex-col items-center justify-center bg-white dark:bg-[#07090e] transition-colors duration-500">
+            <div class="relative w-16 h-16 mb-6">
+                <div class="absolute inset-0 border-3 border-indigo-500/15 rounded-2xl"></div>
+                <div class="absolute inset-0 border-3 border-t-indigo-600 dark:border-t-indigo-400 rounded-2xl animate-spin"></div>
+                <img src="/favicon.svg" class="absolute inset-0 m-auto w-7 h-7 opacity-80 animate-pulse" alt="Loading" />
             </div>
+            <span class="text-xs mono uppercase tracking-widest text-slate-400 font-bold">Initializing Core...</span>
         </div>
 
-        <!-- Layout Shell -->
-        <div class="flex h-full w-full" x-show="!loading" x-cloak x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+        <div class="flex h-full w-full">
             <LeftRail />
-            <MainView />
-            <ServiceNav />
-        </div>
-
-        <!-- Service history -->
-        <div x-show="activeService" class="fixed inset-0 z-[120] flex justify-end overflow-hidden" x-cloak>
-            <!-- Background Overlay -->
-            <div x-show="activeService" 
-                 x-transition:enter="ease-out duration-500" 
-                 x-transition:enter-start="opacity-0" 
-                 x-transition:enter-end="opacity-100" 
-                 x-transition:leave="ease-in duration-500" 
-                 x-transition:leave-start="opacity-100" 
-                 x-transition:leave-end="opacity-0" 
-                 class="absolute inset-0 bg-[#050505]/60 backdrop-blur-sm transition-opacity" 
-                 @click="activeService = null; updateUrl()"></div>
-
-            <!-- Drawer Container -->
-            <div x-show="activeService" 
-                 x-transition:enter="transform transition ease-out duration-500" 
-                 x-transition:enter-start="translate-x-full" 
-                 x-transition:enter-end="translate-x-0" 
-                 x-transition:leave="transform transition ease-in duration-500" 
-                 x-transition:leave-start="translate-x-0" 
-                 x-transition:leave-end="translate-x-full" 
-                 class="relative w-screen max-w-lg bg-card border-l border-slate-200 dark:border-white/5 shadow-2xl flex flex-col h-full theme-transition">
-                
-                <!-- Drawer Header -->
-                <div class="px-4 py-4 sm:px-6 sm:py-6 border-b border-subtle bg-sidebar backdrop-blur-md">
-                    <div class="flex items-center justify-between mb-3 sm:mb-4">
-                        <div class="flex items-center gap-2">
-                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.7)] animate-pulse-slow"></span>
-                            <span class="text-[10px] mono text-slate-500 dark:text-slate-400 font-black uppercase tracking-[0.2em]">Service History</span>
-                        </div>
-                        <button @click="activeService = null; updateUrl()" aria-label="Close service history drawer" class="p-2 bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all active:scale-90 cursor-pointer">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
-                        </button>
-                    </div>
-                    <div class="flex flex-col gap-1.5 mb-4 sm:mb-6">
-                        <div class="flex items-center gap-2.5 sm:gap-3 flex-wrap">
-                            <h2 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white italic uppercase tracking-tighter leading-none" x-text="activeService"></h2>
-                            <template x-if="serviceHistory.length > 0">
-                                <span class="px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 text-[9px] mono font-bold" x-text="serviceHistory.length + ' updates'"></span>
-                            </template>
-                        </div>
-                        <template x-if="serviceHistory.length > 0">
-                            <span class="text-[9px] mono text-slate-400 dark:text-slate-500 uppercase font-bold tracking-widest">
-                                Last updated: <span class="text-indigo-600 dark:text-indigo-400 font-semibold" x-text="getVersionDate(serviceHistory[0].v)"></span>
-                            </span>
-                        </template>
-                    </div>
-                    
-                    <div class="relative group/search">
-                        <input type="text" id="serviceHistorySearch" x-model.debounce.200ms="serviceHistorySearch" aria-label="Search service history" placeholder="Filter history..." 
-                               class="w-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl py-2 sm:py-2.5 pl-10 pr-9 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/40 transition-all text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 shadow-sm font-medium">
-                        <svg class="absolute left-3.5 top-2.5 w-4 h-4 text-slate-400 dark:text-slate-500 group-focus-within/search:text-indigo-500 transition-colors pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                        <button x-show="serviceHistorySearch" @click="serviceHistorySearch = ''" aria-label="Clear filter" class="absolute right-3 top-2 sm:top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-0.5">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- History List -->
-                <div class="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 custom-scroll bg-inherit">
-                    <div class="relative">
-                        <div class="absolute left-[14px] sm:left-[19px] top-0 bottom-0 w-[1px] bg-slate-200 dark:bg-white/10"></div>
-                        
-                        <div class="space-y-4 sm:space-y-6">
-                            <!-- Loading State -->
-                            <template x-if="serviceHistoryLoading">
-                                <div class="space-y-4 sm:space-y-6 animate-pulse">
-                                    <template x-for="i in 5">
-                                        <div class="relative pl-9 sm:pl-12">
-                                            <div class="absolute left-[9px] sm:left-[14px] top-2 w-2.5 h-2.5 rounded-full bg-slate-200 dark:bg-white/10"></div>
-                                            <div class="h-24 bg-slate-50 dark:bg-white/[0.03] rounded-2xl sm:rounded-[20px] border border-slate-200 dark:border-white/5"></div>
-                                        </div>
-                                    </template>
-                                </div>
-                            </template>
-
-                            <template x-for="log in filteredServiceHistory" :key="log.v + log.t">
-                                <div x-show="!serviceHistoryLoading" class="relative pl-9 sm:pl-12 group/history">
-                                    <div class="absolute left-[9px] sm:left-[14px] top-2 w-2.5 h-2.5 rounded-full bg-white dark:bg-[#080b11] border-2 border-slate-300 dark:border-white/20 shadow-sm z-10 transition-colors group-hover/history:border-indigo-500"></div>
-                                    
-                                    <div class="flex flex-col gap-2 p-4 sm:p-5 bg-white dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/5 rounded-2xl sm:rounded-[20px] hover:bg-slate-50/50 dark:hover:bg-white/[0.06] hover:border-indigo-500/30 transition-all duration-300 overflow-hidden shadow-xs hover:shadow-md">
-                                        <div class="flex items-center justify-between">
-                                            <div class="flex items-center gap-2">
-                                                <button @click="selectVersion(log.v); activeService = null; updateUrl()" 
-                                                        :aria-label="'Select release version ' + log.v"
-                                                        class="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-500/20 dark:border-indigo-500/30 rounded-md mono text-[9px] font-black text-indigo-700 dark:text-indigo-300 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all active:scale-95 shadow-xs cursor-pointer" 
-                                                        x-html="highlight(log.v, serviceHistorySearch)"></button>
-                                                <button @click="copyToClipboard(activeService.toUpperCase() + ': ' + log.t + ' (' + log.v + ')')" 
-                                                        title="Copy update text"
-                                                        aria-label="Copy update text"
-                                                        class="opacity-70 sm:opacity-0 sm:group-hover/history:opacity-100 p-1.5 rounded-md text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-white/10 transition-all active:scale-90 cursor-pointer">
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                                                </button>
-                                            </div>
-                                            <span x-show="getVersionDate(log.v)" x-text="getVersionDate(log.v)" x-cloak class="text-[8px] mono text-slate-400 dark:text-slate-500 uppercase tracking-widest font-bold"></span>
-                                        </div>
-                                        <p class="text-slate-600 dark:text-slate-300 text-[12.5px] sm:text-[13px] md:text-[14px] leading-relaxed font-medium tracking-tight group-hover/history:text-slate-900 dark:group-hover/history:text-white transition-colors break-words" x-html="formatDescription(log.t, serviceHistorySearch)"></p>
-                                    </div>
-                                </div>
-                            </template>
-
-                            <!-- Empty Results State -->
-                            <template x-if="!serviceHistoryLoading && filteredServiceHistory.length === 0">
-                                <div class="py-32 text-center">
-                                    <div class="w-16 h-16 bg-slate-100 dark:bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6 opacity-40">
-                                        <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                                    </div>
-                                    <p class="text-xs mono uppercase tracking-[0.2em] text-slate-500 font-black">No Records Match</p>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <MainView initialChanges={initialChanges} latestVersion={latestVersion} allServices={trackData.allServices} />
         </div>
     </div>
 </Layout>
 
-<script>
+<script define:vars={{ initialLatestId: latestVersion.id, initialChangesJson: initialChanges, initialServiceCounts: trackData?.serviceCounts || {}, initialAllServices: trackData?.allServices || [] }}>
     document.addEventListener('alpine:init', () => {
         Alpine.data('botoCore', () => ({
-            selectedVersion: '',
+            sidebarTab: 'versions', // 'versions' | 'services'
+            viewMode: 'release',    // 'release' | 'service'
+            selectedVersion: initialLatestId || '',
             versions: [],
-            allServices: [],
-            currentVersionData: [],
+            allServices: initialAllServices || [],
+            serviceCounts: initialServiceCounts || {},
+            serviceSort: 'popular',
+            currentVersionData: initialChangesJson || [],
+            isClientHydrated: true,
             serviceSearch: '',
             versionSearch: '',
             versionRailSearch: '',
+            releaseServiceFilter: '',
             activeFilter: 'all',
             railLimit: 50,
             activeService: null,
             serviceHistory: [],
             serviceHistorySearch: '',
+            serviceHistoryFilter: 'all',
+            serviceVersionFilter: 'all',
+            serviceHistoryLimit: 40,
             serviceHistoryLoading: false,
-            showMobileServices: false,
             showMobileVersions: false,
             showBackToTop: false,
             error: null,
-            loading: true,
-            versionCache: {},
+            loading: false,
+            versionCache: initialLatestId ? { [initialLatestId]: initialChangesJson } : {},
             copyStatus: false,
             copiedItemIndex: null,
             showPipCopied: false,
@@ -220,7 +109,7 @@ import ServiceNav from '../components/ServiceNav.astro';
                 try {
                     localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
                 } catch(e) {}
-                const themeColor = this.isDarkMode ? '#080b11' : '#f8fafc';
+                const themeColor = this.isDarkMode ? '#07090e' : '#f8fafc';
                 const metaTheme = document.querySelector('meta[name="theme-color"]');
                 if (metaTheme) metaTheme.setAttribute('content', themeColor);
             },
@@ -259,12 +148,12 @@ import ServiceNav from '../components/ServiceNav.astro';
 
                 formatted = formatted.replace(
                     /``([^`]+?)``/g,
-                    '<code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-white/10 text-[11px] mono text-indigo-700 dark:text-indigo-300 border border-slate-200/60 dark:border-white/10 font-medium">$1</code>'
+                    '<code class="px-1.5 py-0.5 rounded-md bg-slate-200/50 dark:bg-white/10 text-[11px] mono text-indigo-700 dark:text-indigo-300 font-medium">$1</code>'
                 );
 
                 formatted = formatted.replace(
                     /`([^`]+?)`/g,
-                    '<code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-white/10 text-[11px] mono text-indigo-700 dark:text-indigo-300 border border-slate-200/60 dark:border-white/10 font-medium">$1</code>'
+                    '<code class="px-1.5 py-0.5 rounded-md bg-slate-200/50 dark:bg-white/10 text-[11px] mono text-indigo-700 dark:text-indigo-300 font-medium">$1</code>'
                 );
 
                 formatted = formatted.replace(
@@ -310,6 +199,50 @@ import ServiceNav from '../components/ServiceNav.astro';
                 };
             },
 
+            get serviceHistoryCounts() {
+                let features = 0;
+                let fixes = 0;
+                for (const item of this.serviceHistory) {
+                    const text = (item.t || '').toLowerCase();
+                    if (text.includes('fix')) {
+                        fixes++;
+                    } else {
+                        features++;
+                    }
+                }
+                return {
+                    total: this.serviceHistory.length,
+                    features,
+                    fixes
+                };
+            },
+
+            get currentActiveFilter() {
+                return this.viewMode === 'release' ? this.activeFilter : this.serviceHistoryFilter;
+            },
+
+            get currentActiveCounts() {
+                return this.viewMode === 'release' ? this.versionCounts : this.serviceHistoryCounts;
+            },
+
+            setMainFilter(filter) {
+                if (this.viewMode === 'release') {
+                    this.activeFilter = filter;
+                } else {
+                    this.serviceHistoryFilter = filter;
+                    this.serviceHistoryLimit = 40;
+                }
+            },
+
+            switchSidebarTab(tab) {
+                this.sidebarTab = tab;
+                if (tab === 'versions' && this.viewMode === 'service') {
+                    this.backToRelease();
+                } else if (tab === 'services' && this.viewMode === 'release' && this.activeService) {
+                    this.openService(this.activeService, true);
+                }
+            },
+
             get currentVersionServices() {
                 const s = new Set();
                 for (const c of this.currentVersionData) {
@@ -337,10 +270,10 @@ import ServiceNav from '../components/ServiceNav.astro';
                 }
 
                 if (e.key === 'Escape') {
-                    this.showMobileServices = false;
                     this.showMobileVersions = false;
-                    this.activeService = null;
-                    this.updateUrl(false);
+                    if (this.viewMode === 'service') {
+                        this.backToRelease();
+                    }
                     return;
                 }
 
@@ -368,7 +301,7 @@ import ServiceNav from '../components/ServiceNav.astro';
 
                 if (e.key === '/') {
                     e.preventDefault();
-                    const searchInput = document.getElementById('serviceSearch');
+                    const searchInput = document.getElementById('versionSearch') || document.getElementById('serviceHistorySearch');
                     if (searchInput) searchInput.focus();
                     return;
                 }
@@ -419,17 +352,17 @@ import ServiceNav from '../components/ServiceNav.astro';
             },
 
             getServiceColorClass(serviceName) {
-                if (!serviceName) return 'bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-500/20';
+                if (!serviceName) return 'bg-slate-500/10 text-slate-700 dark:text-slate-300';
                 if (this._serviceColorCache[serviceName]) return this._serviceColorCache[serviceName];
                 const classes = [
-                    'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/25',
-                    'bg-sky-500/10 text-sky-700 dark:text-sky-300 border-sky-500/25',
-                    'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/25',
-                    'bg-violet-500/10 text-violet-700 dark:text-violet-300 border-violet-500/25',
-                    'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/25',
-                    'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/25',
-                    'bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border-cyan-500/25',
-                    'bg-teal-500/10 text-teal-700 dark:text-teal-300 border-teal-500/25'
+                    'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-500/15',
+                    'bg-sky-500/10 text-sky-700 dark:text-sky-300 hover:bg-sky-500/15',
+                    'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/15',
+                    'bg-violet-500/10 text-violet-700 dark:text-violet-300 hover:bg-violet-500/15',
+                    'bg-rose-500/10 text-rose-700 dark:text-rose-300 hover:bg-rose-500/15',
+                    'bg-amber-500/10 text-amber-700 dark:text-amber-300 hover:bg-amber-500/15',
+                    'bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 hover:bg-cyan-500/15',
+                    'bg-teal-500/10 text-teal-700 dark:text-teal-300 hover:bg-teal-500/15'
                 ];
                 let hash = 0;
                 for (let i = 0; i < serviceName.length; i++) {
@@ -445,9 +378,7 @@ import ServiceNav from '../components/ServiceNav.astro';
                     await navigator.clipboard.writeText(text);
                     this.copyStatus = true;
                     setTimeout(() => this.copyStatus = false, 2000);
-                } catch (err) {
-                    console.error('Failed to copy: ', err);
-                }
+                } catch (err) {}
             },
 
             async prefetchVersion(id) {
@@ -480,6 +411,9 @@ import ServiceNav from '../components/ServiceNav.astro';
                     const data = await res.json();
                     this.versions = data.versions;
                     this.allServices = data.allServices;
+                    if (data.serviceCounts) {
+                        this.serviceCounts = data.serviceCounts;
+                    }
 
                     this._versionDateMap = new Map();
                     for (const v of this.versions) {
@@ -492,24 +426,27 @@ import ServiceNav from '../components/ServiceNav.astro';
                     const vParam = params.get('v');
                     const sParam = params.get('s');
 
-                    if (vParam && this.versions.find(v => v.id === vParam)) {
-                        await this.selectVersion(vParam, false);
-                    } else if (this.versions.length > 0) {
-                        await this.selectVersion(this.versions[0].id, false);
-                    }
-
                     if (sParam && this.allServices.includes(sParam)) {
-                        this.openService(sParam, false);
+                        await this.openService(sParam, false);
+                    } else if (vParam && vParam !== initialLatestId && this.versions.find(v => v.id === vParam)) {
+                        await this.selectVersion(vParam, false);
+                    } else if (vParam === initialLatestId) {
+                        this.selectedVersion = initialLatestId;
+                        this.currentVersionData = initialChangesJson;
+                    } else if (this.versions.length > 0 && !this.selectedVersion) {
+                        await this.selectVersion(this.versions[0].id, false);
                     }
 
                     window.addEventListener('popstate', () => {
                         const curParams = new URLSearchParams(window.location.search);
                         const v = curParams.get('v') || (this.versions[0] ? this.versions[0].id : null);
                         const s = curParams.get('s');
-                        if (v && v !== this.selectedVersion) {
+                        if (s && this.allServices.includes(s)) {
+                            this.openService(s, false);
+                        } else if (v) {
+                            this.viewMode = 'release';
                             this.selectVersion(v, false);
                         }
-                        this.activeService = s || null;
                     });
                 } catch (e) {
                     this.error = e.message;
@@ -536,18 +473,33 @@ import ServiceNav from '../components/ServiceNav.astro';
 
             updateUrl(push = false) {
                 const params = new URLSearchParams();
-                if (this.selectedVersion && this.versions[0] && this.selectedVersion !== this.versions[0].id) {
-                    params.set('v', this.selectedVersion);
-                }
-                if (this.activeService) {
+                if (this.viewMode === 'service' && this.activeService) {
                     params.set('s', this.activeService);
+                    if (this.selectedVersion && this.versions[0] && this.selectedVersion !== this.versions[0].id) {
+                        params.set('v', this.selectedVersion);
+                    }
+                } else {
+                    if (this.selectedVersion && this.versions[0] && this.selectedVersion !== this.versions[0].id) {
+                        params.set('v', this.selectedVersion);
+                    }
                 }
                 const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname;
                 if (push) {
-                    window.history.pushState({ v: this.selectedVersion, s: this.activeService }, '', newUrl);
+                    window.history.pushState({ v: this.selectedVersion, s: this.activeService, viewMode: this.viewMode }, '', newUrl);
                 } else {
-                    window.history.replaceState({ v: this.selectedVersion, s: this.activeService }, '', newUrl);
+                    window.history.replaceState({ v: this.selectedVersion, s: this.activeService, viewMode: this.viewMode }, '', newUrl);
                 }
+            },
+
+            backToRelease() {
+                this.viewMode = 'release';
+                this.activeService = null;
+                this.sidebarTab = 'versions';
+                this.updateUrl(true);
+                document.title = `BotoView by 5goos — Release ${this.selectedVersion} | AWS Boto3 Changelog`;
+                const mainArea = document.getElementById('mainScrollArea');
+                if (mainArea) mainArea.scrollTo({ top: 0, behavior: 'instant' });
+                this.syncIndicator(this.selectedVersion, true);
             },
 
             prefetchAdjacent(currentIndex) {
@@ -562,12 +514,18 @@ import ServiceNav from '../components/ServiceNav.astro';
 
             async selectVersion(id, push = true) {
                 if (this.isMobile(1024)) this.showMobileVersions = false;
-                if (this.selectedVersion === id && this.currentVersionData.length > 0) return;
+                this.viewMode = 'release';
+                this.sidebarTab = 'versions';
+                this.activeService = null;
+                this.releaseServiceFilter = '';
+                if (this.selectedVersion === id && this.currentVersionData.length > 0) {
+                    this.updateUrl(push);
+                    return;
+                }
                 
                 const prevVersion = this.selectedVersion;
                 this.selectedVersion = id;
 
-                // Expand railLimit if needed so selected version is rendered in DOM
                 const idx = this.versions.findIndex(v => v.id === id);
                 if (idx !== -1 && idx >= this.railLimit) {
                     this.railLimit = idx + 20;
@@ -577,14 +535,14 @@ import ServiceNav from '../components/ServiceNav.astro';
 
                 if (this.versionCache[id]) {
                     this.currentVersionData = this.versionCache[id];
-                    document.title = `BotoView — Release ${id} | AWS Boto3 Changelog & Release Notes`;
+                    document.title = `BotoView by 5goos — Release ${id} | AWS Boto3 Changelog & Release Notes`;
                     this.syncIndicator(id);
                     this.prefetchAdjacent(idx);
                     return;
                 }
 
                 this.currentVersionData = []; 
-                document.title = `BotoView — Release ${id} | AWS Boto3 Changelog & Release Notes`;
+                document.title = `BotoView by 5goos — Release ${id} | AWS Boto3 Changelog & Release Notes`;
                 this.syncIndicator(id, false); 
 
                 try {
@@ -616,14 +574,8 @@ import ServiceNav from '../components/ServiceNav.astro';
 
                 requestAnimationFrame(() => {
                     this.$nextTick(() => {
-                        const active = document.querySelector(`button[data-version="${id}"]`);
-                        const indicatorContainer = document.querySelector('.glow-container');
-                        
+                        const active = document.querySelector(`a[data-version="${id}"]`);
                         if (active) {
-                            if (indicatorContainer) {
-                                indicatorContainer.style.setProperty('--glow-top', active.offsetTop + 'px');
-                                indicatorContainer.style.setProperty('--glow-height', active.offsetHeight + 'px');
-                            }
                             active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
                         }
                     });
@@ -631,12 +583,31 @@ import ServiceNav from '../components/ServiceNav.astro';
             },
 
             async openService(svc, push = true) {
-                if (this.isMobile(768)) this.showMobileServices = false;
                 this.activeService = svc;
-                this.updateUrl(push);
+                this.viewMode = 'service';
+                this.sidebarTab = 'services';
+                this.serviceHistoryFilter = 'all';
+                this.serviceVersionFilter = 'all';
+                this.serviceHistoryLimit = 40;
+                this.serviceHistorySearch = '';
                 this.serviceHistory = [];
                 this.serviceHistoryLoading = true;
-                this.serviceHistorySearch = '';
+                this.updateUrl(push);
+
+                document.title = `AWS ${svc.toUpperCase()} Boto3 Changelog & Release Notes | BotoView by 5goos`;
+
+                const mainArea = document.getElementById('mainScrollArea');
+                if (mainArea) mainArea.scrollTo({ top: 0, behavior: 'instant' });
+
+                requestAnimationFrame(() => {
+                    this.$nextTick(() => {
+                        const activeSvcEl = document.querySelector(`[data-service="${svc.toLowerCase().trim()}"]`);
+                        if (activeSvcEl) {
+                            activeSvcEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                        }
+                    });
+                });
+
                 const serviceId = svc.toLowerCase().trim().replace(/[\._\s]+/g, '-').replace(/-+/g, '-');
                 const cacheKey = `svc_${serviceId}`;
 
@@ -662,9 +633,20 @@ import ServiceNav from '../components/ServiceNav.astro';
             },
 
             get filteredServices() {
-                if (!this.serviceSearch) return this.allServices;
-                const s = this.serviceSearch.toLowerCase();
-                return this.allServices.filter(svc => svc.toLowerCase().includes(s));
+                let list = this.allServices || [];
+                if (this.serviceSearch) {
+                    const s = this.serviceSearch.toLowerCase().trim();
+                    list = list.filter(svc => svc.toLowerCase().includes(s));
+                }
+                if (this.serviceSort === 'popular') {
+                    return [...list].sort((a, b) => {
+                        const countA = this.serviceCounts[a] || 0;
+                        const countB = this.serviceCounts[b] || 0;
+                        if (countB !== countA) return countB - countA;
+                        return a.localeCompare(b);
+                    });
+                }
+                return [...list].sort((a, b) => a.localeCompare(b));
             },
 
             _getFilteredVersionsBase() {
@@ -705,10 +687,56 @@ import ServiceNav from '../components/ServiceNav.astro';
                 this.railLimit += 50;
             },
 
+            get availableServiceVersionPrefixes() {
+                const s = new Set();
+                for (const item of this.serviceHistory) {
+                    if (item.v) {
+                        const parts = item.v.split('.');
+                        if (parts.length >= 2) {
+                            s.add(`${parts[0]}.${parts[1]}`);
+                        }
+                    }
+                }
+                return Array.from(s).slice(0, 10);
+            },
+
             get filteredServiceHistory() {
-                if (!this.serviceHistorySearch) return this.serviceHistory;
-                const s = this.serviceHistorySearch.toLowerCase();
-                return this.serviceHistory.filter(log => log.v.includes(s) || log.t.toLowerCase().includes(s));
+                let list = this.serviceHistory;
+                if (this.serviceHistoryFilter === 'feature') {
+                    list = list.filter(item => !(item.t && item.t.toLowerCase().includes('fix')));
+                } else if (this.serviceHistoryFilter === 'fix') {
+                    list = list.filter(item => item.t && item.t.toLowerCase().includes('fix'));
+                }
+
+                if (this.serviceVersionFilter && this.serviceVersionFilter !== 'all') {
+                    list = list.filter(item => item.v && item.v.startsWith(this.serviceVersionFilter));
+                }
+
+                if (!this.serviceHistorySearch || !this.serviceHistorySearch.trim()) {
+                    return list;
+                }
+                const s = this.serviceHistorySearch.toLowerCase().trim();
+                return list.filter(log => (log.v && log.v.toLowerCase().includes(s)) || (log.t && log.t.toLowerCase().includes(s)));
+            },
+
+            get visibleServiceHistory() {
+                return this.filteredServiceHistory.slice(0, this.serviceHistoryLimit);
+            },
+
+            get hasMoreServiceHistory() {
+                return this.serviceHistoryLimit < this.filteredServiceHistory.length;
+            },
+
+            loadMoreServiceHistory() {
+                this.serviceHistoryLimit += 40;
+            },
+
+            toggleReleaseServiceFilter(svc) {
+                if (this.releaseServiceFilter === svc) {
+                    this.releaseServiceFilter = '';
+                } else {
+                    this.releaseServiceFilter = svc;
+                }
             },
 
             get filteredVersionData() {
@@ -717,6 +745,11 @@ import ServiceNav from '../components/ServiceNav.astro';
                     data = data.filter(i => !(i.type && i.type.includes('fix')));
                 } else if (this.activeFilter === 'fix') {
                     data = data.filter(i => i.type && i.type.includes('fix'));
+                }
+
+                if (this.releaseServiceFilter) {
+                    const s = this.releaseServiceFilter.toLowerCase().trim();
+                    data = data.filter(i => i.category && i.category.toLowerCase().trim() === s);
                 }
 
                 if (!this.versionSearch) return data;

@@ -4,7 +4,6 @@ import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 
 import cloudflare from '@astrojs/cloudflare';
-import sitemap from '@astrojs/sitemap';
 import alpinejs from '@astrojs/alpinejs';
 import partytown from '@astrojs/partytown';
 
@@ -19,7 +18,6 @@ export default defineConfig({
 
   adapter: cloudflare(),
   integrations: [
-    sitemap(), 
     alpinejs(),
     partytown({
       config: { forward: ['dataLayer.push'] }

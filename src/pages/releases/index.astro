@@ -1,0 +1,210 @@
+---
+export const prerender = true;
+
+import Layout from '../../layouts/Layout.astro';
+import trackData from '../../../public/data/track.json';
+import { formatDate } from '../../utils/formatting';
+
+interface VersionItem {
+    id: string;
+    date: string;
+}
+
+const allVersions: VersionItem[] = trackData?.versions || [];
+const latestVersion = allVersions[0] || { id: 'latest', date: '' };
+
+// Group releases by Year-Month for clean structured navigation
+const groupedByMonth: Record<string, VersionItem[]> = {};
+for (const v of allVersions) {
+    if (!v.date) continue;
+    const monthKey = v.date.substring(0, 7); // e.g. "2026-11"
+    if (!groupedByMonth[monthKey]) {
+        groupedByMonth[monthKey] = [];
+    }
+    groupedByMonth[monthKey].push(v);
+}
+
+const months = Object.keys(groupedByMonth).sort().reverse();
+
+const pageTitle = "AWS Boto3 Releases Directory — All Versions & Changelogs | BotoView";
+const pageDescription = "Browse all AWS Boto3 releases, version updates, and changelogs. Track Python AWS SDK release dates, modified services, and breaking API changes.";
+const canonicalUrl = "https://botoview.5goos.com/releases";
+
+const breadcrumbSchema = {
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+        {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://botoview.5goos.com/"
+        },
+        {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Releases",
+            "item": canonicalUrl
+        }
+    ]
+};
+
+const collectionSchema = {
+    "@type": "CollectionPage",
+    "@id": `${canonicalUrl}#collection`,
+    "name": "AWS Boto3 Releases Directory",
+    "description": pageDescription,
+    "url": canonicalUrl,
+    "mainEntity": {
+        "@type": "ItemList",
+        "numberOfItems": allVersions.length,
+        "itemListElement": allVersions.slice(0, 50).map((v, index) => ({
+            "@type": "ListItem",
+            "position": index + 1,
+            "name": `AWS Boto3 v${v.id}`,
+            "url": `https://botoview.5goos.com/releases/${v.id}`
+        }))
+    }
+};
+---
+
+<Layout 
+    title={pageTitle} 
+    description={pageDescription} 
+    canonical={canonicalUrl}
+    bodyClass="min-h-screen w-full overflow-y-auto text-[var(--text-secondary)] transition-colors duration-500"
+    jsonLd={[breadcrumbSchema, collectionSchema]}
+>
+    <div class="min-h-screen flex flex-col bg-transparent" x-data="{ search: '' }">
+        <header class="h-12 flex items-center justify-between px-3.5 sm:px-8 glass-header sticky top-0 z-40">
+            <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+                <a href="/" class="flex items-center gap-2 group cursor-pointer flex-shrink-0" aria-label="BotoView Home">
+                    <img src="/favicon.svg" width="22" height="22" alt="BotoView logo" class="w-5 sm:w-6 h-5 sm:h-6 drop-shadow-xs group-hover:scale-105 transition-transform" />
+                    <span class="text-xs sm:text-sm font-black italic tracking-tighter uppercase text-slate-900 dark:text-white leading-none">BotoView</span>
+                </a>
+                <span class="text-slate-300 dark:text-white/10 hidden sm:inline">/</span>
+                <span class="text-xs mono font-black uppercase text-indigo-600 dark:text-indigo-400 truncate max-w-[140px] sm:max-w-none">
+                    Releases Directory
+                </span>
+            </div>
+
+            <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                <a href="/services" class="text-xs mono font-bold uppercase tracking-wider text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 transition-colors mr-2 hidden sm:inline">
+                    Services
+                </a>
+                <a href="/" 
+                   class="inline-flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full text-xs font-bold transition-all active:scale-95 shadow-sm shadow-indigo-500/25 flex-shrink-0">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    <span class="hidden sm:inline">Interactive Explorer</span>
+                    <span class="sm:hidden text-[11px]">App</span>
+                </a>
+            </div>
+        </header>
+
+        <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12">
+            <div class="mb-10 text-center max-w-2xl mx-auto">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 text-xs mono font-bold uppercase tracking-wider mb-4">
+                    <span>{allVersions.length} Boto3 Releases Indexed</span>
+                </div>
+                <h1 class="text-3xl sm:text-4xl font-black italic uppercase tracking-tighter text-slate-900 dark:text-white leading-tight mb-3">
+                    AWS Boto3 Releases Directory
+                </h1>
+                <p class="text-sm sm:text-base text-slate-600 dark:text-slate-400 font-medium leading-relaxed">
+                    Complete release history and changelog archive for AWS Boto3. Inspect changes per version, browse modified services, and track breaking updates.
+                </p>
+
+                <div class="relative mt-6 max-w-md mx-auto">
+                    <input type="text" 
+                           x-model="search" 
+                           placeholder="Filter versions (e.g. 1.44, 1.43, 2026)..." 
+                           aria-label="Filter releases"
+                           class="w-full glass-input rounded-xl py-2 pl-9 pr-8 text-xs focus:outline-none text-slate-900 dark:text-white font-medium transition-all" />
+                    <svg class="absolute left-3 top-2.5 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <button x-show="search" @click="search = ''" aria-label="Clear search" class="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+            {latestVersion && (
+                <section aria-label="Latest release" class="mb-10 p-6 rounded-3xl soft-card border border-indigo-500/20">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] mono font-bold uppercase bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+                                    Latest Release
+                                </span>
+                                <h2 class="text-xl font-bold mono text-slate-900 dark:text-white">
+                                    v{latestVersion.id}
+                                </h2>
+                            </div>
+                            <p class="text-xs mono text-slate-400">
+                                Released on {formatDate(latestVersion.date)}
+                            </p>
+                        </div>
+                        <a href={`/releases/${latestVersion.id}`}
+                           class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all active:scale-95 shadow-md shadow-indigo-500/20 self-start sm:self-auto">
+                            <span>View Full v{latestVersion.id} Changelog</span>
+                            <span>&rarr;</span>
+                        </a>
+                    </div>
+                </section>
+            )}
+
+            <div class="space-y-10">
+                {months.map((month) => {
+                    const monthVersions = groupedByMonth[month] || [];
+                    return (
+                        <section class="space-y-3" x-show={`!search || '${month}'.includes(search) || ${JSON.stringify(monthVersions.map(v => v.id))}.some(id => id.includes(search))`}>
+                            <div class="flex items-center justify-between border-b border-black/[0.04] dark:border-white/[0.06] pb-2">
+                                <h3 class="text-sm font-bold mono uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                                    <span>{month}</span>
+                                </h3>
+                                <span class="text-xs mono text-slate-400">
+                                    {monthVersions.length} releases
+                                </span>
+                            </div>
+
+                            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5">
+                                {monthVersions.map((v) => (
+                                    <a href={`/releases/${v.id}`}
+                                       x-show={`!search || '${v.id}'.includes(search)`}
+                                       class="soft-card p-3 rounded-xl flex flex-col justify-between hover:border-indigo-500/40 transition-all group active:scale-98">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-xs mono font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
+                                                v{v.id}
+                                            </span>
+                                            {v.id === latestVersion.id && (
+                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                            )}
+                                        </div>
+                                        <time class="text-[9.5px] mono text-slate-400">
+                                            {formatDate(v.date)}
+                                        </time>
+                                    </a>
+                                ))}
+                            </div>
+                        </section>
+                    );
+                })}
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="mt-auto py-10 px-4 sm:px-8 border-t border-black/[0.04] dark:border-white/[0.06] bg-transparent">
+            <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
+                <div class="flex items-center gap-2">
+                    <img src="/favicon.svg" width="18" height="18" alt="BotoView" class="w-4 h-4 opacity-80" />
+                    <span class="font-bold text-slate-700 dark:text-slate-300">BotoView</span>
+                    <span class="text-slate-400">&copy; {new Date().getFullYear()}</span>
+                </div>
+                <div class="flex items-center gap-4 text-slate-500">
+                    <a href="/" class="hover:text-indigo-600 dark:hover:text-indigo-400">Interactive Explorer</a>
+                    <a href="/services" class="hover:text-indigo-600 dark:hover:text-indigo-400">Services Directory</a>
+                    <a href="/releases" class="text-indigo-600 dark:text-indigo-400 font-bold">Releases Directory</a>
+                    <a href="https://github.com/5goos/botoview" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 dark:hover:text-indigo-400">GitHub</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+</Layout>

@@ -1,303 +1,405 @@
-<main class="flex-1 flex flex-col min-w-0 bg-inherit relative theme-transition overflow-hidden">
+---
+import { getServiceColorClass, formatDescription, formatDate } from '../utils/formatting';
 
-    <header class="h-14 md:h-16 border-b border-subtle flex items-center justify-between px-3 sm:px-4 md:px-6 lg:px-8 bg-white/80 dark:bg-[#080b11]/90 backdrop-blur-xl sticky top-0 z-40 gap-2 md:gap-4 min-w-0 overflow-x-clip">
-        <div class="flex items-center gap-1.5 sm:gap-2.5 min-w-0 flex-shrink">
-            <button @click="showMobileVersions = true"
-                    aria-label="Open releases drawer"
-                    class="lg:hidden flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100/90 dark:bg-white/[0.06] border border-slate-200/90 dark:border-white/10 hover:border-indigo-500/40 hover:bg-slate-200/60 dark:hover:bg-white/10 transition-all active:scale-95 shadow-xs flex-shrink-0 group cursor-pointer">
-                <img src="/favicon.svg" width="22" height="22" alt="BotoView logo" class="w-5 h-5 flex-shrink-0 drop-shadow-xs group-hover:scale-105 transition-transform" />
-                <div class="flex items-center gap-1.5">
-                    <span class="text-xs font-black mono text-slate-900 dark:text-white tracking-tight">v<span x-text="selectedVersion || '...'"></span></span>
-                    <svg class="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 flex-shrink-0 group-hover:translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
-                </div>
-            </button>
+interface Props {
+    initialChanges?: Array<{ category: string; description: string; type: string }>;
+    latestVersion?: { id: string; date: string };
+    allServices?: string[];
+}
+const { initialChanges = [], latestVersion = { id: '', date: '' }, allServices = [] } = Astro.props;
+---
 
-            <div class="hidden lg:flex items-center gap-2 bg-slate-100/70 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 px-2.5 py-1 rounded-full shadow-xs flex-shrink-0">
-                <div class="flex items-center gap-1">
-                    <span class="text-[8px] mono text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">v</span>
-                    <button @click="copyToClipboard(selectedVersion)"
-                            class="group/copy flex items-center gap-1 transition-all active:scale-95 relative cursor-pointer"
-                            :aria-label="'Copy release version ' + (selectedVersion || '...')">
-                        <span class="text-[11px] mono text-indigo-600 dark:text-indigo-400 font-black tracking-tight" x-text="selectedVersion || '...'"></span>
-                        <span x-show="!copyStatus" x-cloak class="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.6)]"></span>
-                        <svg x-show="copyStatus" x-cloak class="w-2.5 h-2.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                        <div x-show="copyStatus" x-cloak x-transition class="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-slate-900 text-white text-[8px] mono font-bold rounded uppercase tracking-tighter whitespace-nowrap z-[60]">Copied!</div>
-                    </button>
-                </div>
+<main id="mainScrollArea"
+      @scroll="showBackToTop = $event.target.scrollTop > 350"
+      class="flex-1 overflow-y-auto relative custom-scroll h-full min-h-0 bg-transparent theme-transition scroll-smooth"
+      aria-label="Main Changelog Content">
 
-                <template x-if="selectedDate">
-                    <div class="flex items-center gap-1.5 border-l border-slate-200 dark:border-white/10 pl-2">
-                        <span x-text="getRelativeDate(selectedDate)" class="text-[9px] mono text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-tight"></span>
+    <header class="sticky top-0 z-30 h-12 glass-header flex items-center">
+        <div class="w-full max-w-6xl 2xl:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2.5 min-w-0">
+                <button @click="showMobileVersions = true"
+                        aria-label="Toggle navigation drawer"
+                        class="lg:hidden flex items-center gap-1.5 px-2 py-1 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-200/50 dark:hover:bg-white/10 transition-colors active:scale-95 flex-shrink-0 cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+                    <span class="text-[11px] font-bold mono text-slate-800 dark:text-slate-200 truncate max-w-[100px]" x-text="viewMode === 'service' ? (activeService || '').toUpperCase() : ('v' + (selectedVersion || '...'))"></span>
+                </button>
+
+                <template x-if="viewMode === 'release'">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <nav aria-label="Breadcrumb" class="flex items-center gap-2 min-w-0">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-xs flex-shrink-0 animate-pulse"></span>
+                            <h1 class="flex items-baseline gap-1.5 min-w-0 text-slate-900 dark:text-white">
+                                <span class="text-[10px] uppercase font-bold mono text-slate-400 dark:text-slate-500 tracking-wider flex-shrink-0">Release</span>
+                                <strong class="text-sm font-bold mono tracking-tight truncate" x-text="'v' + (selectedVersion || '...')"></strong>
+                            </h1>
+                            <template x-if="selectedDate">
+                                <span class="text-xs mono text-slate-400 dark:text-slate-500 hidden sm:inline flex-shrink-0" x-text="'(' + formatDate(selectedDate) + ' • ' + getRelativeDate(selectedDate) + ')'"></span>
+                            </template>
+                        </nav>
+
+                        <div class="hidden sm:flex items-center gap-0.5 flex-shrink-0 ml-1">
+                            <button @click="adjacentVersions.newer && selectVersion(adjacentVersions.newer, true)"
+                                    :disabled="!adjacentVersions.newer"
+                                    title="Newer release (k)"
+                                    :class="adjacentVersions.newer ? 'hover:bg-slate-200/60 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 cursor-pointer' : 'text-slate-300 dark:text-white/10 cursor-not-allowed'"
+                                    class="p-1 rounded-lg transition-all active:scale-90">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+                            </button>
+                            <button @click="adjacentVersions.older && selectVersion(adjacentVersions.older, true)"
+                                    :disabled="!adjacentVersions.older"
+                                    title="Older release (j)"
+                                    :class="adjacentVersions.older ? 'hover:bg-slate-200/60 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 cursor-pointer' : 'text-slate-300 dark:text-white/10 cursor-not-allowed'"
+                                    class="p-1 rounded-lg transition-all active:scale-90">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+
+                <template x-if="viewMode === 'service'">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <button @click="backToRelease()"
+                                title="Back to Release (Esc)"
+                                class="inline-flex items-center gap-1 text-xs mono font-bold text-indigo-600 dark:text-indigo-400 hover:underline transition-all active:scale-95 cursor-pointer flex-shrink-0">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+                            <span>v<span x-text="selectedVersion"></span></span>
+                        </button>
+                        <span class="text-slate-300 dark:text-white/20">/</span>
+                        <h1 class="flex items-center gap-1.5 min-w-0 text-slate-900 dark:text-white">
+                            <span class="text-[10px] uppercase font-bold mono text-slate-400 dark:text-slate-500 tracking-wider flex-shrink-0">Service:</span>
+                            <span class="text-sm font-bold mono uppercase truncate" x-text="activeService"></span>
+                            <span class="px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] mono font-semibold flex-shrink-0"
+                                  x-text="serviceHistory.length + ' updates'"></span>
+                        </h1>
                     </div>
                 </template>
             </div>
 
-            <div class="hidden sm:flex items-center gap-0.5 bg-slate-100/60 dark:bg-white/5 border border-subtle dark:border-white/10 p-0.5 rounded-full shadow-xs flex-shrink-0">
-                <button @click="adjacentVersions.newer && selectVersion(adjacentVersions.newer, true)"
-                        :disabled="!adjacentVersions.newer"
-                        aria-label="Newer release (k)"
-                        title="Newer release (k)"
-                        :class="adjacentVersions.newer ? 'text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-white/10 shadow-xs' : 'text-slate-300 dark:text-white/10 cursor-not-allowed'"
-                        class="p-1 rounded-full transition-all active:scale-90 outline-none">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+            <div class="flex items-center gap-2 flex-shrink-0">
+                <div class="hidden md:flex items-center gap-2.5 text-[10px] mono text-slate-400 dark:text-slate-500 pr-1 select-none">
+                    <span><kbd class="kbd-badge">/</kbd> filter</span>
+                    <span><kbd class="kbd-badge">j</kbd><kbd class="kbd-badge ml-0.5">k</kbd> releases</span>
+                    <span><kbd class="kbd-badge">t</kbd> theme</span>
+                </div>
+
+                <button @click="toggleTheme()"
+                        aria-label="Toggle color theme"
+                        title="Toggle dark / light theme (t)"
+                        class="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-white/10 transition-all active:scale-90 cursor-pointer flex-shrink-0">
+                    <svg x-show="!isDarkMode" class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                    <svg x-show="isDarkMode" x-cloak class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                 </button>
-                <button @click="adjacentVersions.older && selectVersion(adjacentVersions.older, true)"
-                        :disabled="!adjacentVersions.older"
-                        aria-label="Older release (j)"
-                        title="Older release (j)"
-                        :class="adjacentVersions.older ? 'text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-white/10 shadow-xs' : 'text-slate-300 dark:text-white/10 cursor-not-allowed'"
-                        class="p-1 rounded-full transition-all active:scale-90 outline-none">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
-                </button>
+
+                <a href="https://github.com/5goos/botoview" target="_blank" rel="noopener noreferrer"
+                   title="Star BotoView on GitHub"
+                   aria-label="GitHub Repository"
+                   class="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-white/10 transition-all active:scale-90 flex-shrink-0">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                </a>
             </div>
-
-            <button @click="copyToClipboard('pip install boto3==' + selectedVersion); showPipCopied = true; setTimeout(() => showPipCopied = false, 2000)"
-                    title="Click to copy pip install boto3 command"
-                    aria-label="Copy pip install command"
-                    class="hidden sm:inline-flex lg:max-xl:hidden xl:inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100/70 dark:bg-white/5 hover:bg-slate-200/80 dark:hover:bg-white/10 border border-slate-200/80 dark:border-white/10 rounded-full text-[10px] mono text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all active:scale-95 shadow-xs flex-shrink-0 cursor-pointer">
-                <svg class="w-3 h-3 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3"></path></svg>
-                <span x-show="!showPipCopied" x-text="'pip ' + selectedVersion"></span>
-                <span x-show="showPipCopied" x-cloak class="text-emerald-500 font-bold">copied!</span>
-            </button>
-
-            <a :href="'https://github.com/boto/botocore/releases/tag/' + selectedVersion"
-               target="_blank"
-               rel="noopener noreferrer"
-               title="View release on GitHub"
-               aria-label="View release on GitHub"
-               class="hidden md:flex items-center justify-center p-1.5 bg-slate-100/60 dark:bg-white/5 border border-subtle dark:border-white/10 rounded-full text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all shadow-xs active:scale-95 flex-shrink-0">
-                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-            </a>
-
-            <div class="hidden lg:block relative group/search flex-shrink min-w-[110px] max-w-[180px] xl:max-w-[220px]">
-                <label for="versionSearch" class="sr-only">Filter logs</label>
-                <input type="text" id="versionSearch" name="versionSearch" x-model.debounce.200ms="versionSearch" placeholder="Filter logs..."
-                       class="w-full bg-slate-100 dark:bg-white/[0.05] border border-transparent focus:border-indigo-500/40 focus:ring-2 focus:ring-indigo-500/20 rounded-full py-1.5 pl-8 pr-7 text-[11px] focus:outline-none transition-all text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 shadow-inner font-medium">
-                <svg class="absolute left-2.5 top-2 w-3.5 h-3.5 text-slate-400 dark:text-slate-500 group-focus-within/search:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                <button x-show="versionSearch" @click="versionSearch = ''" aria-label="Clear log search" class="absolute right-2 top-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
-        </div>
-
-        <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-            <nav class="hidden sm:flex items-center gap-0.5 p-0.5 bg-slate-100 dark:bg-white/5 rounded-full border border-subtle" aria-label="Filter types">
-                <button @click="activeFilter = 'all'" :aria-pressed="activeFilter === 'all'" :class="activeFilter === 'all' ? 'bg-white dark:bg-white/10 text-indigo-600 dark:text-indigo-400 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-200'" class="px-2 sm:px-2.5 py-1 rounded-full text-[9px] mono uppercase transition-all active:scale-95 outline-none flex items-center gap-1 cursor-pointer">
-                    <span>All</span>
-                    <span class="text-[8px] px-1 py-0.2 rounded-full bg-slate-200/80 dark:bg-white/10" x-text="versionCounts.total"></span>
-                </button>
-                <button @click="activeFilter = 'feature'" :aria-pressed="activeFilter === 'feature'" :class="activeFilter === 'feature' ? 'bg-white dark:bg-white/10 text-emerald-600 dark:text-emerald-400 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-200'" class="px-2 sm:px-2.5 py-1 rounded-full text-[9px] mono uppercase transition-all active:scale-95 outline-none flex items-center gap-1 cursor-pointer">
-                    <span class="hidden md:inline lg:hidden xl:inline">Features</span>
-                    <span class="md:hidden lg:inline xl:hidden">Feat</span>
-                    <span class="text-[8px] px-1 py-0.2 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold" x-text="versionCounts.features"></span>
-                </button>
-                <button @click="activeFilter = 'fix'" :aria-pressed="activeFilter === 'fix'" :class="activeFilter === 'fix' ? 'bg-white dark:bg-white/10 text-rose-600 dark:text-rose-400 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-200'" class="px-2 sm:px-2.5 py-1 rounded-full text-[9px] mono uppercase transition-all active:scale-95 outline-none flex items-center gap-1 cursor-pointer">
-                    <span class="hidden md:inline lg:hidden xl:inline">Fixes</span>
-                    <span class="md:hidden lg:inline xl:hidden">Fix</span>
-                    <span class="text-[8px] px-1 py-0.2 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 font-bold" x-text="versionCounts.fixes"></span>
-                </button>
-            </nav>
-
-            <button @click="toggleTheme()"
-                    aria-label="Toggle color theme"
-                    title="Toggle dark / light theme (t)"
-                    class="p-1.5 bg-slate-100 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 rounded-full text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all active:scale-90 outline-none shadow-xs cursor-pointer flex-shrink-0">
-                <svg x-show="!isDarkMode" class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-                <svg x-show="isDarkMode" x-cloak class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-            </button>
-
-            <button @click="showMobileServices = true"
-                    aria-label="Open service directory"
-                    class="md:hidden flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-500/20 dark:border-indigo-500/30 rounded-full text-indigo-700 dark:text-indigo-300 text-[11px] mono font-bold active:scale-95 shadow-xs flex-shrink-0 cursor-pointer">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-                <span>Services</span>
-                <span x-show="currentVersionServices.size > 0" class="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_6px_rgba(99,102,241,0.6)]"></span>
-            </button>
         </div>
     </header>
 
-    <div class="flex-1 relative overflow-hidden flex flex-col">
-        <div class="ambient-glow"></div>
-
-        <div class="absolute inset-0 z-10 pointer-events-none bg-gradient-to-b from-white dark:from-[#080b11] via-transparent to-white dark:to-[#080b11] opacity-0 group-hover:opacity-100 transition-opacity"></div>
-
-        <div id="mainScrollArea"
-             @scroll="showBackToTop = $event.target.scrollTop > 350"
-             class="flex-1 overflow-y-auto p-4 sm:p-6 md:p-12 custom-scroll bg-transparent relative z-10">
-            <div class="max-w-4xl mx-auto min-h-[calc(100vh-140px)] flex flex-col">
-
-                <div class="flex-1 pb-32">
-                <div class="sm:hidden mb-6 space-y-3">
-                    <div class="relative group/msearch">
-                        <label for="versionSearchMobile" class="sr-only">Filter changelog</label>
-                        <input type="text" id="versionSearchMobile" name="versionSearchMobile" x-model.debounce.200ms="versionSearch" placeholder="Filter this release (e.g. s3, fix, bedrock)..."
-                               class="w-full bg-slate-100/90 dark:bg-white/[0.05] border border-slate-200/90 dark:border-white/10 rounded-xl py-2.5 pl-9 pr-8 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/25 focus:border-indigo-500 transition-all text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 shadow-xs font-medium">
-                        <svg class="absolute left-3 top-3 w-3.5 h-3.5 text-slate-400 group-focus-within/msearch:text-indigo-500 transition-colors pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                        <button x-show="versionSearch" @click="versionSearch = ''" aria-label="Clear log search" class="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                        </button>
-                    </div>
-
-                    <div class="flex items-center justify-between gap-1 p-1 bg-slate-100/90 dark:bg-white/5 rounded-xl border border-slate-200/80 dark:border-white/10 shadow-xs" role="tablist" aria-label="Mobile filter types">
-                        <button @click="activeFilter = 'all'" :aria-pressed="activeFilter === 'all'" :class="activeFilter === 'all' ? 'bg-white dark:bg-white/10 text-indigo-600 dark:text-indigo-400 shadow-xs font-black' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 font-medium'" class="flex-1 py-1.5 rounded-lg text-[10px] mono uppercase transition-all flex items-center justify-center gap-1 active:scale-95 cursor-pointer">
-                            <span>All</span>
-                            <span class="text-[8px] px-1.5 py-0.2 rounded-full bg-slate-200/80 dark:bg-white/10 font-bold" x-text="versionCounts.total"></span>
-                        </button>
-                        <button @click="activeFilter = 'feature'" :aria-pressed="activeFilter === 'feature'" :class="activeFilter === 'feature' ? 'bg-white dark:bg-white/10 text-emerald-600 dark:text-emerald-400 shadow-xs font-black' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 font-medium'" class="flex-1 py-1.5 rounded-lg text-[10px] mono uppercase transition-all flex items-center justify-center gap-1 active:scale-95 cursor-pointer">
-                            <span>Feat</span>
-                            <span class="text-[8px] px-1.5 py-0.2 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold" x-text="versionCounts.features"></span>
-                        </button>
-                        <button @click="activeFilter = 'fix'" :aria-pressed="activeFilter === 'fix'" :class="activeFilter === 'fix' ? 'bg-white dark:bg-white/10 text-rose-600 dark:text-rose-400 shadow-xs font-black' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 font-medium'" class="flex-1 py-1.5 rounded-lg text-[10px] mono uppercase transition-all flex items-center justify-center gap-1 active:scale-95 cursor-pointer">
-                            <span>Fix</span>
-                            <span class="text-[8px] px-1.5 py-0.2 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 font-bold" x-text="versionCounts.fixes"></span>
-                        </button>
-                    </div>
-
-                    <div x-show="versionSearch || activeFilter !== 'all'" x-cloak class="flex items-center justify-between px-1 text-[9px] mono text-slate-500 dark:text-slate-400">
-                        <span>Showing <strong class="text-indigo-600 dark:text-indigo-400 font-bold" x-text="filteredVersionData.length"></strong> of <strong x-text="currentVersionData.length"></strong> updates</span>
-                        <button @click="versionSearch = ''; activeFilter = 'all'" class="text-indigo-600 dark:text-indigo-400 font-bold underline underline-offset-2">Reset</button>
-                    </div>
+    <section aria-label="Changelog filters" class="sticky top-12 z-20 glass-toolbar py-2 sm:py-2.5">
+        <div class="w-full max-w-6xl 2xl:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div x-show="viewMode === 'release'" class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
+                <div class="relative flex-1 group">
+                    <input type="text" id="versionSearch" name="versionSearch" x-model.debounce.150ms="versionSearch"
+                           placeholder="Filter changes in this release (e.g. s3, ami, fix)..."
+                           aria-label="Filter changes in this release"
+                           class="w-full glass-input rounded-xl py-1.5 pl-8 pr-7 text-[11px] font-medium text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none">
+                    <svg class="absolute left-2.5 top-[8px] w-3.5 h-3.5 text-slate-400 group-focus-within:text-indigo-500 transition-colors pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <button x-show="versionSearch" @click="versionSearch = ''" aria-label="Clear filter input" class="absolute right-2 top-[7px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 cursor-pointer">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
                 </div>
 
-                <div class="space-y-3">
-                    <template x-if="currentVersionData.length === 0">
-                        <div class="space-y-4 pt-2">
-                            <template x-for="i in 4">
-                                <div class="p-5 rounded-2xl border border-slate-200/60 dark:border-white/5 bg-white/40 dark:bg-white/[0.01] animate-pulse space-y-3">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-7 h-7 rounded-lg bg-slate-200 dark:bg-white/10"></div>
-                                        <div class="h-5 w-24 bg-slate-200 dark:bg-white/10 rounded-md"></div>
-                                        <div class="h-4 w-16 bg-slate-100 dark:bg-white/5 rounded-md"></div>
-                                    </div>
-                                    <div class="h-4 w-full bg-slate-100 dark:bg-white/5 rounded-md"></div>
-                                    <div class="h-4 w-3/4 bg-slate-100 dark:bg-white/5 rounded-md"></div>
-                                </div>
+                <div class="flex items-center gap-1 p-0.5 glass-segmented rounded-xl mono text-[9.5px] flex-shrink-0 self-start sm:self-auto">
+                    <button @click="activeFilter = 'all'"
+                            :class="activeFilter === 'all' ? 'bg-white dark:bg-white/10 text-indigo-600 dark:text-indigo-400 font-bold shadow-xs' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                            class="px-2.5 py-1 rounded-lg uppercase transition-all cursor-pointer">
+                        All (<span x-text="versionCounts.total"></span>)
+                    </button>
+                    <button @click="activeFilter = 'feature'"
+                            :class="activeFilter === 'feature' ? 'bg-white dark:bg-white/10 text-emerald-600 dark:text-emerald-400 font-bold shadow-xs' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                            class="px-2.5 py-1 rounded-lg uppercase transition-all cursor-pointer">
+                        Features (<span x-text="versionCounts.features"></span>)
+                    </button>
+                    <button @click="activeFilter = 'fix'"
+                            :class="activeFilter === 'fix' ? 'bg-white dark:bg-white/10 text-rose-600 dark:text-rose-400 font-bold shadow-xs' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                            class="px-2.5 py-1 rounded-lg uppercase transition-all cursor-pointer">
+                        Fixes (<span x-text="versionCounts.fixes"></span>)
+                    </button>
+                </div>
+            </div>
+
+            <div x-show="viewMode === 'service'" x-cloak class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
+                <div class="relative flex-1 group">
+                    <input type="text" 
+                           id="serviceHistorySearch" 
+                           name="serviceHistorySearch" 
+                           x-model.debounce.150ms="serviceHistorySearch" 
+                           @input="serviceHistoryLimit = 40" 
+                           :placeholder="'Search all ' + (serviceHistory.length || '') + ' ' + (activeService || '').toUpperCase() + ' updates...'"
+                           aria-label="Search service changelogs"
+                           class="w-full glass-input rounded-xl py-1.5 pl-8 pr-7 text-[11px] font-medium text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none">
+                    <svg class="absolute left-2.5 top-[8px] w-3.5 h-3.5 text-slate-400 group-focus-within:text-indigo-500 transition-colors pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <button x-show="serviceHistorySearch" @click="serviceHistorySearch = ''; serviceHistoryLimit = 40" aria-label="Clear service history search" class="absolute right-2 top-[7px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 cursor-pointer">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-2 flex-wrap">
+                    <div class="flex items-center gap-1 p-0.5 glass-segmented rounded-xl mono text-[9.5px]">
+                        <button @click="serviceHistoryFilter = 'all'; serviceHistoryLimit = 40"
+                                :class="serviceHistoryFilter === 'all' ? 'bg-white dark:bg-white/10 text-indigo-600 dark:text-indigo-400 font-bold shadow-xs' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                                class="px-2.5 py-1 rounded-lg uppercase transition-all cursor-pointer">
+                            All (<span x-text="serviceHistoryCounts.total"></span>)
+                        </button>
+                        <button @click="serviceHistoryFilter = 'feature'; serviceHistoryLimit = 40"
+                                :class="serviceHistoryFilter === 'feature' ? 'bg-white dark:bg-white/10 text-emerald-600 dark:text-emerald-400 font-bold shadow-xs' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                                class="px-2.5 py-1 rounded-lg uppercase transition-all cursor-pointer">
+                            Features (<span x-text="serviceHistoryCounts.features"></span>)
+                        </button>
+                        <button @click="serviceHistoryFilter = 'fix'; serviceHistoryLimit = 40"
+                                :class="serviceHistoryFilter === 'fix' ? 'bg-white dark:bg-white/10 text-rose-600 dark:text-rose-400 font-bold shadow-xs' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                                class="px-2.5 py-1 rounded-lg uppercase transition-all cursor-pointer">
+                            Fixes (<span x-text="serviceHistoryCounts.fixes"></span>)
+                        </button>
+                    </div>
+
+                    <template x-if="availableServiceVersionPrefixes.length > 0">
+                        <select x-model="serviceVersionFilter" @change="serviceHistoryLimit = 40"
+                                aria-label="Filter by major version"
+                                class="glass-input rounded-lg px-2 py-1 text-slate-700 dark:text-slate-300 font-medium text-[10px] focus:outline-none cursor-pointer mono">
+                            <option value="all">All Releases</option>
+                            <template x-for="pfx in availableServiceVersionPrefixes" :key="pfx">
+                                <option :value="pfx" x-text="'v' + pfx + '.x'"></option>
                             </template>
-                        </div>
+                        </select>
                     </template>
 
-                    <template x-for="(change, changeIndex) in filteredVersionData" :key="change.category + '-' + change.type + '-' + change.description">
-                        <article class="group relative p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-white dark:bg-white/[0.02] border-y border-r border-slate-200/80 dark:border-white/5 border-l-2 border-l-transparent hover:border-l-indigo-500/60 hover:border-y-indigo-500/25 hover:border-r-indigo-500/25 dark:hover:border-y-indigo-500/30 dark:hover:border-r-indigo-500/30 hover:bg-slate-50/50 dark:hover:bg-white/[0.04] shadow-xs hover:shadow-sm transition-all duration-200 animate-slide-up">
-                            <div class="flex items-start justify-between gap-2 mb-2 sm:mb-2.5">
-                                <div class="flex items-center gap-1.5 sm:gap-2.5 min-w-0 flex-wrap flex-1">
-                                    <div class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-transform shadow-xs border group-hover:scale-105"
-                                         :class="getServiceColorClass(change.category)">
-                                        <span class="font-black mono text-[8px] sm:text-[9px]" x-text="change.category.substring(0, 2).toUpperCase()"></span>
-                                    </div>
+                    <div class="flex items-center gap-2 mono text-slate-400 dark:text-slate-500 text-[10px] sm:ml-auto">
+                        <span>Showing <strong class="text-slate-900 dark:text-white font-bold" x-text="visibleServiceHistory.length"></strong> of <strong x-text="filteredServiceHistory.length"></strong></span>
+                        <button x-show="serviceHistorySearch || serviceHistoryFilter !== 'all' || serviceVersionFilter !== 'all'"
+                                x-cloak
+                                @click="serviceHistorySearch = ''; serviceHistoryFilter = 'all'; serviceVersionFilter = 'all'; serviceHistoryLimit = 40"
+                                class="text-indigo-600 dark:text-indigo-400 font-bold hover:underline cursor-pointer">
+                            Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-                                    <button @click="openService(change.category)"
-                                            @mouseenter="prefetchService(change.category)"
-                                            :aria-label="'View service history for ' + change.category"
-                                            class="group/link inline-flex items-center gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-1 bg-indigo-50/80 dark:bg-indigo-500/10 border border-indigo-500/20 dark:border-indigo-500/30 rounded-lg text-[9.5px] sm:text-[10px] mono font-black text-indigo-700 dark:text-indigo-300 hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-600 dark:hover:text-white transition-all uppercase tracking-wider outline-none active:scale-95 shadow-xs cursor-pointer max-w-[180px] sm:max-w-none truncate">
-                                        <span class="truncate" x-html="highlight(change.category, versionSearch)"></span>
-                                    </button>
+    <div class="w-full max-w-6xl 2xl:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-16 space-y-4 min-h-[calc(100vh-140px)] flex flex-col">
+        <div x-show="viewMode === 'release'" class="space-y-4 flex-1">
+            <section aria-label="Services in this release" class="soft-card rounded-2xl p-4 sm:p-5 space-y-3">
+                <div class="flex items-center justify-between gap-2 flex-wrap">
+                    <div class="flex items-center gap-2">
+                        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 mono flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                            <span>Services</span>
+                        </h2>
+                        <span class="px-2 py-0.5 rounded-full bg-slate-200/50 dark:bg-white/10 text-[9.5px] mono font-bold text-slate-600 dark:text-slate-400"
+                              x-text="currentVersionServices.size + ' services'"></span>
+                    </div>
+
+                    <template x-if="releaseServiceFilter">
+                        <div class="flex items-center gap-2 text-xs">
+                            <span class="text-slate-500 text-[11px]">Filtered to:</span>
+                            <span class="px-2.5 py-0.5 rounded-full bg-indigo-600 text-white font-bold mono uppercase text-[9.5px]" x-text="releaseServiceFilter"></span>
+                            <button @click="releaseServiceFilter = ''" class="text-slate-400 hover:text-rose-500 text-[10.5px] font-bold cursor-pointer" title="Clear service filter">✕ Clear</button>
+                            <a :href="'/services/' + (releaseServiceFilter || '').toLowerCase()" @click.prevent="openService(releaseServiceFilter)" class="text-indigo-600 dark:text-indigo-400 font-bold hover:underline text-[11px] mono ml-1 cursor-pointer">
+                                Explore all <span class="uppercase" x-text="releaseServiceFilter"></span> updates &rarr;
+                            </a>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="flex items-center gap-1.5 flex-wrap pt-0.5">
+                    <template x-for="svc in Array.from(currentVersionServices)" :key="svc">
+                        <a :href="'/services/' + (svc || '').toLowerCase()" 
+                           @click.prevent="toggleReleaseServiceFilter(svc)"
+                           @mouseenter="prefetchService(svc)"
+                           :class="releaseServiceFilter === svc ? 'bg-indigo-600 text-white font-bold shadow-xs scale-105' : getServiceColorClass(svc)"
+                           :title="releaseServiceFilter === svc ? 'Clear ' + svc + ' filter' : 'Filter changelog to ' + svc"
+                           class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] mono font-bold uppercase transition-all hover:scale-105 active:scale-95 cursor-pointer">
+                            <span x-text="svc"></span>
+                            <span x-show="releaseServiceFilter === svc" x-cloak class="text-[8px]">✕</span>
+                        </a>
+                    </template>
+                    <span x-show="currentVersionServices.size === 0" class="text-[11px] mono text-slate-400">Core SDK changes only</span>
+                </div>
+            </section>
+
+            <div class="space-y-3 pt-1">
+                <!-- Static initial render for SEO crawlers and instant boot -->
+                <div x-show="!isClientHydrated" class="space-y-3" id="ssr-changelog-stream">
+                    {initialChanges.map((change) => {
+                        const serviceSlug = change.category.toLowerCase().replace(/[\._\s]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+                        return (
+                            <article class="soft-card rounded-2xl p-4 sm:p-5">
+                                <div class="flex items-center justify-between gap-2 mb-2.5">
+                                    <div class="flex items-center gap-2">
+                                        <a href={`/services/${serviceSlug}`} 
+                                           class={`px-2.5 py-0.5 rounded-full text-[10px] mono font-bold uppercase tracking-wider ${getServiceColorClass(change.category)}`}>
+                                            {change.category}
+                                        </a>
+                                        <span class="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/[0.05] text-[9px] mono font-bold uppercase text-slate-600 dark:text-slate-400">
+                                            {change.type}
+                                        </span>
+                                    </div>
+                                </div>
+                                <p class="text-slate-700 dark:text-slate-200 leading-relaxed text-[13.5px] sm:text-[14px]" set:html={formatDescription(change.description)}></p>
+                            </article>
+                        );
+                    })}
+                </div>
+
+                <div x-show="isClientHydrated" x-cloak class="space-y-3">
+                    <template x-for="(change, changeIndex) in filteredVersionData" :key="change.category + '-' + change.type + '-' + change.description">
+                        <article class="soft-card rounded-2xl p-4 sm:p-5 group">
+                            <div class="flex items-center justify-between gap-2 mb-2.5 flex-wrap">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <a :href="'/services/' + (change.category || '').toLowerCase().trim()"
+                                       @click.prevent="openService(change.category)"
+                                       @mouseenter="prefetchService(change.category)"
+                                       :class="getServiceColorClass(change.category)"
+                                       :title="'View complete history for ' + change.category"
+                                       class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] mono font-bold uppercase tracking-wider transition-all hover:scale-105 active:scale-95 cursor-pointer">
+                                        <span x-html="highlight(change.category, versionSearch)"></span>
+                                    </a>
 
                                     <div :class="{
-                                        'text-rose-600 dark:text-rose-400 border-rose-500/20 bg-rose-500/5': change.type.toLowerCase().includes('fix'),
-                                        'text-blue-600 dark:text-blue-400 border-blue-500/20 bg-blue-500/5': change.type.toLowerCase().includes('enhan'),
-                                        'text-emerald-600 dark:text-emerald-400 border-emerald-500/20 bg-emerald-500/5': change.type.toLowerCase().includes('feature') || change.type.toLowerCase().includes('api'),
-                                        'text-slate-600 dark:text-slate-400 border-slate-500/20 bg-slate-500/5': !['fix', 'enhan', 'feature', 'api'].some(t => change.type.toLowerCase().includes(t))
-                                    }" class="flex-shrink-0 flex items-center gap-1.5 px-1.5 py-0.5 sm:px-2 rounded-md border text-[8px] mono font-bold uppercase tracking-wider shadow-xs">
-                                        <div :class="{
-                                            'bg-rose-500 shadow-[0_0_6px_rgba(244,63,94,0.4)]': change.type.toLowerCase().includes('fix'),
-                                            'bg-blue-500 shadow-[0_0_6px_rgba(59,130,246,0.4)]': change.type.toLowerCase().includes('enhan'),
-                                            'bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.4)]': change.type.toLowerCase().includes('feature') || change.type.toLowerCase().includes('api'),
+                                        'text-rose-600 dark:text-rose-400 bg-rose-500/10': change.type.toLowerCase().includes('fix'),
+                                        'text-blue-600 dark:text-blue-400 bg-blue-500/10': change.type.toLowerCase().includes('enhan'),
+                                        'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10': change.type.toLowerCase().includes('feature') || change.type.toLowerCase().includes('api'),
+                                        'text-slate-600 dark:text-slate-400 bg-slate-500/10': !['fix', 'enhan', 'feature', 'api'].some(t => change.type.toLowerCase().includes(t))
+                                    }" class="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] mono font-bold uppercase tracking-wider">
+                                        <span :class="{
+                                            'bg-rose-500': change.type.toLowerCase().includes('fix'),
+                                            'bg-blue-500': change.type.toLowerCase().includes('enhan'),
+                                            'bg-emerald-500': change.type.toLowerCase().includes('feature') || change.type.toLowerCase().includes('api'),
                                             'bg-slate-500': !['fix', 'enhan', 'feature', 'api'].some(t => change.type.toLowerCase().includes(t))
-                                        }" class="w-1.5 h-1.5 rounded-full"></div>
-                                        <span x-text="change.type.includes('api') ? 'api change' : change.type"></span>
+                                        }" class="w-1.5 h-1.5 rounded-full"></span>
+                                        <span x-text="change.type.includes('api') ? 'API Change' : change.type"></span>
                                     </div>
                                 </div>
 
                                 <button @click="copyItem(change, changeIndex)"
-                                        :title="'Copy change text'"
-                                        class="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-white/10 transition-all active:scale-90 flex items-center gap-1 flex-shrink-0 cursor-pointer"
-                                        :aria-label="'Copy change text'">
+                                        title="Copy change entry"
+                                        class="p-1 rounded-lg text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer">
                                     <svg x-show="copiedItemIndex !== changeIndex" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                                     <svg x-show="copiedItemIndex === changeIndex" x-cloak class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
-                                    <span x-show="copiedItemIndex === changeIndex" x-cloak class="text-[9px] mono text-emerald-600 dark:text-emerald-400 font-bold">Copied</span>
                                 </button>
                             </div>
 
-                            <p class="text-slate-700 dark:text-slate-200 leading-relaxed text-[12.5px] sm:text-[13px] md:text-[14px] font-normal tracking-normal group-hover:text-slate-900 dark:group-hover:text-white transition-colors break-words" x-html="formatDescription(change.description, versionSearch)"></p>
+                            <p class="text-slate-700 dark:text-slate-200 leading-relaxed text-[13.5px] sm:text-[14px] font-normal break-words" x-html="formatDescription(change.description, versionSearch)"></p>
                         </article>
                     </template>
-                </div>
 
-                <template x-if="currentVersionData.length > 0 && filteredVersionData.length === 0">
-                    <div class="flex flex-col items-center justify-center py-20 text-center animate-slide-up">
-                        <div class="w-16 h-16 bg-slate-100 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 rounded-2xl flex items-center justify-center mb-5 shadow-inner text-slate-400 dark:text-slate-500">
-                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <template x-if="currentVersionData.length > 0 && filteredVersionData.length === 0">
+                        <div class="py-12 text-center soft-card rounded-2xl p-6">
+                            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">No matching updates in release v<span x-text="selectedVersion"></span></h2>
+                            <button @click="versionSearch = ''; activeFilter = 'all'; releaseServiceFilter = ''" class="mt-3 px-3.5 py-1.5 rounded-full bg-indigo-600 text-white text-xs font-bold cursor-pointer hover:bg-indigo-700 transition-colors">
+                                Reset Filters
+                            </button>
                         </div>
-                        <h2 class="text-slate-900 dark:text-white text-lg font-black mb-1.5 uppercase italic tracking-tighter">No Matches Found</h2>
-                        <p class="text-slate-500 dark:text-slate-400 mono text-[10px] uppercase tracking-widest max-w-sm">
-                            No changes match your criteria in release <span x-text="selectedVersion" class="text-indigo-600 dark:text-indigo-400 font-bold"></span>
-                        </p>
-                        <button @click="versionSearch = ''; activeFilter = 'all'" class="mt-6 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-black rounded-full transition-all active:scale-95 shadow-lg shadow-indigo-500/20 uppercase tracking-widest">
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="viewMode === 'service'" x-cloak class="space-y-4 flex-1">
+            <div class="space-y-3 pt-1">
+                <template x-if="serviceHistoryLoading">
+                    <div class="space-y-3 animate-pulse">
+                        <template x-for="i in 5">
+                            <div class="h-24 bg-white/50 dark:bg-white/[0.02] rounded-2xl"></div>
+                        </template>
+                    </div>
+                </template>
+
+                <template x-for="(log, idx) in visibleServiceHistory" :key="log.v + log.t">
+                    <article class="soft-card rounded-2xl p-4 sm:p-5 group">
+                        <div class="flex items-center justify-between gap-2 mb-2.5 flex-wrap">
+                            <div class="flex items-center gap-2">
+                                <button @click="selectVersion(log.v, true); viewMode = 'release';"
+                                        :title="'Switch to Release ' + log.v"
+                                        class="px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-600 hover:text-white mono text-[10px] font-bold transition-all active:scale-95 cursor-pointer"
+                                        x-text="'v' + log.v">
+                                </button>
+
+                                <span :class="log.t.toLowerCase().includes('fix') ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'"
+                                      class="px-2 py-0.5 rounded-full text-[9px] mono font-bold uppercase"
+                                      x-text="log.t.toLowerCase().includes('fix') ? 'Fix' : 'Feature / API'">
+                                </span>
+
+                                <button @click="copyToClipboard((activeService || '').toUpperCase() + ': ' + log.t + ' (' + log.v + ')')"
+                                        title="Copy change entry"
+                                        class="p-1 rounded-lg text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                </button>
+                            </div>
+
+                            <time class="text-[10px] mono text-slate-400 dark:text-slate-500 font-medium" x-text="getVersionDate(log.v)"></time>
+                        </div>
+
+                        <div class="text-slate-700 dark:text-slate-200 leading-relaxed text-[13.5px] sm:text-[14px] font-normal break-words" x-html="formatDescription(log.t, serviceHistorySearch)"></div>
+                    </article>
+                </template>
+
+                <template x-if="!serviceHistoryLoading && hasMoreServiceHistory">
+                    <div class="pt-2">
+                        <button @click="loadMoreServiceHistory()"
+                                class="w-full py-3 px-4 rounded-2xl bg-white/60 dark:bg-white/[0.03] hover:bg-indigo-50 dark:hover:bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 text-xs mono font-bold uppercase tracking-wider transition-all active:scale-98 cursor-pointer flex items-center justify-center gap-2">
+                            <span>Load More Updates (+40)</span>
+                            <span class="text-[10px] opacity-75 font-normal" x-text="'(' + (filteredServiceHistory.length - visibleServiceHistory.length) + ' remaining)'"></span>
+                        </button>
+                    </div>
+                </template>
+
+                <template x-if="!serviceHistoryLoading && filteredServiceHistory.length === 0">
+                    <div class="py-16 text-center soft-card rounded-2xl p-6">
+                        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">No updates matching your criteria</h2>
+                        <p class="text-xs text-slate-400 mt-1">Try a different search term or reset the version/type filters.</p>
+                        <button @click="serviceHistorySearch = ''; serviceHistoryFilter = 'all'; serviceVersionFilter = 'all'; serviceHistoryLimit = 40" class="mt-3 px-3.5 py-1.5 rounded-full bg-indigo-600 text-white text-xs font-bold cursor-pointer hover:bg-indigo-700 transition-colors">
                             Reset Filters
                         </button>
                     </div>
                 </template>
             </div>
-
-            <footer class="mt-24 pt-16 pb-20 border-t border-slate-200/60 dark:border-white/5 relative">
-                <div class="flex flex-col lg:flex-row justify-between gap-16">
-                    <div class="flex-1 max-w-2xl">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="w-8 h-8 bg-indigo-500/10 border border-indigo-500/20 rounded-xl flex items-center justify-center shadow-sm">
-                                <img src="/favicon.svg" width="16" height="16" alt="BotoView logo" class="w-4 h-4 opacity-95" />
-                            </div>
-                            <h1 class="text-sm font-black uppercase tracking-[0.2em] text-slate-900 dark:text-white">BotoView — AWS Boto3 Changelog Explorer & Release Notes Tracker</h1>
-                        </div>
-
-                        <div class="space-y-4 text-[13px] leading-relaxed text-slate-500 dark:text-slate-400 font-medium">
-                            <p>
-                                <strong>BotoView</strong> is an interactive web application to track, filter, and explore <strong>AWS Boto3 changelogs</strong> and <strong>boto changelogs</strong>.
-                                Designed for developers looking for a fast <strong>boto3 changelog</strong> viewer and complete <strong>boto3 release notes</strong> tracker.
-                            </p>
-                            <p>
-                                Easily use <strong>boto3 changelog filter by service</strong> (such as S3, Bedrock, Lambda, DynamoDB, EC2), compare release versions, inspect breaking changes, and stay ahead of all <strong>aws boto3 version updates</strong>.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-col lg:items-end gap-8 min-w-[200px]">
-                        <div class="flex flex-col lg:items-end gap-3">
-                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Open Source</span>
-                            <a href="https://github.com/5goos/botoview" target="_blank" rel="noopener noreferrer"
-                               class="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl hover:border-indigo-500/30 hover:bg-indigo-50/60 dark:hover:bg-indigo-500/10 transition-all shadow-sm active:scale-95 group">
-                                <svg class="w-4 h-4 text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path d="M12 .587l3.668 7.431 8.332 1.21-6.001 5.85 1.416 8.297-7.415-3.897-7.415 3.897 1.416-8.297-6.001-5.85 8.332-1.21z"/>
-                                </svg>
-                                <span class="text-[11px] font-black uppercase tracking-widest text-slate-700 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">Star on GitHub</span>
-                            </a>
-                        </div>
-
-                        <div class="flex flex-col lg:items-end gap-1.5 mt-auto">
-                            <p class="text-[11px] font-black uppercase tracking-widest text-slate-400">
-                                &copy; {new Date().getFullYear()} BotoView
-                            </p>
-                            <p class="text-[10px] uppercase tracking-[0.1em] text-slate-400 font-medium">
-                                Crafted by <a href="https://www.thurimerla.com/" target="_blank" rel="noopener noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors font-bold">Naveen Thurimerla</a>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </footer>
         </div>
-    </div>
+
+        <footer class="mt-auto pt-10 pb-8 text-xs text-slate-400 dark:text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+                <img src="/favicon.svg" width="16" height="16" alt="BotoView" class="w-4 h-4 opacity-80" />
+                <span class="font-bold text-slate-700 dark:text-slate-300">BotoView</span>
+                <span>•</span>
+                <span>Real-time AWS Boto3 SDK Explorer</span>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <a href="https://github.com/5goos/botoview" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 dark:hover:text-indigo-400 font-medium">GitHub</a>
+                <span>•</span>
+                <span>Crafted by <a href="https://www.thurimerla.com/" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold underline decoration-slate-300 dark:decoration-slate-700 underline-offset-2">Naveen Thurimerla</a></span>
+            </div>
+        </footer>
     </div>
 
     <button x-show="showBackToTop"
             x-cloak
             x-transition:enter="transition ease-out duration-200"
-            x-transition:enter-start="opacity-0 translate-y-3"
+            x-transition:enter-start="opacity-0 translate-y-2"
             x-transition:enter-end="opacity-100 translate-y-0"
             x-transition:leave="transition ease-in duration-150"
             x-transition:leave-start="opacity-100 translate-y-0"
-            x-transition:leave-end="opacity-0 translate-y-3"
+            x-transition:leave-end="opacity-0 translate-y-2"
             @click="document.getElementById('mainScrollArea').scrollTo({ top: 0, behavior: 'smooth' })"
             aria-label="Scroll back to top"
-            class="sm:hidden fixed bottom-6 left-4 z-40 flex items-center gap-1.5 px-3 py-2 rounded-full bg-slate-900/90 dark:bg-indigo-600/90 text-white backdrop-blur-md shadow-lg border border-white/15 text-[10px] mono font-bold active:scale-95 cursor-pointer">
+            class="fixed bottom-6 right-6 z-40 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-900/85 dark:bg-indigo-600/85 hover:bg-slate-900 dark:hover:bg-indigo-600 text-white backdrop-blur-xl shadow-lg border border-white/20 text-[11px] mono font-bold active:scale-95 cursor-pointer transition-all">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
         <span>Top</span>
     </button>

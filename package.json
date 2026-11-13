@@ -17,7 +17,6 @@
     "@astrojs/alpinejs": "^1.0.0",
     "@astrojs/cloudflare": "^14.4.3",
     "@astrojs/partytown": "^2.1.9",
-    "@astrojs/sitemap": "^3.7.4",
     "@tailwindcss/vite": "^4.3.3",
     "alpinejs": "^3.17.5",
     "astro": "^7.4.4",
