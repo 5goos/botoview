@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.2",
+    "t": "This release updates range of maxInQueueDepth and maxConcurrency limit from 10000 to 1000."
+  },
+  {
     "v": "1.43.115",
     "t": "Documentation update release for AWS service"
   },

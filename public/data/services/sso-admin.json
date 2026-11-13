@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.2",
+    "t": "Adds support for Network Controls on IAM Identity Center instances. You can now require that access to your instance and AWS managed applications originate from VPC endpoints in your organization, and optionally narrow that perimeter to specific VPCs, IP ranges, or application exceptions."
+  },
+  {
     "v": "1.43.119",
     "t": "Added support for the RegionScope parameter on ListInstances, allowing you to list IAM Identity Center instances in the current Region or across all Regions."
   },

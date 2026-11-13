@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.2",
+    "t": "Amazon Route 53 now supports Record Set Protection, which blocks changes to protected records in a hosted zone."
+  },
+  {
     "v": "1.42.6",
     "t": "Amazon Route 53 now supports the EU (Germany) Region (eusc-de-east-1) for latency records, geoproximity records, and private DNS for Amazon VPCs in that region"
   },

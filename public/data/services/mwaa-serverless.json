@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.2",
+    "t": "Adds support for Airflow UI in MWAA Serverless"
+  },
+  {
     "v": "1.43.124",
     "t": "Adding support to Environment Variables in MWAA Serverless"
   },

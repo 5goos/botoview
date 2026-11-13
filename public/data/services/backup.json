@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.2",
+    "t": "Adding new notification types for SNS notifications"
+  },
+  {
     "v": "1.43.78",
     "t": "Updating CLI Docs for Backup Audit Manager List Job Summaries APIs."
   },

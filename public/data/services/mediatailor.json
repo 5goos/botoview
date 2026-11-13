@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.2",
+    "t": "Add post origin manifest hook, add HLS tag processor"
+  },
+  {
     "v": "1.43.111",
     "t": "Add caching settings to http functions"
   },

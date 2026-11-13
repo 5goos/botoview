@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.2",
+    "t": "Adds support for saving, retrieving, listing, and deleting CloudWatch metric data query definitions."
+  },
+  {
     "v": "1.43.116",
     "t": "Amazon CloudWatch now supports two new anomaly detector settings. AdaptationSpeed (FAST, NORMAL, SLOW) controls how fast the model adapts to baseline changes, and OutlierFilteringStrength (MINIMAL, MODERATE, STRICT) controls how aggressively outliers are filtered."
   },

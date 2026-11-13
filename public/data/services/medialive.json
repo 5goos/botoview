@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.2",
+    "t": "AWS Elemental MediaLive now adds a caption language setting for MediaPackage V2 output groups that signals a stream carries no closed captions."
+  },
+  {
     "v": "1.43.121",
     "t": "AWS Elemental MediaLive now supports SMPTE 2022-7 seamless protection switching for multicast inputs on MediaLive Anywhere. Support for MulticastSettings sources to add a redundant copy of the stream received on a second network interface."
   },

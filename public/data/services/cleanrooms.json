@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.2",
+    "t": "Adds a retry signal to protected query and protected job errors that indicates whether running the same request again might succeed, and defines error codes that identify the category of the failure."
+  },
+  {
     "v": "1.43.122",
     "t": "Adds support for the PySpark 2.0 analysis template format and for choosing the file format (CSV or Parquet) of protected job results written to Amazon S3, including in a membership's default job result configuration."
   },

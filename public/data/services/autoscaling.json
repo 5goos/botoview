@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.2",
+    "t": "Amazon EC2 Auto Scaling now supports ASGAverageCPUUtilizationHighResolution as a predefined metric type for target tracking scaling policies."
+  },
+  {
     "v": "1.43.126",
     "t": "Amazon EC2 Auto Scaling now lets you exclude managed resources from describe API responses using the new optional IncludeManagedResources parameter. Set this parameter to false to exclude managed resources from the response. By default, managed resources are included."
   },

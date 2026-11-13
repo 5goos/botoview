@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.2",
+    "t": "Add aggregationTemporality and monotonicity to GetContextGraph MetricMetadata"
+  },
+  {
     "v": "1.44.0",
     "t": "Release of GetSpaceDataAccess API - Used to get temporary credentials, limited to the requested actions, for working with data in a space."
   },
