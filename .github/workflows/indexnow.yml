@@ -1,11 +1,12 @@
 name: IndexNow SEO Submission
 
 on:
-  push:
-    branches:
-      - main
   workflow_run:
-    workflows: ["Daily Boto Changelogs Sync"]
+    workflows:
+      - "Deploy to Cloudflare"
+      - "Deploy"
+      - "Cloudflare Pages"
+      - "Daily Boto Changelogs Sync"
     types:
       - completed
   workflow_dispatch:
