@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.3",
+    "t": "Initial release of the customer-managed runtime APIs. Runtime publishers can now create, version, and manage custom runtimes, and use aliases to roll out new runtime versions to the functions that use them."
+  },
+  {
     "v": "1.43.112",
     "t": "Lambda Network Connector now supports Lambda Web Functions, letting them reach private VPC resources, and adds versioning, each connector update creates an immutable version that revisions pin to, so customers can roll out and roll back networking changes without affecting running workloads"
   },

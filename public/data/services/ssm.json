@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.3",
+    "t": "Adding Google Cloud Platform (GCP) support to SSM Cloud Connector to enable onboarding of GCP Compute Engine instances to AWS Systems Manager. Customers can now optionally create an SSM Cloud Connector without an AWS Config connector."
+  },
+  {
     "v": "1.43.126",
     "t": "AWS Systems Manager now provides two new APIs - RegisterDefaultHostManagementConfiguration and DeregisterDefaultHostManagementConfiguration - along with a new DefaultHostManagementConfiguration CloudFormation resource type."
   },

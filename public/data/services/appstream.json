@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.3",
+    "t": "Amazon WorkSpaces Agent Access now supports image builders, so AI agents can install, configure, and test applications before you create an image. New Replay Session delivers a video of screenshots, a transcript, and a report for each agent session, optionally encrypted with your own KMS key."
+  },
+  {
     "v": "1.43.119",
     "t": "Add Windows 11 to PlatformType enum"
   },

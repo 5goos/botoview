@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.3",
+    "t": "New DISABLED status for Security Hub CSPM Central Configuration."
+  },
+  {
     "v": "1.43.124",
     "t": "Release Software APIs- GetSoftwareV2, GetSoftwareStatisticsV2 and GetSoftwareResourcesV2 to list software packages with aggregated resource count, get aggregated software statistics, and find the resources that contain a specific software package."
   },

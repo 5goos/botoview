@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.3",
+    "t": "Add documentation clarification around List API behavior, and add image available waiter"
+  },
+  {
     "v": "1.44.1",
     "t": "Update list operations to support wildcard name filtering and page sizes up to 100 results via MaxResults"
   },

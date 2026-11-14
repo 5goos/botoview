@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.3",
+    "t": "Adds support for customer-managed runtimes in the CreateFunction and UpdateFunctionConfiguration APIs. Functions can now use a customer-managed runtime and receive its updates automatically, or pin to a specific runtime version using the existing runtime controls."
+  },
+  {
     "v": "1.43.123",
     "t": "Adds ConsumptionMode to SelfManagedKafkaEventSourceConfig, letting Lambda event source mappings consume self-managed Apache Kafka topics as a queue. Set ConsumptionMode to Queue when creating an event source mapping."
   },

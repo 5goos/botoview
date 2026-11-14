@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.3",
+    "t": "Adding support for dynamic client registration."
+  },
+  {
     "v": "1.44.1",
     "t": "This release adds session management operations that let user pool administrators and users list and revoke active sessions, and configure session tracking, per-user session limits, and SSO session validity per app client."
   },

@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.3",
+    "t": "Adds LastModifiedTime to DescribeCampaign and ListCampaigns responses."
+  },
+  {
     "v": "1.43.62",
     "t": "Launching feature for abandonment rate pacing control for outbound campaigns."
   },

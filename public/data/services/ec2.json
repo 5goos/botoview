@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.3",
+    "t": "Adds support for Networking Flexible Cost Allocation APIs, enabling Network Admin, Architect, and Engineers to break down shared networking costs by the resources that generated the traffic."
+  },
+  {
     "v": "1.44.2",
     "t": "This release adds support for multiple features, including EC2 Image Builder image recipes and container recipes in AMI usage reports, Amazon EC2 Detailed Monitoring adds opt-in metrics, and Global Accelerator and API Gateway V2 as resource exclusions for VPC Encryption Control."
   },

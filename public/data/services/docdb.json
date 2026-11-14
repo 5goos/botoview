@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.3",
+    "t": "Update the documentation for the --engine-version flag for cluster creation"
+  },
+  {
     "v": "1.43.123",
     "t": "Amazon DocumentDB now returns ServerlessV2PlatformVersion in DBCluster API responses and adds the DescribeServerlessV2PlatformVersions API to discover available platform versions and their capabilities."
   },

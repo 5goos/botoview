@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.3",
+    "t": "AWS CloudFormation introduces stack aliases, which let you refer to an existing stack by a new name without deleting and recreating it. Manage aliases with SetAlias and RemoveAlias, and use an alias in place of the stack name in operations such as UpdateStack."
+  },
+  {
     "v": "1.43.110",
     "t": "CloudFormation introduces force rollback, a new opt-in capability that lets your stacks complete a rollback even when an individual resource cannot be reverted. Set ForceRollback on ContinueUpdateRollback and CloudFormation records each resource that fails as skipped, completing the rollback."
   },

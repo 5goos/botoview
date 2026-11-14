@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.3",
+    "t": "Amazon VPC Lattice now supports modification of resource configuration DNS resolution on Resource Gateways"
+  },
+  {
     "v": "1.43.97",
     "t": "Adding support for CIDR Resource Configuration"
   },

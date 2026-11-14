@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.3",
+    "t": "AWS Deadline Cloud now supports the NVIDIA RTX PRO 4500 GPU accelerator (rtx-pro-4500) for service-managed fleets running Amazon EC2 G7 instances."
+  },
+  {
     "v": "1.43.119",
     "t": "fix the sdk documenation issue only"
   },
