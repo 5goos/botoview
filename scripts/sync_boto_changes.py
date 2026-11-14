@@ -173,24 +173,5 @@ class BotoSync:
 
         logger.info(f"Sync complete. Added {len(new_versions)} versions.")
 
-        # Notify IndexNow of new versions and updated endpoints
-        if new_versions:
-            try:
-                import sys
-                script_dir = str(Path(__file__).resolve().parent)
-                if script_dir not in sys.path:
-                    sys.path.append(script_dir)
-                from ping_indexnow import submit_urls
-                urls_to_ping = [
-                    "https://botoview.5goos.com/",
-                    "https://botoview.5goos.com/releases",
-                    "https://botoview.5goos.com/services"
-                ]
-                for nv in new_versions[:50]:
-                    urls_to_ping.append(f"https://botoview.5goos.com/releases/{nv['id']}")
-                submit_urls(urls_to_ping)
-            except Exception as e:
-                logger.warning(f"IndexNow notification failed: {e}")
-
 if __name__ == "__main__":
     BotoSync().run()

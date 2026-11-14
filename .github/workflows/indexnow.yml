@@ -4,10 +4,18 @@ on:
   push:
     branches:
       - main
+  workflow_run:
+    workflows: ["Daily Boto Changelogs Sync"]
+    types:
+      - completed
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   submit-indexnow:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -24,11 +32,11 @@ jobs:
           INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
         run: |
           if [ -z "$INDEXNOW_KEY" ]; then
-            echo "::error::INDEXNOW_KEY secret is not set in repository settings."
+            echo "::error::INDEXNOW_KEY secret is not configured in repository settings."
             exit 1
           fi
 
-          echo "Polling https://botoview.5goos.com/${INDEXNOW_KEY}.txt to ensure production deployment is live..."
+          echo "Polling dynamic IndexNow key endpoint to ensure production deployment is live..."
           MAX_ATTEMPTS=24
           DELAY=10
           IS_LIVE=false
@@ -48,7 +56,7 @@ jobs:
           done
 
           if [ "$IS_LIVE" = false ]; then
-            echo "::warning::Verification endpoint did not return 200 within timeout. Proceeding with IndexNow ping..."
+            echo "::warning::Verification endpoint did not return HTTP 200 within timeout. Proceeding with submission..."
           fi
 
           python3 scripts/ping_indexnow.py

@@ -30,7 +30,7 @@ const canonicalUrl = "https://botoview.5goos.com/";
              x-transition:leave="transition-opacity ease-in duration-200"
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
-             class="fixed inset-0 bg-slate-900/30 dark:bg-black/60 backdrop-blur-xs z-[90] lg:hidden" 
+             class="fixed inset-0 bg-slate-900/30 dark:bg-black/60 backdrop-blur-xs z-40 lg:hidden" 
              @click="showMobileVersions = false"></div>
 
         <div x-show="error" x-cloak x-transition.opacity class="fixed inset-0 z-[150] flex items-center justify-center p-6 bg-[#050505]/90 backdrop-blur-xl">
@@ -68,6 +68,7 @@ const canonicalUrl = "https://botoview.5goos.com/";
             sidebarTab: 'versions', // 'versions' | 'services'
             viewMode: 'release',    // 'release' | 'service'
             selectedVersion: initialLatestId || '',
+            navigatedFromVersion: null,
             versions: [],
             allServices: initialAllServices || [],
             serviceCounts: initialServiceCounts || {},
@@ -239,7 +240,7 @@ const canonicalUrl = "https://botoview.5goos.com/";
                 if (tab === 'versions' && this.viewMode === 'service') {
                     this.backToRelease();
                 } else if (tab === 'services' && this.viewMode === 'release' && this.activeService) {
-                    this.openService(this.activeService, true);
+                    this.openService(this.activeService, true, false);
                 }
             },
 
@@ -427,7 +428,7 @@ const canonicalUrl = "https://botoview.5goos.com/";
                     const sParam = params.get('s');
 
                     if (sParam && this.allServices.includes(sParam)) {
-                        await this.openService(sParam, false);
+                        await this.openService(sParam, false, vParam || null);
                     } else if (vParam && vParam !== initialLatestId && this.versions.find(v => v.id === vParam)) {
                         await this.selectVersion(vParam, false);
                     } else if (vParam === initialLatestId) {
@@ -437,14 +438,15 @@ const canonicalUrl = "https://botoview.5goos.com/";
                         await this.selectVersion(this.versions[0].id, false);
                     }
 
-                    window.addEventListener('popstate', () => {
+                    window.addEventListener('popstate', (e) => {
                         const curParams = new URLSearchParams(window.location.search);
                         const v = curParams.get('v') || (this.versions[0] ? this.versions[0].id : null);
                         const s = curParams.get('s');
                         if (s && this.allServices.includes(s)) {
-                            this.openService(s, false);
+                            this.openService(s, false, curParams.get('v') || (e.state && e.state.navigatedFromVersion) || null);
                         } else if (v) {
                             this.viewMode = 'release';
+                            this.navigatedFromVersion = null;
                             this.selectVersion(v, false);
                         }
                     });
@@ -473,11 +475,9 @@ const canonicalUrl = "https://botoview.5goos.com/";
 
             updateUrl(push = false) {
                 const params = new URLSearchParams();
-                if (this.viewMode === 'service' && this.activeService) {
-                    params.set('s', this.activeService);
-                    if (this.selectedVersion && this.versions[0] && this.selectedVersion !== this.versions[0].id) {
-                        params.set('v', this.selectedVersion);
-                    }
+                if (this.viewMode === 'service') {
+                    if (this.activeService) params.set('s', this.activeService);
+                    if (this.navigatedFromVersion) params.set('v', this.navigatedFromVersion);
                 } else {
                     if (this.selectedVersion && this.versions[0] && this.selectedVersion !== this.versions[0].id) {
                         params.set('v', this.selectedVersion);
@@ -485,21 +485,27 @@ const canonicalUrl = "https://botoview.5goos.com/";
                 }
                 const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname;
                 if (push) {
-                    window.history.pushState({ v: this.selectedVersion, s: this.activeService, viewMode: this.viewMode }, '', newUrl);
+                    window.history.pushState({ v: this.selectedVersion, s: this.activeService, navigatedFromVersion: this.navigatedFromVersion, viewMode: this.viewMode }, '', newUrl);
                 } else {
-                    window.history.replaceState({ v: this.selectedVersion, s: this.activeService, viewMode: this.viewMode }, '', newUrl);
+                    window.history.replaceState({ v: this.selectedVersion, s: this.activeService, navigatedFromVersion: this.navigatedFromVersion, viewMode: this.viewMode }, '', newUrl);
                 }
             },
 
             backToRelease() {
+                const targetVersion = this.navigatedFromVersion || this.selectedVersion || (this.versions[0] ? this.versions[0].id : '');
                 this.viewMode = 'release';
                 this.activeService = null;
+                this.navigatedFromVersion = null;
                 this.sidebarTab = 'versions';
-                this.updateUrl(true);
-                document.title = `BotoView by 5goos — Release ${this.selectedVersion} | AWS Boto3 Changelog`;
-                const mainArea = document.getElementById('mainScrollArea');
-                if (mainArea) mainArea.scrollTo({ top: 0, behavior: 'instant' });
-                this.syncIndicator(this.selectedVersion, true);
+                if (targetVersion && targetVersion !== this.selectedVersion) {
+                    this.selectVersion(targetVersion, true);
+                } else {
+                    this.updateUrl(true);
+                    document.title = `BotoView by 5goos — Release ${this.selectedVersion} | AWS Boto3 Changelog`;
+                    const mainArea = document.getElementById('mainScrollArea');
+                    if (mainArea) mainArea.scrollTo({ top: 0, behavior: 'instant' });
+                    this.syncIndicator(this.selectedVersion, true);
+                }
             },
 
             prefetchAdjacent(currentIndex) {
@@ -517,6 +523,7 @@ const canonicalUrl = "https://botoview.5goos.com/";
                 this.viewMode = 'release';
                 this.sidebarTab = 'versions';
                 this.activeService = null;
+                this.navigatedFromVersion = null;
                 this.releaseServiceFilter = '';
                 if (this.selectedVersion === id && this.currentVersionData.length > 0) {
                     this.updateUrl(push);
@@ -582,10 +589,17 @@ const canonicalUrl = "https://botoview.5goos.com/";
                 });
             },
 
-            async openService(svc, push = true) {
+            async openService(svc, push = true, fromVersion = null) {
                 this.activeService = svc;
                 this.viewMode = 'service';
                 this.sidebarTab = 'services';
+                if (typeof fromVersion === 'string') {
+                    this.navigatedFromVersion = fromVersion;
+                } else if (fromVersion === true) {
+                    this.navigatedFromVersion = this.selectedVersion || null;
+                } else if (fromVersion === false) {
+                    this.navigatedFromVersion = null;
+                }
                 this.serviceHistoryFilter = 'all';
                 this.serviceVersionFilter = 'all';
                 this.serviceHistoryLimit = 40;
