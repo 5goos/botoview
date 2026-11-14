@@ -49,14 +49,18 @@ jobs:
                 echo "Verification endpoint is live and verified on attempt $i."
                 IS_LIVE=true
                 break
+              else
+                echo "Attempt $i/$MAX_ATTEMPTS: Endpoint returned HTTP 200 but body did not match expected key. Waiting ${DELAY}s..."
               fi
+            else
+              echo "Attempt $i/$MAX_ATTEMPTS: Endpoint returned HTTP $HTTP_CODE. Waiting ${DELAY}s..."
             fi
-            echo "Attempt $i/$MAX_ATTEMPTS: Endpoint returned HTTP $HTTP_CODE. Waiting ${DELAY}s..."
             sleep $DELAY
           done
 
           if [ "$IS_LIVE" = false ]; then
-            echo "::warning::Verification endpoint did not return HTTP 200 within timeout. Proceeding with submission..."
+            echo "::error::Verification endpoint https://botoview.5goos.com/${INDEXNOW_KEY}.txt did not return HTTP 200 with the matching key within timeout. Ensure INDEXNOW_KEY is configured in Cloudflare Worker environment variables and production deployment has completed."
+            exit 1
           fi
 
           python3 scripts/ping_indexnow.py

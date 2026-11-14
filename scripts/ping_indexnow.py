@@ -52,7 +52,15 @@ def submit_urls(urls: List[str]) -> bool:
                 logger.warning(f"IndexNow returned unexpected status: {status}")
                 return False
     except urllib.error.HTTPError as e:
-        logger.error(f"IndexNow HTTP Error: {e.code} - {e.reason}")
+        error_body = ""
+        try:
+            error_body = e.read().decode("utf-8", errors="ignore").strip()
+        except Exception:
+            pass
+        if error_body:
+            logger.error(f"IndexNow HTTP Error: {e.code} - {e.reason} ({error_body})")
+        else:
+            logger.error(f"IndexNow HTTP Error: {e.code} - {e.reason}")
         return False
     except Exception as e:
         logger.error(f"Error connecting to IndexNow API: {e}")
