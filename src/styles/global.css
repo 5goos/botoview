@@ -59,6 +59,14 @@
 html {
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
+    /* Use dynamic viewport height to account for mobile browser bars */
+    height: -webkit-fill-available;
+}
+
+/* Ensure full-screen app layout respects mobile browser bars */
+.h-screen {
+    height: 100vh;
+    height: 100dvh;
 }
 
 button,
@@ -128,7 +136,10 @@ body {
     background-clip: content-box;
 }
 .dark .custom-scroll::-webkit-scrollbar-thumb { 
-    background: rgba(255, 255, 255, 0.12); 
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 9999px;
+    border: 1px solid transparent;
+    background-clip: content-box;
 }
 .custom-scroll::-webkit-scrollbar-thumb:hover { 
     background: rgba(99, 102, 241, 0.6) !important; 

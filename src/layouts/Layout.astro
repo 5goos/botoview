@@ -113,8 +113,8 @@ const structuredData = {
 		<meta charset="UTF-8" />
 		<link rel="preload" href="/data/track.json" as="fetch" crossorigin="anonymous" />
 
-		<script is:inline async src="https://www.googletagmanager.com/gtm.js?id=GTM-MVFTNMZL"></script>
-		<script is:inline>
+		<script type="text/partytown" src="https://www.googletagmanager.com/gtm.js?id=GTM-MVFTNMZL"></script>
+		<script type="text/partytown">
 		  window.dataLayer = window.dataLayer || [];
 		  function gtag(){dataLayer.push(arguments);}
 		  gtag('js', new Date());
@@ -178,6 +178,7 @@ const structuredData = {
 		<script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />
 	</head>
 	<body class={bodyClass}>
+		<a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[200] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-indigo-600 focus:text-white focus:text-sm focus:font-bold focus:shadow-lg">Skip to content</a>
 		<noscript>
 			<div style="padding: 2rem; background: #fff; color: #000; font-family: sans-serif;">
 				<h1>BotoView by 5goos — AWS Boto3 Changelog Explorer & Release Notes Tracker</h1>

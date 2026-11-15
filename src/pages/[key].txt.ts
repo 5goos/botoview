@@ -1,6 +1,8 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
+// @ts-ignore
+import { env as cfWorkerEnv } from 'cloudflare:workers';
 
 export const GET: APIRoute = async ({ params, locals }) => {
     try {

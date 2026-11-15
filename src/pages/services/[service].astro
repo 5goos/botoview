@@ -126,10 +126,10 @@ const serviceFaqSchema = {
     title={pageTitle} 
     description={pageDescription} 
     canonical={canonicalUrl}
-    bodyClass="h-screen w-full bg-main text-[var(--text-secondary)] transition-colors duration-500 overflow-hidden"
+    bodyClass="h-screen w-full text-[var(--text-secondary)] transition-colors duration-500 overflow-hidden"
     jsonLd={[breadcrumbSchema, serviceArticleSchema, serviceFaqSchema]}
 >
-    <div class="h-screen flex flex-col bg-transparent overflow-hidden" x-data="servicePage">
+    <div class="h-screen flex flex-col bg-transparent overflow-hidden" style="height: 100dvh;" x-data="servicePage">
         <header class="h-12 flex items-center justify-between px-3.5 sm:px-8 glass-header flex-shrink-0 z-40">
             <div class="flex items-center gap-2 sm:gap-3 min-w-0">
                 <a href="/" class="flex items-center gap-2 group cursor-pointer flex-shrink-0" aria-label="BotoView Home">
@@ -209,7 +209,7 @@ const serviceFaqSchema = {
                                x-model.debounce.200ms="searchQuery" 
                                @input="currentPage = 1"
                                placeholder={`Search ${serviceUpper} updates (e.g. ami, fix, v1.43)...`}
-                               class="w-full bg-white/60 dark:bg-white/[0.04] border border-black/[0.04] dark:border-white/[0.06] backdrop-blur-md rounded-xl py-1.5 pl-8 pr-7 text-[11px] focus:ring-2 focus:ring-indigo-500/25 text-slate-900 dark:text-white placeholder:text-slate-400 font-medium transition-all" />
+                               class="w-full bg-white/60 dark:bg-white/[0.04] border border-black/[0.04] dark:border-white/[0.06] backdrop-blur-md rounded-xl py-1.5 pl-8 pr-7 text-[11px] focus:outline-none focus:ring-2 focus:ring-indigo-500/25 text-slate-900 dark:text-white placeholder:text-slate-400 font-medium transition-all" />
                         <svg class="absolute left-2.5 top-[7.5px] w-3.5 h-3.5 text-slate-400 group-focus-within:text-indigo-500 transition-colors pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                         <button x-show="searchQuery" @click="searchQuery = ''; currentPage = 1" class="absolute right-2 top-[6.5px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>

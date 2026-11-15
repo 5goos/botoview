@@ -19,6 +19,7 @@ const canonicalUrl = "https://botoview.5goos.com/";
 
 <Layout title={pageTitle} description={pageDescription} canonical={canonicalUrl}>
     <div class="flex h-screen w-full overflow-hidden bg-transparent text-[var(--text-secondary)] transition-all" 
+         style="height: 100dvh;"
          x-data="botoCore" 
          @keydown.window="handleGlobalKeydown($event)">
         
@@ -111,8 +112,7 @@ const canonicalUrl = "https://botoview.5goos.com/";
                     localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
                 } catch(e) {}
                 const themeColor = this.isDarkMode ? '#07090e' : '#f8fafc';
-                const metaTheme = document.querySelector('meta[name="theme-color"]');
-                if (metaTheme) metaTheme.setAttribute('content', themeColor);
+                document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute('content', themeColor));
             },
 
             isMobile(breakpoint = 768) {
