@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.4",
+    "t": "ECR feature support for replicating image deletion and untagging."
+  },
+  {
     "v": "1.43.119",
     "t": "Add support for ECR replication backfill"
   },

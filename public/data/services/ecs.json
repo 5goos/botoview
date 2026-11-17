@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.4",
+    "t": "Amazon ECS gateway connectors now support a configurable deregistration delay (0-3600 seconds, default 300 seconds)."
+  },
+  {
     "v": "1.43.127",
     "t": "Amazon ECS Managed Instances now supports isolated and confidential tasks, which run in AWS Nitro Sandboxes. Configure them with trustedExecutionConfiguration in task definitions and nitroEnclavesEnabled in capacity providers."
   },

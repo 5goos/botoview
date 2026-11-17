@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.4",
+    "t": "Updated CreateDeviceProfile to accept MaxEirp values up to 36 dBm in LoRaWANDeviceProfile. Previously the maximum value was 15."
+  },
+  {
     "v": "1.43.115",
     "t": "Documentation update release for AWS service"
   },

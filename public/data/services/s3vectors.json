@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.4",
+    "t": "Amazon S3 Vectors now supports hybrid search, providing metadata text search along with vector search."
+  },
+  {
     "v": "1.43.106",
     "t": "Amazon S3 Vectors now supports metadata prefiltering, providing higher recall on filtered queries."
   },

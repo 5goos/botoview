@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.4",
+    "t": "Context Sharing with Firewalls"
+  },
+  {
     "v": "1.43.118",
     "t": "AWS Cloud WAN now provides managed one-to-one NAT directly on it's core network attachments, through integration with Regional Private NAT Gateway. Use UpdateAttachmentNatConfiguration to enable NAT and configure NAT rules, and ListAttachmentNatConfigurations to view them."
   },

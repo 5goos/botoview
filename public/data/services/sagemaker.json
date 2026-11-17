@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.4",
+    "t": "Amazon SageMaker adds Synthetic Data Generation, Auto-labeling, Data Quality Evaluation, and Data Transformation capabilities, Cross-Region Inference Routing, KV Aware routing for realtime inference endpoints."
+  },
+  {
     "v": "1.44.3",
     "t": "New feature for Sagemaker Hyperpod Slurm clusters to install Extensions and view cluster operations."
   },

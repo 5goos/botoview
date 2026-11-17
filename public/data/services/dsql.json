@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.4",
+    "t": "Added support for Amazon Aurora DSQL advanced monitoring metric groups, which publish detailed database metrics and logs to Amazon CloudWatch Database Insights. Adds the metricGroups parameter to CreateCluster, UpdateCluster, and GetCluster."
+  },
+  {
     "v": "1.43.79",
     "t": "Corrected the validation pattern on the ServiceName response field in the GetVpcEndpointServiceName API to match the values Amazon Aurora DSQL actually returns."
   },

@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.4",
+    "t": "This release adds Performance Monitors to Amazon CloudWatch Network Monitoring. Without installing an agent, they track traffic in the VPCs you select and report an impact score (None, Low, Medium, or High) showing whether the AWS network is degrading your workloads."
+  },
+  {
     "v": "1.41.0",
     "t": "Added new enum value (AWS::EKS::Cluster) for type field under MonitorLocalResource"
   },

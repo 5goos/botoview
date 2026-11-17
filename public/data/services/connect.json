@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.4",
+    "t": "Adds the DeleteAllEntitySessions API, which signs a user out of all of their active sessions in an Amazon Connect instance."
+  },
+  {
     "v": "1.44.2",
     "t": "This release adds a LastModifiedTime and LastModifiedRegion field to ListIntegrationAssociations so customers can see at what time and in which Region an IntegrationAssociation was last modified in."
   },

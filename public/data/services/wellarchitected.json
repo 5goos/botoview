@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.4",
+    "t": "This release adds AWS Organizations integration, on-demand reports, recommendation and profile sharing, and automated basic profiles to the Well-Architected Agent."
+  },
+  {
     "v": "1.43.103",
     "t": "This change releases the Well-Architected Agent, a generative AI service that analyzes a customer's AWS environment and delivers personalized, prioritized recommendations across cost, security, performance, and resilience."
   },

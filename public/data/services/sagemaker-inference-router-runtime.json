@@ -1,0 +1,6 @@
+[
+  {
+    "v": "1.44.4",
+    "t": "Amazon SageMaker adds cross-region inference routing with new runtime APIs that intelligently route inference requests across endpoints in multiple AWS regions."
+  }
+]

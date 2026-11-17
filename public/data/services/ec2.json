@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.4",
+    "t": "Adds a new Transit Gateway Attachment type called Network Function. Launches associated KMS Keys for EBS Snapshots - associated KMS keys enable customers to share and copy snapshots encrypted with AWS Managed Keys across AWS accounts."
+  },
+  {
     "v": "1.44.3",
     "t": "Adds support for Networking Flexible Cost Allocation APIs, enabling Network Admin, Architect, and Engineers to break down shared networking costs by the resources that generated the traffic."
   },

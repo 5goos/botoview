@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.4",
+    "t": "Lambda network connectors now support service-managed Elastic IP addresses. This enables traffic routed through a connector to reach the public internet without a NAT gateway."
+  },
+  {
     "v": "1.44.3",
     "t": "Initial release of the customer-managed runtime APIs. Runtime publishers can now create, version, and manage custom runtimes, and use aliases to roll out new runtime versions to the functions that use them."
   },

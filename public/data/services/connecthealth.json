@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.4",
+    "t": "Adds dataset APIs and async medical coding jobs that can use a customer dataset (preview). Ambient listening sessions add medical coding job details and real-time periodontal chart and checklist events (preview). SubmitFeedback compares human-approved and AI-generated artifacts (preview)."
+  },
+  {
     "v": "1.43.101",
     "t": "Multi language support with code switching, custom template sectionHeader now allows underscores."
   },

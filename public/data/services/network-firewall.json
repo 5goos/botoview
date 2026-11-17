@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.4",
+    "t": "Adds support for context-aware stateful rule groups, letting rules reference AWS resource IDs through ContextSets sourced from a Network Manager context store."
+  },
+  {
     "v": "1.44.3",
     "t": "Releasing Firewall Proxy API and deprecating Egress Proxy API."
   },
