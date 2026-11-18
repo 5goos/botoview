@@ -7,6 +7,7 @@ interface Props {
     allServices?: string[];
 }
 const { initialChanges = [], latestVersion = { id: '', date: '' }, allServices = [] } = Astro.props;
+const initialServices = Array.from(new Set(initialChanges.map((c: any) => c.category))).filter(Boolean);
 ---
 
 <main id="mainScrollArea"
@@ -25,10 +26,15 @@ const { initialChanges = [], latestVersion = { id: '', date: '' }, allServices =
                 </button>
 
                 <div x-show="viewMode === 'release'" class="flex items-center gap-2 min-w-0 flex-1 truncate">
-                    <span class="text-xs sm:text-sm md:text-base font-bold mono text-slate-800 dark:text-slate-200 truncate min-w-0 tracking-tight" x-text="'v' + (selectedVersion || '...')"></span>
+                    <span class="text-xs sm:text-sm md:text-base font-bold mono text-slate-800 dark:text-slate-200 truncate min-w-0 tracking-tight" x-text="'v' + (selectedVersion || '...')">{latestVersion.id ? `v${latestVersion.id}` : ''}</span>
                     <template x-if="selectedDate">
                         <span class="text-xs mono text-slate-400 dark:text-slate-500 hidden md:inline shrink-0" x-text="'(' + formatDate(selectedDate) + ' • ' + getRelativeDate(selectedDate) + ')'"></span>
                     </template>
+                    {latestVersion.date && (
+                        <span x-show="!isClientHydrated" class="text-xs mono text-slate-400 dark:text-slate-500 hidden md:inline shrink-0">
+                            ({formatDate(latestVersion.date)})
+                        </span>
+                    )}
                     <div class="hidden sm:flex items-center gap-0.5 shrink-0 ml-1">
                         <button @click="adjacentVersions.newer && selectVersion(adjacentVersions.newer, true)"
                                 :disabled="!adjacentVersions.newer"
@@ -187,6 +193,44 @@ const { initialChanges = [], latestVersion = { id: '', date: '' }, allServices =
 
     <div class="w-full max-w-6xl 2xl:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-20 sm:pb-16 space-y-4 min-h-[calc(100vh-140px)] flex flex-col min-w-0">
         <div x-show="viewMode === 'release'" class="space-y-4 flex-1 w-full max-w-full min-w-0" role="region" aria-label="Release changelog" aria-live="polite" aria-atomic="false">
+            <header class="soft-card rounded-2xl p-4 sm:p-5 space-y-2">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 text-[10px] mono font-bold uppercase tracking-wider">
+                                AWS SDK Tracker
+                            </span>
+                            <span class="text-slate-400 text-xs">•</span>
+                            <span class="text-xs mono text-slate-500 dark:text-slate-400">
+                                570+ AWS Services Indexed
+                            </span>
+                            {latestVersion.id && (
+                                <>
+                                    <span class="text-slate-400 text-xs">•</span>
+                                    <span class="text-xs mono text-slate-500 dark:text-slate-400">
+                                        Latest: <strong class="text-slate-700 dark:text-slate-200">v{latestVersion.id}</strong>
+                                    </span>
+                                </>
+                            )}
+                        </div>
+                        <h1 class="text-base sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight">
+                            BotoView — AWS Boto3 Changelog Explorer &amp; Release Notes Tracker
+                        </h1>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 max-w-3xl leading-relaxed">
+                            Filter and explore AWS Boto3 and Botocore changelogs in real time. Track service updates across S3, Bedrock, Lambda, DynamoDB, and EC2 with instant release history and SDK version diffs.
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-2 self-start sm:self-auto shrink-0">
+                        <a href="/services" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-white/[0.05] dark:hover:bg-white/10 text-[11px] mono font-bold text-slate-700 dark:text-slate-200 transition-colors">
+                            Services &rarr;
+                        </a>
+                        <a href="/releases" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-white/[0.05] dark:hover:bg-white/10 text-[11px] mono font-bold text-slate-700 dark:text-slate-200 transition-colors">
+                            Releases &rarr;
+                        </a>
+                    </div>
+                </div>
+            </header>
+
             <section aria-label="Services in this release" class="soft-card rounded-2xl p-4 sm:p-5 space-y-3 w-full max-w-full min-w-0 overflow-hidden">
                 <div class="flex items-center justify-between gap-2 flex-wrap w-full max-w-full min-w-0">
                     <div class="flex items-center justify-between sm:justify-start gap-2 w-full sm:w-auto max-w-full min-w-0 flex-wrap">
@@ -195,7 +239,7 @@ const { initialChanges = [], latestVersion = { id: '', date: '' }, allServices =
                             <span>Services</span>
                         </h2>
                         <span class="px-2 py-0.5 rounded-full bg-slate-200/50 dark:bg-white/10 text-[9.5px] mono font-bold text-slate-600 dark:text-slate-400 shrink-0 whitespace-nowrap"
-                              x-text="currentVersionServices.size + ' services'"></span>
+                              x-text="currentVersionServices.size + ' services'">{initialServices.length > 0 ? `${initialServices.length} services` : ''}</span>
                     </div>
 
                     <template x-if="releaseServiceFilter">
@@ -211,6 +255,14 @@ const { initialChanges = [], latestVersion = { id: '', date: '' }, allServices =
                 </div>
 
                 <div class="flex items-center gap-1.5 flex-wrap pt-0.5 w-full max-w-full min-w-0">
+                    <div x-show="!isClientHydrated" class="contents">
+                        {initialServices.map((svc) => (
+                            <a href={`/services/${svc.toLowerCase()}`}
+                               class={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] mono font-bold uppercase transition-all ${getServiceColorClass(svc)}`}>
+                                <span>{svc}</span>
+                            </a>
+                        ))}
+                    </div>
                     <template x-for="svc in Array.from(currentVersionServices)" :key="svc">
                         <a :href="'/services/' + (svc || '').toLowerCase()" 
                            @click.prevent="openService(svc, true, true)"

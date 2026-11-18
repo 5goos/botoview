@@ -5,7 +5,6 @@ import tailwindcss from '@tailwindcss/vite';
 
 import cloudflare from '@astrojs/cloudflare';
 import alpinejs from '@astrojs/alpinejs';
-import partytown from '@astrojs/partytown';
 
 export default defineConfig({
   site: 'https://botoview.5goos.com',
@@ -18,9 +17,6 @@ export default defineConfig({
 
   adapter: cloudflare(),
   integrations: [
-    alpinejs(),
-    partytown({
-      config: { forward: ['dataLayer.push'] }
-    })
+    alpinejs()
   ]
 });
