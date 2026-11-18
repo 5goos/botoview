@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.5",
+    "t": "Enables creation of a serverless Valkey cache that supports write-through caching for DynamoDB table data."
+  },
+  {
     "v": "1.43.116",
     "t": "LiveMigration enables customers to migrate from self-hosted EC2 Redis and Valkey clusters to ElastiCache Serverless with near-zero downtime. Customers control the migration through three API-driven phases (prepare, start, complete) that handle traffic proxying, data replication, and cutover."
   },

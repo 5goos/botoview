@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.5",
+    "t": "This release extends vulnerability management to Google Cloud Platform (GCP) Compute Engine virtual machine (VM) instances, container images in Google Artifact Registry (GAR), and Cloud Run functions."
+  },
+  {
     "v": "1.43.120",
     "t": "Adding support for Machine Image scan"
   },

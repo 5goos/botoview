@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.5",
+    "t": "AWS Control Tower now reports source drift when an enabled baseline no longer matches the landing zone's configuration."
+  },
+  {
     "v": "1.43.115",
     "t": "Documentation update release for AWS service"
   },

@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.5",
+    "t": "For the S3 operations AbortMultipartUpload, CreateMultipartUpload, ListParts, UploadPart, UploadPartCopy, the Object Version ID is returned as a response header, if the bucket has versioning enabled. For ListMultipartUploads, it will be returned in the response body."
+  },
+  {
     "v": "1.43.122",
     "t": "Prevent generate_presigned_post from mutating the caller's Conditions list."
   },

@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.5",
+    "t": "Add SessionMetadata to PutRumEvents for attributes that apply to every event in a batch, such as browser, device, and operating system."
+  },
+  {
     "v": "1.41.0",
     "t": "CloudWatch RUM now supports mobile application monitoring for Android and iOS platforms"
   },

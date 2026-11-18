@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.5",
+    "t": "Amazon Connect Customer now allows conversational analytics for voice contacts to be analyzed in more than one language. The languages detected will be present in the output."
+  },
+  {
     "v": "1.43.124",
     "t": "Rules TBAC GA (Contact Lens V1) - Adds an optional ListFilter (CategoriesAttributeFilter with OrConditions, AndCondition and TagCondition) to ListRealtimeContactAnalysisSegments. This filters matched categories by rule tags. It also adds an optional RuleId to CategoryDetails in the response."
   },

@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.5",
+    "t": "Adds the SplitCredit and TransferCredit APIs to split or transfer credits, and adds benefit level sharing for Reserved Instances and Savings Plans to GetBillingPreferences and UpdateBillingPreferences."
+  },
+  {
     "v": "1.43.119",
     "t": "Adds support for managing private pricing contracts and contractual investments including listing and associating contracts, retrieving contractual investments and their summaries, and creating, listing, and canceling contractual investment attestations"
   },

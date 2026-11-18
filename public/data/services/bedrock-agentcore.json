@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.5",
+    "t": "Adds support for continuous insights and automatic dataset generation"
+  },
+  {
     "v": "1.44.1",
     "t": "Support SigV4 request signing (cryptographically signed) in the Bedrock AgentCore Harness MCP connector tool."
   },

@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.5",
+    "t": "Adds support for S3 Intelligent Tiering Access Tier and publishing to AWS Billing and Cost Management in S3 Storage Lens"
+  },
+  {
     "v": "1.43.127",
     "t": "Adds support for cross-account access grants with InstanceScope parameter for GetDataAccess and ListCallerAccessGrants operations in S3 Access Grants."
   },

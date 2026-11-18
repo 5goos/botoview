@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.5",
+    "t": "This release adds Microsoft Azure connectors, third-party telemetry enrichment and StartTelemetryPipelineRefresh, to discover Azure resources, enrich their telemetry and refresh external-cloud pipelines."
+  },
+  {
     "v": "1.43.115",
     "t": "Adding support for EKS Container Insights Telemetry Rules"
   },

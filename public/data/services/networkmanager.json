@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.5",
+    "t": "Adds support for Multipath Resilience change values to be delivered when reviewing a core network change set."
+  },
+  {
     "v": "1.44.4",
     "t": "Context Sharing with Firewalls"
   },

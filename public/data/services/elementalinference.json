@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.5",
+    "t": "AWS Elemental Inference now supports functions, for running your own analysis on feed media, and question sets, for custom decisions on contextual metadata shots and scenes."
+  },
+  {
     "v": "1.43.118",
     "t": "Elemental Inference now supports feed scheduling, letting you apply feed configuration changes at a time you choose instead of building your own automation."
   },

@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.5",
+    "t": "AWS Transform adds Express Migration for MAP, remote source actions, per-server default launch settings, F5 BIG-IP to Elastic Load Balancing migration, AWS Outposts support, greenfield network design, and replication of volumes up to 64 TB."
+  },
+  {
     "v": "1.43.124",
     "t": "This release adds Migration Planning artifacts as a source environment for network migration definitions, and an optional clientToken on CreateNetworkMigrationDefinition so that retried requests don't create duplicate definitions."
   },

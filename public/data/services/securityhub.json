@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.5",
+    "t": "Security Hub now supports Google Cloud. Use connector APIs to connect GCP organizations or projects and monitor their security posture. It also infers resource criticality from tags, CloudWatch metrics, and SBOM data to help you prioritize findings"
+  },
+  {
     "v": "1.44.3",
     "t": "New DISABLED status for Security Hub CSPM Central Configuration."
   },
