@@ -5,7 +5,7 @@ const topServices = (trackData?.allServices || []).slice(0, 30);
 ---
 <aside :class="{ 'translate-x-0': showMobileVersions, '-translate-x-full': !showMobileVersions }"
        :inert="!showMobileVersions && window.innerWidth < 1024 ? '' : null"
-       class="fixed lg:relative inset-y-0 left-0 -translate-x-full lg:translate-x-0 w-72 sm:w-80 lg:w-64 xl:w-72 max-w-[85vw] flex-shrink-0 flex flex-col bg-white dark:bg-[#07090e] lg:bg-transparent dark:lg:bg-transparent shadow-2xl shadow-slate-900/10 dark:shadow-black/60 lg:shadow-none z-50 lg:z-20 transition-transform duration-300 ease-in-out select-none"
+       class="fixed lg:relative inset-y-0 left-0 -translate-x-full lg:translate-x-0 w-72 sm:w-80 lg:w-72 xl:w-80 max-w-[85vw] flex-shrink-0 flex flex-col bg-white dark:bg-[#07090e] lg:bg-transparent dark:lg:bg-transparent shadow-2xl shadow-slate-900/10 dark:shadow-black/60 lg:shadow-none z-50 lg:z-20 transition-transform duration-300 ease-in-out select-none"
        aria-label="Navigation Sidebar">
 
     <div class="h-12 flex items-center justify-between px-4 flex-shrink-0 border-b border-slate-100 dark:border-white/5 lg:border-b-0">
@@ -30,19 +30,19 @@ const topServices = (trackData?.allServices || []).slice(0, 30);
                     :class="sidebarTab === 'versions' 
                         ? 'bg-white dark:bg-white/10 text-indigo-600 dark:text-indigo-400 font-semibold shadow-xs' 
                         : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium'"
-                    class="flex-1 inline-flex items-center justify-center gap-1.5 max-w-full overflow-hidden py-1.5 px-2 rounded-lg text-[11px] transition-all cursor-pointer active:scale-98 min-w-0">
+                    class="flex-1 inline-flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-[11px] transition-all cursor-pointer active:scale-98">
                 <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
-                <span class="truncate">Releases</span>
-                <span class="shrink-0 px-1.5 py-0.5 text-xs leading-none rounded-full bg-slate-200/50 dark:bg-white/10 font-semibold mono" x-text="versions.length ? (versions.length > 999 ? (versions.length/1000).toFixed(1) + 'k' : versions.length) : '...'"></span>
+                <span class="whitespace-nowrap">Releases</span>
+                <span class="shrink-0 px-1.5 py-0.5 text-[9.5px] leading-none rounded-full bg-slate-200/60 dark:bg-white/10 font-bold mono" x-text="versions.length ? (versions.length > 999 ? (versions.length/1000).toFixed(1) + 'k' : versions.length) : '...'"></span>
             </button>
             <button @click="switchSidebarTab('services')"
                     :class="sidebarTab === 'services' 
                         ? 'bg-white dark:bg-white/10 text-indigo-600 dark:text-indigo-400 font-semibold shadow-xs' 
                         : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium'"
-                    class="flex-1 inline-flex items-center justify-center gap-1.5 max-w-full overflow-hidden py-1.5 px-2 rounded-lg text-[11px] transition-all cursor-pointer active:scale-98 min-w-0">
+                    class="flex-1 inline-flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-[11px] transition-all cursor-pointer active:scale-98">
                 <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                <span class="truncate">Services</span>
-                <span class="shrink-0 px-1.5 py-0.5 text-xs leading-none rounded-full bg-slate-200/50 dark:bg-white/10 font-semibold mono" x-text="allServices.length || '573'"></span>
+                <span class="whitespace-nowrap">Services</span>
+                <span class="shrink-0 px-1.5 py-0.5 text-[9.5px] leading-none rounded-full bg-slate-200/60 dark:bg-white/10 font-bold mono" x-text="allServices.length || '573'"></span>
             </button>
         </nav>
     </div>

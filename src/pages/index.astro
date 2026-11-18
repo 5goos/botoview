@@ -12,8 +12,8 @@ const versionModules = import.meta.glob<Array<{ category: string; description: s
 
 const latestKey = `../../public/data/versions/${latestVersion.id}.json`;
 const initialChanges = versionModules[latestKey] || [];
-const pageTitle = "BotoView — AWS Boto3 Changelog Explorer & Release Tracker";
-const pageDescription = "Explore and filter AWS Boto3 changelogs by service (S3, Bedrock, Lambda, EC2). Track SDK version updates, API changes, and release notes in real time.";
+const pageTitle = "BotoView by 5goos — AWS Boto3 Changelog Explorer & Release Notes Tracker";
+const pageDescription = "Track, search, and filter AWS Boto3 changelogs and release notes by service (S3, Bedrock, Lambda, DynamoDB, EC2). Explore Boto3 version updates, breaking changes, and SDK history in real time.";
 const canonicalUrl = "https://botoview.5goos.com/";
 ---
 
@@ -66,8 +66,8 @@ const canonicalUrl = "https://botoview.5goos.com/";
 <script define:vars={{ initialLatestId: latestVersion.id, initialChangesJson: initialChanges, initialServiceCounts: trackData?.serviceCounts || {}, initialAllServices: trackData?.allServices || [] }}>
     document.addEventListener('alpine:init', () => {
         Alpine.data('botoCore', () => ({
-            sidebarTab: 'versions', // 'versions' | 'services'
-            viewMode: 'release',    // 'release' | 'service'
+            sidebarTab: 'versions',
+            viewMode: 'release',
             selectedVersion: initialLatestId || '',
             navigatedFromVersion: null,
             versions: [],

@@ -17,17 +17,13 @@ const { initialChanges = [], latestVersion = { id: '', date: '' }, allServices =
 
     <header class="sticky top-0 z-30 h-12 glass-header backdrop-blur-md flex items-center">
         <div class="w-full max-w-6xl 2xl:max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-full flex items-center justify-between gap-2">
-            <!-- Left cluster (flex items-center gap-2 min-w-0 flex-1): Hamburger/drawer button (shrink-0) + dynamic title/breadcrumb (min-w-0 truncate) -->
             <div class="flex items-center gap-2 min-w-0 flex-1">
-                <!-- Hamburger/drawer button (shrink-0) -->
                 <button @click="showMobileVersions = true"
                         aria-label="Toggle navigation drawer"
                         class="lg:hidden flex items-center justify-center p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-200/50 dark:hover:bg-white/10 transition-colors active:scale-95 shrink-0 cursor-pointer">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
                 </button>
 
-                <!-- Dynamic Title & Breadcrumb Container (flex-1 min-w-0 truncate) -->
-                <!-- State A: User selects a Version (e.g., 1.35.92) -->
                 <div x-show="viewMode === 'release'" class="flex items-center gap-2 min-w-0 flex-1 truncate">
                     <span class="text-xs sm:text-sm md:text-base font-bold mono text-slate-800 dark:text-slate-200 truncate min-w-0 tracking-tight" x-text="'v' + (selectedVersion || '...')"></span>
                     <template x-if="selectedDate">
@@ -51,14 +47,12 @@ const { initialChanges = [], latestVersion = { id: '', date: '' }, allServices =
                     </div>
                 </div>
 
-                <!-- State B: User selects a Service directly (e.g., s3 or bedrock) -->
                 <div x-show="viewMode === 'service' && !navigatedFromVersion" x-cloak class="flex items-center gap-1.5 min-w-0 flex-1 truncate">
                     <span class="text-xs sm:text-sm md:text-base font-bold mono uppercase text-slate-900 dark:text-white truncate min-w-0 tracking-tight" x-text="activeService"></span>
                     <span class="hidden md:inline-block px-1.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[9px] mono font-semibold shrink-0"
                           x-text="serviceHistory.length + ' updates'"></span>
                 </div>
 
-                <!-- State C: User navigates to a Service from a specific Version -->
                 <div x-show="viewMode === 'service' && navigatedFromVersion" x-cloak class="flex items-center gap-1.5 min-w-0 flex-1 truncate">
                     <button @click="backToRelease()"
                             :title="'Back to Release v' + navigatedFromVersion + ' (Esc)'"
@@ -73,7 +67,6 @@ const { initialChanges = [], latestVersion = { id: '', date: '' }, allServices =
                 </div>
             </div>
 
-            <!-- Right cluster (flex items-center gap-1.5 shrink-0): Theme toggle + GitHub icon -->
             <div class="flex items-center gap-1.5 shrink-0">
                 <div class="hidden md:flex items-center gap-2.5 text-[10px] mono text-slate-400 dark:text-slate-500 pr-1 select-none">
                     <span><kbd class="kbd-badge">/</kbd> filter</span>
@@ -220,13 +213,12 @@ const { initialChanges = [], latestVersion = { id: '', date: '' }, allServices =
                 <div class="flex items-center gap-1.5 flex-wrap pt-0.5 w-full max-w-full min-w-0">
                     <template x-for="svc in Array.from(currentVersionServices)" :key="svc">
                         <a :href="'/services/' + (svc || '').toLowerCase()" 
-                           @click.prevent="toggleReleaseServiceFilter(svc)"
+                           @click.prevent="openService(svc, true, true)"
                            @mouseenter="prefetchService(svc)"
-                           :class="releaseServiceFilter === svc ? 'bg-indigo-600 text-white font-bold shadow-xs scale-105' : getServiceColorClass(svc)"
-                           :title="releaseServiceFilter === svc ? 'Clear ' + svc + ' filter' : 'Filter changelog to ' + svc"
+                           :class="getServiceColorClass(svc)"
+                           :title="'View complete ' + svc.toUpperCase() + ' history'"
                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] mono font-bold uppercase transition-all hover:scale-105 active:scale-95 cursor-pointer max-w-full">
                             <span class="truncate max-w-[200px] sm:max-w-none" x-text="svc"></span>
-                            <span x-show="releaseServiceFilter === svc" x-cloak class="text-[8px] shrink-0">✕</span>
                         </a>
                     </template>
                     <span x-show="currentVersionServices.size === 0" class="text-[11px] mono text-slate-400">Core SDK changes only</span>
@@ -234,7 +226,6 @@ const { initialChanges = [], latestVersion = { id: '', date: '' }, allServices =
             </section>
 
             <div class="space-y-3 pt-1">
-                <!-- Static initial render for SEO crawlers and instant boot -->
                 <div x-show="!isClientHydrated" class="space-y-3" id="ssr-changelog-stream">
                     {initialChanges.map((change) => {
                         const serviceSlug = change.category.toLowerCase().replace(/[\._\s]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
@@ -377,10 +368,14 @@ const { initialChanges = [], latestVersion = { id: '', date: '' }, allServices =
                 <img src="/favicon.svg" width="16" height="16" alt="BotoView" class="w-4 h-4 opacity-80" />
                 <span class="font-bold text-slate-700 dark:text-slate-300">BotoView</span>
                 <span>•</span>
-                <span>Real-time AWS Boto3 SDK Explorer</span>
+                <span>by <a href="https://5goos.com/" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold underline decoration-slate-300 dark:decoration-slate-700 underline-offset-2">5goos</a></span>
             </div>
 
             <div class="flex items-center gap-3">
+                <a href="/services" class="hover:text-indigo-600 dark:hover:text-indigo-400 font-medium">Services</a>
+                <span>•</span>
+                <a href="/releases" class="hover:text-indigo-600 dark:hover:text-indigo-400 font-medium">Releases</a>
+                <span>•</span>
                 <a href="https://github.com/5goos/botoview" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 dark:hover:text-indigo-400 font-medium">GitHub</a>
                 <span>•</span>
                 <span>Crafted by <a href="https://www.thurimerla.com/" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold underline decoration-slate-300 dark:decoration-slate-700 underline-offset-2">Naveen Thurimerla</a></span>

@@ -8,6 +8,7 @@ interface Props {
 	canonical?: string;
 	ogType?: string;
 	bodyClass?: string;
+	robots?: string;
 	jsonLd?: Record<string, any> | Array<Record<string, any>>;
 }
 const {
@@ -16,11 +17,15 @@ const {
 	keywords = "botoview, 5goos, botoview 5goos, 5goos botoview, boto changelogs, boto3 changelog, boto3 release notes, boto3 changelog filter by service, aws boto3 version updates, botocore changelog, boto3 updates, aws sdk tracker, python aws development, aws changelog",
 	canonical,
 	ogType = "website",
-	bodyClass = "h-screen w-full overflow-hidden transition-colors duration-500",
+	bodyClass = "min-h-screen w-full transition-colors duration-500",
+	robots = "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1",
 	jsonLd,
 } = Astro.props;
 
 const canonicalUrl = canonical || new URL(Astro.url.pathname, Astro.site || 'https://botoview.5goos.com').href;
+
+const userGraph = Array.isArray(jsonLd) ? jsonLd : (jsonLd ? [jsonLd] : []);
+const hasCustomFaq = userGraph.some((node: any) => node?.["@type"] === "FAQPage");
 
 const defaultGraph = [
 	{
@@ -29,23 +34,25 @@ const defaultGraph = [
 		"url": "https://botoview.5goos.com/",
 		"name": "BotoView",
 		"alternateName": ["BotoView by 5goos", "5goos BotoView", "BotoView App"],
-		"publisher": { "@id": "https://botoview.5goos.com/#organization" },
+		"publisher": { "@id": "https://5goos.com/#organization" },
 		"description": description,
 		"potentialAction": {
 			"@type": "SearchAction",
-			"target": {
-				"@type": "EntryPoint",
-				"urlTemplate": "https://botoview.5goos.com/?s={search_term_string}"
-			},
+			"target": "https://botoview.5goos.com/?s={search_term_string}",
 			"query-input": "required name=search_term_string"
 		}
 	},
 	{
 		"@type": "Organization",
-		"@id": "https://botoview.5goos.com/#organization",
+		"@id": "https://5goos.com/#organization",
 		"name": "5goos",
-		"url": "https://botoview.5goos.com/",
-		"logo": "https://botoview.5goos.com/favicon.png",
+		"url": "https://5goos.com/",
+		"logo": {
+			"@type": "ImageObject",
+			"url": "https://botoview.5goos.com/favicon.png",
+			"width": 512,
+			"height": 512
+		},
 		"sameAs": [
 			"https://github.com/5goos",
 			"https://github.com/5goos/botoview"
@@ -59,8 +66,8 @@ const defaultGraph = [
 		"applicationCategory": "DeveloperApplication",
 		"operatingSystem": "Web",
 		"url": "https://botoview.5goos.com/",
-		"author": { "@id": "https://botoview.5goos.com/#organization" },
-		"creator": { "@id": "https://botoview.5goos.com/#organization" },
+		"author": { "@id": "https://5goos.com/#organization" },
+		"creator": { "@id": "https://5goos.com/#organization" },
 		"description": description,
 		"offers": {
 			"@type": "Offer",
@@ -68,7 +75,7 @@ const defaultGraph = [
 			"priceCurrency": "USD"
 		}
 	},
-	{
+	...(!hasCustomFaq && Astro.url.pathname === '/' ? [{
 		"@type": "FAQPage",
 		"mainEntity": [
 			{
@@ -96,14 +103,14 @@ const defaultGraph = [
 				}
 			}
 		]
-	}
+	}] : [])
 ];
 
 const structuredData = {
 	"@context": "https://schema.org",
 	"@graph": [
 		...defaultGraph,
-		...(Array.isArray(jsonLd) ? jsonLd : (jsonLd ? [jsonLd] : []))
+		...userGraph
 	]
 };
 ---
@@ -125,7 +132,7 @@ const structuredData = {
 		<meta name="description" content={description} />
 		<meta name="keywords" content={keywords} />
 		<meta name="author" content="Naveen Thurimerla" />
-		<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+		<meta name="robots" content={robots} />
 
 		<meta name="theme-color" content="#07090e" media="(prefers-color-scheme: dark)" />
 		<meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)" />
@@ -139,13 +146,18 @@ const structuredData = {
 		<meta property="og:description" content={description} />
 		<meta property="og:url" content={canonicalUrl} />
 		<meta property="og:image" content="https://botoview.5goos.com/og-image.png" />
+		<meta property="og:image:alt" content="BotoView — AWS Boto3 Changelog Explorer" />
+		<meta property="og:image:type" content="image/png" />
 		<meta property="og:image:width" content="1200" />
 		<meta property="og:image:height" content="630" />
 
 		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:site" content="@5goos" />
+		<meta name="twitter:creator" content="@thurimerla" />
 		<meta name="twitter:title" content={title} />
 		<meta name="twitter:description" content={description} />
 		<meta name="twitter:image" content="https://botoview.5goos.com/og-image.png" />
+		<meta name="twitter:image:alt" content="BotoView — AWS Boto3 Changelog Explorer" />
 
 		<link rel="canonical" href={canonicalUrl} />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -178,12 +190,12 @@ const structuredData = {
 		<script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />
 	</head>
 	<body class={bodyClass}>
-		<a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[200] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-indigo-600 focus:text-white focus:text-sm focus:font-bold focus:shadow-lg">Skip to content</a>
+		<a href="#mainScrollArea" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[200] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-indigo-600 focus:text-white focus:text-sm focus:font-bold focus:shadow-lg">Skip to content</a>
 		<noscript>
 			<div style="padding: 2rem; background: #fff; color: #000; font-family: sans-serif;">
 				<h1>BotoView by 5goos — AWS Boto3 Changelog Explorer & Release Notes Tracker</h1>
 				<p>
-					<strong>BotoView</strong> (by <a href="https://github.com/5goos/botoview">5goos</a>) is an interactive web application to track, filter, and explore <strong>boto changelogs</strong>, <strong>boto3 changelog</strong>, and <strong>boto3 release notes</strong>.
+					<strong>BotoView</strong> (by <a href="https://5goos.com/">5goos</a>) is an interactive web application to track, filter, and explore <strong>boto changelogs</strong>, <strong>boto3 changelog</strong>, and <strong>boto3 release notes</strong>.
 					Filter boto3 changelog by service (such as S3, Bedrock, Lambda, DynamoDB, EC2) and inspect AWS Boto3 version updates across the entire AWS SDK ecosystem.
 				</p>
 				<p>

@@ -1,0 +1,5 @@
+Contact: mailto:5goos@proton.me
+Expires: 2027-12-31T23:59:59.000Z
+Preferred-Languages: en
+Canonical: https://botoview.5goos.com/.well-known/security.txt
+Policy: https://5goos.com/
