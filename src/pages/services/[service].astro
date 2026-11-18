@@ -58,8 +58,28 @@ const latestDate = Astro.props.latestDate || versionDates[latestVersion] || '';
 const totalUpdates = Astro.props.totalUpdates || changes.length;
 
 const serviceUpper = service.toUpperCase();
-const pageTitle = `AWS Boto3 ${serviceUpper} Changelog & Release Notes | BotoView`;
-const pageDescription = `Complete AWS Boto3 SDK changelog and release notes for ${serviceUpper}. Explore ${totalUpdates} updates across Boto3 versions, breaking changes, and API changes.`;
+const baseTitle = `AWS Boto3 ${serviceUpper} Changelog`;
+const fullTitle = `${baseTitle} & Release Notes | BotoView`;
+let pageTitle = fullTitle;
+if (pageTitle.length > 60) {
+    pageTitle = `${baseTitle} | BotoView`;
+}
+if (pageTitle.length > 60) {
+    pageTitle = `${serviceUpper} Changelog | BotoView`;
+}
+if (pageTitle.length > 60) {
+    pageTitle = `${serviceUpper.slice(0, 45)}... | BotoView`;
+}
+
+const baseDesc = `AWS Boto3 SDK changelog and release notes for ${serviceUpper}.`;
+const tailDesc = ` Explore ${totalUpdates} updates, breaking changes, and API history.`;
+let pageDescription = baseDesc + tailDesc;
+if (pageDescription.length > 155) {
+    pageDescription = `AWS Boto3 changelog for ${serviceUpper}. Explore ${totalUpdates} updates, breaking changes, and API release history.`;
+}
+if (pageDescription.length > 155) {
+    pageDescription = pageDescription.slice(0, 152).trim() + '...';
+}
 const canonicalUrl = `https://botoview.5goos.com/services/${service}`;
 
 const popularServices = ['s3', 'bedrock', 'dynamodb', 'lambda', 'ec2', 'iam', 'cloudwatch', 'sqs', 'rds', 'secretsmanager'].filter(s => s !== service);

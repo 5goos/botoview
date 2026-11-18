@@ -63,10 +63,14 @@ async function runQASuite() {
         const { text } = await fetchPage(page);
         
         const titleMatch = text.match(/<title>([^<]+)<\/title>/);
-        assert(`${page} has valid title`, titleMatch && titleMatch[1].includes('BotoView'), titleMatch ? titleMatch[1] : 'No title');
+        const titleText = titleMatch ? titleMatch[1].replace(/&amp;/g, '&') : '';
+        assert(`${page} has valid title`, titleText.includes('BotoView'), titleText || 'No title');
+        assert(`${page} title length is Bing/Google compliant (15-65 chars)`, titleText.length >= 15 && titleText.length <= 65, `Length: ${titleText.length}`);
 
         const descMatch = text.match(/<meta\s+name="description"\s+content="([^"]+)"/i);
-        assert(`${page} has non-empty meta description`, descMatch && descMatch[1].length > 15, descMatch ? descMatch[1] : 'Missing');
+        const descText = descMatch ? descMatch[1] : '';
+        assert(`${page} has non-empty meta description`, descText.length > 15, descText || 'Missing');
+        assert(`${page} meta description is Bing/Google compliant (25-160 chars)`, descText.length >= 25 && descText.length <= 160, `Length: ${descText.length}`);
 
         const canonicalMatch = text.match(/<link\s+rel="canonical"\s+href="([^"]+)"/i);
         assert(`${page} has canonical pointing to https://botoview.5goos.com`, canonicalMatch && canonicalMatch[1].startsWith('https://botoview.5goos.com'), canonicalMatch ? canonicalMatch[1] : 'Missing');

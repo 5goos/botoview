@@ -12,8 +12,8 @@ const versionModules = import.meta.glob<Array<{ category: string; description: s
 
 const latestKey = `../../public/data/versions/${latestVersion.id}.json`;
 const initialChanges = versionModules[latestKey] || [];
-const pageTitle = "BotoView by 5goos — AWS Boto3 Changelog Explorer & Release Notes Tracker";
-const pageDescription = "Track, search, and filter AWS Boto3 changelogs and release notes by service (S3, Bedrock, Lambda, DynamoDB, EC2). Explore Boto3 version updates, breaking changes, and SDK history in real time.";
+const pageTitle = "BotoView — AWS Boto3 Changelog & Release Notes | 5goos";
+const pageDescription = "Track and filter AWS Boto3 changelogs and release notes by service. Explore Boto3 version updates, breaking changes, and SDK history in real time.";
 const canonicalUrl = "https://botoview.5goos.com/";
 ---
 
@@ -501,7 +501,7 @@ const canonicalUrl = "https://botoview.5goos.com/";
                     this.selectVersion(targetVersion, true);
                 } else {
                     this.updateUrl(true);
-                    document.title = `BotoView by 5goos — Release ${this.selectedVersion} | AWS Boto3 Changelog`;
+                    document.title = `AWS Boto3 v${this.selectedVersion} Changelog & Release Notes | BotoView`;
                     const mainArea = document.getElementById('mainScrollArea');
                     if (mainArea) mainArea.scrollTo({ top: 0, behavior: 'instant' });
                     this.syncIndicator(this.selectedVersion, true);
@@ -542,14 +542,14 @@ const canonicalUrl = "https://botoview.5goos.com/";
 
                 if (this.versionCache[id]) {
                     this.currentVersionData = this.versionCache[id];
-                    document.title = `BotoView by 5goos — Release ${id} | AWS Boto3 Changelog & Release Notes`;
+                    document.title = `AWS Boto3 v${id} Changelog & Release Notes | BotoView`;
                     this.syncIndicator(id);
                     this.prefetchAdjacent(idx);
                     return;
                 }
 
                 this.currentVersionData = []; 
-                document.title = `BotoView by 5goos — Release ${id} | AWS Boto3 Changelog & Release Notes`;
+                document.title = `AWS Boto3 v${id} Changelog & Release Notes | BotoView`;
                 this.syncIndicator(id, false); 
 
                 try {
@@ -608,7 +608,7 @@ const canonicalUrl = "https://botoview.5goos.com/";
                 this.serviceHistoryLoading = true;
                 this.updateUrl(push);
 
-                document.title = `AWS ${svc.toUpperCase()} Boto3 Changelog & Release Notes | BotoView by 5goos`;
+                document.title = `AWS Boto3 ${svc.toUpperCase()} Changelog | BotoView`;
 
                 const mainArea = document.getElementById('mainScrollArea');
                 if (mainArea) mainArea.scrollTo({ top: 0, behavior: 'instant' });
