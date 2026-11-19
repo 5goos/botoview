@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.6",
+    "t": "Supporting a new PAUSED device status and a DeviceStatusReason."
+  },
+  {
     "v": "1.42.85",
     "t": "Added support for t3, g6, and g6e instance types for Hybrid Jobs."
   },

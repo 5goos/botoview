@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.6",
+    "t": "Cache static User-Agent components to reduce per-request CPU overhead without changing the emitted header."
+  },
+  {
     "v": "1.37.4",
     "t": "Update user agent string to include client feature use."
   },

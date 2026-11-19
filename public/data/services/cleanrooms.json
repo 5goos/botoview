@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.6",
+    "t": "Adds support for populating intermediate tables with results from PySpark analysis templates."
+  },
+  {
     "v": "1.44.2",
     "t": "Adds a retry signal to protected query and protected job errors that indicates whether running the same request again might succeed, and defines error codes that identify the category of the failure."
   },

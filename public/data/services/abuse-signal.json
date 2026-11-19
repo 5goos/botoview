@@ -1,0 +1,6 @@
+[
+  {
+    "v": "1.44.6",
+    "t": "This release introduces the AWS Abuse Signal API, enabling customers to programmatically submit and track AWS abuse reports."
+  }
+]

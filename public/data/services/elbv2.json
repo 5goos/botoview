@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.6",
+    "t": "This release adds support for the keyExchange field in CloudTrail tlsDetails, enabling customers to distinguish classical from post-quantum hybrid key exchange for TLS connections on Application Load Balancers."
+  },
+  {
     "v": "1.43.88",
     "t": "This release adds support for sending TCP resets for Gateway Load Balancer when a flow's idle timeout expires, or when a target becomes unhealthy or is deregistered. This adds updates the CLI documentation."
   },

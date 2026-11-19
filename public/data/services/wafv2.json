@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.6",
+    "t": "Adds the AnalyticsConfig parameter to CreateWebACL and UpdateWebACL to enable or disable cross-Region security analytics for a WebACL. When you enable security analytics, you authorize AWS to transfer and store full request logs outside the AWS Region where the WebACL is hosted."
+  },
+  {
     "v": "1.43.125",
     "t": "AWS WAF customers who monetize AI traffic on Web ACLs can now configure payments through connected accounts (Stripe)."
   },

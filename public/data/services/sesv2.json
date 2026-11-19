@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.6",
+    "t": "This release adds support for Spillover Routing in Amazon SES."
+  },
+  {
     "v": "1.43.110",
     "t": "SESV2 DEED - Documentation Update"
   },

@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.6",
+    "t": "Adds resource tags functionality to the AWS Health service"
+  },
+  {
     "v": "1.44.4",
     "t": "Adds resource tags functionality to the AWS Health service"
   },
