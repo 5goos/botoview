@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.7",
+    "t": "Added support for Job Submit Plugins in AWS PCS."
+  },
+  {
     "v": "1.44.0",
     "t": "Added support for configuring AMIs, Amazon EC2 security groups, SSH key pairs, and launch template modes when creating or updating AWS PCS compute node groups."
   },

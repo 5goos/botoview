@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.7",
+    "t": "Amazon CloudFront adds configuration for SNI-less clients on Anycast static IPs, introduces Anycast IP based domain routing for Distribution Tenants, provides automatic domain ownership validation when creating or updating Distribution Tenants, and enables HTTP traffic via DNS validation."
+  },
+  {
     "v": "1.43.114",
     "t": "This release adds a new \"IpAddressType\" field to \"VPCOriginEndpointConfig\", allowing customers to specify whether their VPC origin accepts IPv4-only or dualstack connections."
   },

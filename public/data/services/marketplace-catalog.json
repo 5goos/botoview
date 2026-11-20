@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.7",
+    "t": "AI Listing Experience that provides listing quality, content and feature recommendations through ListAssessments and DescribeAssessment APIs. Adds a new API StartAssessment to trigger Seller testing for Metering and Entitlement integration for products."
+  },
+  {
     "v": "1.43.119",
     "t": "This release adds support for the SubsidiaryAuthorization entity type in the ListEntities operation, including entity-type filters with partial name search, sort options, and a summary returned for each subsidiary authorization."
   },

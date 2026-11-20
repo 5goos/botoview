@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.7",
+    "t": "Adds voice cloning to Amazon Polly. The new CreateVoice, GetVoice and DeleteVoice operations create and manage a custom voice from a speaker's recording, usable with the generative engine in all synthesis operations."
+  },
+  {
     "v": "1.43.124",
     "t": "Amazon Polly now supports tagging lexicons. Use the new TagResource, UntagResource and ListTagsForResource APIs, or add tags when creating a lexicon with PutLexicon, to organize lexicons and control access with tag-based (ABAC) IAM policies."
   },

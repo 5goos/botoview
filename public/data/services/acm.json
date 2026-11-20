@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.7",
+    "t": "AWS Certificate Manager now supports the ability to issue certificates from the Amazon N2 certificate authorities (CAs), an Amazon-operated CA hierarchy."
+  },
+  {
     "v": "1.43.121",
     "t": "AWS Certificate Manager now supports the Automatic Certificate Management Environment (ACME) protocol in the AWS GovCloud (US-East) and AWS GovCloud (US-West) Regions."
   },

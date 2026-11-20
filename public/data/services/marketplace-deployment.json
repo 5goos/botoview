@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.7",
+    "t": "Add support for deployment configurations for Data as a Service products in AWS Marketplace"
+  },
+  {
     "v": "1.40.61",
     "t": "Update endpoint ruleset parameters casing"
   },

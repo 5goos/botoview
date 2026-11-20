@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.7",
+    "t": "Route 53 Private Endpoint Health Checks support"
+  },
+  {
     "v": "1.44.2",
     "t": "Amazon Route 53 now supports Record Set Protection, which blocks changes to protected records in a hosted zone."
   },

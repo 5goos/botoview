@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.7",
+    "t": "Adding new API, GetUsageLinesEstimatedCost which can be used to estimate the cost of usage lines."
+  },
+  {
     "v": "1.43.61",
     "t": "Removing Smithy RPC v2 CBOR support that was added in previous SDK release."
   },

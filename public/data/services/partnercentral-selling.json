@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.7",
+    "t": "Adds the Leads APIs (SearchEngagements, ListEngagementGroups), customer account APIs with statistics and bulk jobs, SearchOpportunities, opportunity bulk jobs, account planning invitations, co-sell motion reason on AWS opportunity summaries, and channel recommendations on lead insights."
+  },
+  {
     "v": "1.43.83",
     "t": "Releasing PARC, new APN Program that lets sellers add solftware revenue details to aws opportunity summary"
   },
