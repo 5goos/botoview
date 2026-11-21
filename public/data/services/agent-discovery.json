@@ -1,0 +1,6 @@
+[
+  {
+    "v": "1.44.8",
+    "t": "Adds the SearchPublicRecords API, which searches public registry records for AI agents, tools, and skills that their publishers have made discoverable."
+  }
+]

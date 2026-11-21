@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.8",
+    "t": "AWS Marketplace Discovery adds ListListingAttributes, an API for trust center, case study, and specialization details. SearchListings adds summaries, seller engagements and filters. GetListing and GetProduct return purchase indicators when products cannot be subscribed to or require no subscription."
+  },
+  {
     "v": "1.43.124",
     "t": "GetListing and SearchListings APIs now return G2 and PeerSpot review sources in review summaries."
   },

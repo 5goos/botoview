@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.8",
+    "t": "Adds support for Network Firewall automated internet firewall to Network Security Manager"
+  },
+  {
     "v": "1.43.101",
     "t": "AWS Network Security Manager is a new service that helps you centrally configure, deploy, and continuously enforce security policies on network security services across the accounts and resources in your AWS Organization."
   }

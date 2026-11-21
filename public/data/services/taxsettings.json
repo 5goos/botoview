@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.8",
+    "t": "Adds support for Norway, New Zealand and United Arab Emirates additional tax information, and the Vietnam VAT credit method and 20-digit payment voucher number."
+  },
+  {
     "v": "1.43.124",
     "t": "Adds Colombia additional information (responsibility codes, taxpayer type code, and RUT issue date) and a rejection reason (statusReason) to tax registration responses, and adds Argentina and Uruguay tax registration types."
   },

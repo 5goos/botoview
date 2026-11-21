@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.8",
+    "t": "Amazon Route 53 support for advanced hosted zones. Including change guardrails, public dns fallback, change history. Also support for AZAffinityRouting."
+  },
+  {
     "v": "1.44.7",
     "t": "Route 53 Private Endpoint Health Checks support"
   },

@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.8",
+    "t": "Added support for Instance Health Checks in AWS PCS."
+  },
+  {
     "v": "1.44.7",
     "t": "Added support for Job Submit Plugins in AWS PCS."
   },

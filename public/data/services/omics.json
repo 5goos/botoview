@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.8",
+    "t": "Adds the parametersUri field to StartRun, which lets you provide run parameters in a JSON file in Amazon S3 instead of inline. GetRun returns parametersUri for runs started this way."
+  },
+  {
     "v": "1.43.123",
     "t": "Adds the outputUriPrefixMode parameter to StartRun and GetRun. You can now write run outputs directly under outputUri, without the prefixes the service adds by default. When you opt in, outputs overwrite existing objects at the same keys."
   },

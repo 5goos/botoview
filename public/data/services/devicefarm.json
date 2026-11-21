@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.8",
+    "t": "Add support for the use of virtual devices on Device Farm."
+  },
+  {
     "v": "1.44.0",
     "t": "Adds the NONE insights type to disable insights generation for a run, a testPackageArn field in run details, and a new artifact type for device connect command logs."
   },

@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.8",
+    "t": "Amazon Bedrock adds APIs to manage projects, discover and apply to Trusted Access Programs, manage enrollments, and configure data retention storage for accounts, organizations, and projects. Model and inference profile discovery now supports project context."
+  },
+  {
     "v": "1.43.116",
     "t": "Amazon Bedrock Guardrails now supports a configurable tier for the contextual grounding policy via a new tier option. Select the Standard tier for grounding that better supports conversations and reasoning, with expanded language coverage."
   },

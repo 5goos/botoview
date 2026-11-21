@@ -1,0 +1,6 @@
+[
+  {
+    "v": "1.44.8",
+    "t": "Adds the InvokeGlobalInferenceGateway and InvokeGlobalInferenceGatewayWithResponseStream APIs for sending inference requests to a SageMaker HyperPod Global Inference Gateway."
+  }
+]

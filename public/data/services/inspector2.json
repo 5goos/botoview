@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.8",
+    "t": "This release adds runtimeReachability, runtimeReachabilityReason, and purl fields to vulnerable packages in the finding model. It also adds runtimeReachability, runtimeReachabilityReason and purlQualifier package filters for listing findings, suppression rules, and findings reports."
+  },
+  {
     "v": "1.44.7",
     "t": "Amazon Inspector Code Security now supports GitHub Enterprise Server integrations. For GitHub Enterprise Server and GitLab Self-Managed, you can connect over a private network by adding a VPC configuration when you create an integration."
   },

@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.8",
+    "t": "Adds MSP program relationships support in AWS Partner Central. Partners can now create, update, list, and delete MSP relationships using the new MSP program type on the CreateProgramManagementAccount, CreateRelationship, UpdateRelationship, and ListRelationships operations."
+  },
+  {
     "v": "1.42.60",
     "t": "Adds the Resold Unified Operations support plan and removes the Resold Business support plan in the CreateRelationship and UpdateRelationship APIs"
   },

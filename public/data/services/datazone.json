@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.8",
+    "t": "Amazon DataZone now supports detaching a project from its project profile via UpdateProject, specifying the environment blueprint ID in environment configuration user parameters, and transferring asset ownership from a source project to a target project via UpdateAssetOwner."
+  },
+  {
     "v": "1.43.127",
     "t": "Adds support for Workday Data Connect and Workday Live Data Query connection types in Amazon DataZone connection APIs."
   },

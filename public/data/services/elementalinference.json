@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.8",
+    "t": "Adds Arabic (ara) as a supported language for subtitling transcription and custom vocabulary dictionaries."
+  },
+  {
     "v": "1.44.5",
     "t": "AWS Elemental Inference now supports functions, for running your own analysis on feed media, and question sets, for custom decisions on contextual metadata shots and scenes."
   },

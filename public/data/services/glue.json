@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.8",
+    "t": "Minor updates to the Glue Business Context APIs"
+  },
+  {
     "v": "1.44.3",
     "t": "Field description update for auto upgrade summaries"
   },

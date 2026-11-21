@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.8",
+    "t": "Amazon Bedrock Runtime adds an optional projectIdentifier parameter to InvokeModel, InvokeModelWithResponseStream, Converse, and ConverseStream, allowing requests to specify a project by ID or ARN."
+  },
+  {
     "v": "1.43.62",
     "t": "Added support for mid-conversation tool changes in the Amazon Bedrock Converse and ConverseStream APIs"
   },
