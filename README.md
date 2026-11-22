@@ -1,6 +1,6 @@
 <div align="center">
 
-  <a href="https://botoview.5goos.com">
+  <a href="https://botoview.5goos.com/">
     <img src="public/favicon.svg" alt="BotoView Logo" width="80" height="80" />
   </a>
 
@@ -11,7 +11,7 @@
   </p>
 
   <p align="center">
-    <a href="https://botoview.5goos.com"><img src="https://img.shields.io/badge/Live%20Demo-botoview.5goos.com-6366f1?style=for-the-badge&logo=cloudflarepages&logoColor=white" alt="Live Demo" /></a>
+    <a href="https://botoview.5goos.com/"><img src="https://img.shields.io/badge/Live%20Demo-botoview.5goos.com-6366f1?style=for-the-badge&logo=cloudflarepages&logoColor=white" alt="Live Demo" /></a>
     <a href="https://github.com/5goos/botoview/actions/workflows/daily_sync.yml"><img src="https://img.shields.io/github/actions/workflow/status/5goos/botoview/daily_sync.yml?branch=main&style=for-the-badge&label=Daily%20Sync&logo=githubactions&logoColor=white" alt="Daily Sync Status" /></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-38bdf8?style=for-the-badge" alt="License: MIT" /></a>
   </p>

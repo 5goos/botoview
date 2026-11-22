@@ -34,27 +34,31 @@ const canonicalUrl = "https://botoview.5goos.com/";
              class="fixed inset-0 bg-slate-900/30 dark:bg-black/60 backdrop-blur-xs z-40 lg:hidden" 
              @click="showMobileVersions = false"></div>
 
-        <div x-show="error" x-cloak x-transition.opacity class="fixed inset-0 z-[150] flex items-center justify-center p-6 bg-[#050505]/90 backdrop-blur-xl">
-            <div class="bg-white dark:bg-[#0e131f] border border-red-500/20 text-slate-900 dark:text-white p-8 sm:p-10 rounded-[28px] max-w-lg w-full text-center shadow-2xl relative overflow-hidden">
-                <div class="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-red-500/20">
-                    <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+        <template x-if="error">
+            <div class="fixed inset-0 z-[150] flex items-center justify-center p-6 bg-[#050505]/90 backdrop-blur-xl">
+                <div class="bg-white dark:bg-[#0e131f] border border-red-500/20 text-slate-900 dark:text-white p-8 sm:p-10 rounded-[28px] max-w-lg w-full text-center shadow-2xl relative overflow-hidden">
+                    <div class="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-red-500/20">
+                        <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    </div>
+                    <div class="text-2xl font-black italic uppercase tracking-tight mb-2" x-text="errorTitle"></div>
+                    <p class="text-slate-500 dark:text-slate-400 mb-8 leading-relaxed text-sm mono" x-text="error"></p>
+                    <button @click="location.reload()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3.5 px-6 rounded-xl transition-all active:scale-95 shadow-md shadow-indigo-500/25 uppercase tracking-wider text-xs cursor-pointer">
+                        Reboot Application
+                    </button>
                 </div>
-                <h2 class="text-2xl font-black italic uppercase tracking-tight mb-2">Connection Override</h2>
-                <p class="text-slate-500 dark:text-slate-400 mb-8 leading-relaxed text-sm mono" x-text="error"></p>
-                <button @click="location.reload()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3.5 px-6 rounded-xl transition-all active:scale-95 shadow-md shadow-indigo-500/25 uppercase tracking-wider text-xs cursor-pointer">
-                    Reboot Application
-                </button>
             </div>
-        </div>
+        </template>
 
-        <div x-show="loading" x-cloak style="display: none;" class="fixed inset-0 z-[140] flex flex-col items-center justify-center bg-white dark:bg-[#07090e] transition-colors duration-500">
-            <div class="relative w-16 h-16 mb-6">
-                <div class="absolute inset-0 border-3 border-indigo-500/15 rounded-2xl"></div>
-                <div class="absolute inset-0 border-3 border-t-indigo-600 dark:border-t-indigo-400 rounded-2xl animate-spin"></div>
-                <img src="/favicon.svg" class="absolute inset-0 m-auto w-7 h-7 opacity-80 animate-pulse" alt="Loading" />
+        <template x-if="loading">
+            <div class="fixed inset-0 z-[140] flex flex-col items-center justify-center bg-white dark:bg-[#07090e] transition-colors duration-500">
+                <div class="relative w-16 h-16 mb-6">
+                    <div class="absolute inset-0 border-3 border-indigo-500/15 rounded-2xl"></div>
+                    <div class="absolute inset-0 border-3 border-t-indigo-600 dark:border-t-indigo-400 rounded-2xl animate-spin"></div>
+                    <img src="/favicon.svg" class="absolute inset-0 m-auto w-7 h-7 opacity-80 animate-pulse" alt="Loading" />
+                </div>
+                <span class="text-xs mono uppercase tracking-widest text-slate-400 font-bold" x-text="loadingText"></span>
             </div>
-            <span class="text-xs mono uppercase tracking-widest text-slate-400 font-bold">Initializing Core...</span>
-        </div>
+        </template>
 
         <div class="flex h-full w-full">
             <LeftRail />
@@ -66,6 +70,8 @@ const canonicalUrl = "https://botoview.5goos.com/";
 <script define:vars={{ initialLatestId: latestVersion.id, initialChangesJson: initialChanges, initialServiceCounts: trackData?.serviceCounts || {}, initialAllServices: trackData?.allServices || [] }}>
     document.addEventListener('alpine:init', () => {
         Alpine.data('botoCore', () => ({
+            errorTitle: 'Connection Override',
+            loadingText: 'Initializing Core...',
             sidebarTab: 'versions',
             viewMode: 'release',
             selectedVersion: initialLatestId || '',

@@ -15,6 +15,18 @@ INDEXNOW_ENDPOINT = "https://api.indexnow.org/indexnow"
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger("IndexNow")
 
+TOP_INDEXABLE_SERVICES = [
+    "ec2", "sagemaker", "rds", "connect", "glue", "ecs", "s3", "ssm",
+    "lambda", "medialive", "quicksight", "mediaconvert", "iot", "eks",
+    "config", "codebuild", "workspaces", "guardduty", "securityhub",
+    "cloudformation", "redshift", "autoscaling", "dynamodb", "cognito-idp",
+    "logs", "elbv2", "batch", "cloudfront", "transfer", "iam", "bedrock",
+    "bedrock-runtime", "organizations", "elasticache", "ce", "wafv2",
+    "route53", "dms", "appstream", "cloudwatch", "transcribe", "lightsail",
+    "datazone", "gamelift", "s3control", "fsx", "opensearch", "apigateway",
+    "rekognition", "secretsmanager", "sts", "sqs", "sns", "stepfunctions"
+]
+
 
 def submit_urls(urls: List[str]) -> bool:
     if not INDEXNOW_KEY:
@@ -46,7 +58,7 @@ def submit_urls(urls: List[str]) -> bool:
         with urllib.request.urlopen(req, timeout=15) as resp:
             status = resp.status
             if status in (200, 202):
-                logger.info(f"Successfully submitted {len(payload['urlList'])} URLs to IndexNow (Status: {status}).")
+                logger.info(f"Successfully submitted {len(payload['urlList'])} high-priority URLs to IndexNow (Status: {status}).")
                 return True
             else:
                 logger.warning(f"IndexNow returned unexpected status: {status}")
@@ -67,43 +79,18 @@ def submit_urls(urls: List[str]) -> bool:
         return False
 
 
-def get_default_urls(release_limit: int = 500) -> List[str]:
+def get_default_urls() -> List[str]:
+    # Pruned high-authority indexable URLs only (Homepage + Hubs + Top AWS Services)
     urls = [
         f"https://{HOST}/",
         f"https://{HOST}/services/",
         f"https://{HOST}/releases/",
     ]
 
-    track_path = Path(__file__).resolve().parent.parent / "public" / "data" / "track.json"
-    if track_path.exists():
-        try:
-            with open(track_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-                
-                # High-priority: Popular services first
-                popular_services = [
-                    "s3", "bedrock", "dynamodb", "lambda", "ec2", "iam",
-                    "cloudwatch", "sqs", "sns", "rds", "secretsmanager",
-                    "kms", "sagemaker", "ecs", "eks", "eventbridge",
-                    "stepfunctions", "route53", "kinesis", "glue"
-                ]
-                for p in popular_services:
-                    urls.append(f"https://{HOST}/services/{p}/")
-
-                # Submit all 570+ AWS service directories
-                services = data.get("allServices", [])
-                for s in services:
-                    url = f"https://{HOST}/services/{s}/"
-                    if url not in urls:
-                        urls.append(url)
-
-                # Submit recent releases (up to release_limit)
-                versions = data.get("versions", [])[:release_limit]
-                for v in versions:
-                    if v.get("id"):
-                        urls.append(f"https://{HOST}/releases/{v['id']}/")
-        except Exception as e:
-            logger.warning(f"Could not read track.json for default URLs: {e}")
+    for s in TOP_INDEXABLE_SERVICES:
+        url = f"https://{HOST}/services/{s}/"
+        if url not in urls:
+            urls.append(url)
 
     return urls
 

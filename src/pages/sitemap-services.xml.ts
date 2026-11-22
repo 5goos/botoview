@@ -4,13 +4,15 @@ import type { APIRoute } from 'astro';
 import fs from 'node:fs';
 import path from 'node:path';
 import trackData from '../../public/data/track.json';
+import { TOP_INDEXABLE_SERVICES } from '../utils/serviceTelemetry';
 
 export const GET: APIRoute = async () => {
     const siteUrl = "https://botoview.5goos.com";
     const fallbackDate = trackData?.versions?.[0]?.date || new Date().toISOString().split('T')[0];
     const versionDateMap = new Map((trackData?.versions || []).map((v: { id: string; date?: string }) => [v.id, v.date || fallbackDate]));
 
-    const services = trackData?.allServices || [];
+    // Sitemaps must exclusively contain canonical, high-authority, indexable URLs
+    const services = TOP_INDEXABLE_SERVICES;
     const entries = services.map((service: string) => {
         let lastmod = fallbackDate;
         try {
@@ -30,7 +32,7 @@ export const GET: APIRoute = async () => {
             url: `${siteUrl}/services/${service}/`,
             lastmod,
             changefreq: 'weekly',
-            priority: '0.8'
+            priority: '0.9'
         };
     });
 

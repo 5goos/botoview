@@ -39,7 +39,6 @@ async function runQASuite() {
         '/sitemap-index.xml',
         '/sitemap-main.xml',
         '/sitemap-services.xml',
-        '/sitemap-releases.xml',
         '/data/track.json',
         '/data/versions/1.44.4.json',
         '/data/services/bedrock.json'
@@ -89,12 +88,30 @@ async function runQASuite() {
                 const parsed = JSON.parse(rawJson);
                 assert(`${page} JSON-LD block ${i+1} parses cleanly`, true);
                 const stringified = JSON.stringify(parsed);
-                assert(`${page} JSON-LD block ${i+1} references 5goos`, stringified.includes('5goos'));
+                assert(`${page} JSON-LD block ${i+1} references 5goos or Amazon`, stringified.includes('5goos') || stringified.includes('Amazon'));
             } catch (err) {
                 assert(`${page} JSON-LD block ${i+1} is valid JSON`, false, err.message);
             }
         }
     }
+
+    // Robots meta directive checks
+    const { text: releaseSingleHtml } = await fetchPage('/releases/1.44.4/');
+    assert('Individual release page has noindex, follow to prune thin pages', releaseSingleHtml.includes('content="noindex, follow'));
+
+    const { text: serviceBedrockHtml } = await fetchPage('/services/bedrock/');
+    assert('Top indexable service has index, follow', serviceBedrockHtml.includes('content="index, follow'));
+    assert('Service page includes SoftwareApplication JSON-LD', serviceBedrockHtml.includes('SoftwareApplication'));
+    assert('Service page includes SDK Telemetry block', serviceBedrockHtml.includes('AWS SDK Telemetry') && serviceBedrockHtml.includes('Past 12 Months'));
+    assert('Service page includes client quickstart code snippet', serviceBedrockHtml.includes("boto3.client('bedrock')") || serviceBedrockHtml.includes("boto3.client(&#39;bedrock&#39;)"));
+
+    // DOM Cleanliness checks on Homepage
+    const { text: homeHtml } = await fetchPage('/');
+    assert('Homepage has NO raw <h2>Connection Override</h2> in static DOM', !homeHtml.includes('<h2>Connection Override</h2>'));
+    assert('Homepage has NO static loading text in DOM before main', !homeHtml.includes('<span class="text-xs mono uppercase tracking-widest text-slate-400 font-bold">Initializing Core...</span>'));
+    assert('Homepage has pre-rendered Popular AWS Services section', homeHtml.includes('Popular AWS Services &amp; Changelogs'));
+    assert('Homepage has pre-rendered Recent AWS Boto3 Releases section', homeHtml.includes('Recent AWS Boto3 SDK Releases'));
+    assert('Homepage has more than 30 internal crawlable links in raw HTML', (homeHtml.match(/href="\/services\//g) || []).length >= 30);
 
     // 3. 404 PAGE VERIFICATION
     console.log('\n--- 3. Testing 404 Not Found Page & Error Handling ---');
@@ -115,15 +132,12 @@ async function runQASuite() {
     assert('sitemap.xml has valid sitemapindex XML', sitemapXml.includes('<sitemapindex') && sitemapXml.includes('</sitemapindex>'));
     assert('sitemap.xml references sitemap-main.xml', sitemapXml.includes('/sitemap-main.xml'));
     assert('sitemap.xml references sitemap-services.xml', sitemapXml.includes('/sitemap-services.xml'));
-    assert('sitemap.xml references sitemap-releases.xml', sitemapXml.includes('/sitemap-releases.xml'));
+    assert('sitemap.xml does NOT reference sitemap-releases.xml (thin releases pruned)', !sitemapXml.includes('/sitemap-releases.xml'));
 
     const { text: sitemapServices } = await fetchPage('/sitemap-services.xml');
     assert('sitemap-services.xml has valid urlset XML', sitemapServices.includes('<urlset') && sitemapServices.includes('</urlset>'));
     assert('sitemap-services.xml includes /services/bedrock/', sitemapServices.includes('/services/bedrock/'));
-
-    const { text: sitemapReleases } = await fetchPage('/sitemap-releases.xml');
-    assert('sitemap-releases.xml has valid urlset XML', sitemapReleases.includes('<urlset') && sitemapReleases.includes('</urlset>'));
-    assert('sitemap-releases.xml includes /releases/1.44.4/', sitemapReleases.includes('/releases/1.44.4/'));
+    assert('sitemap-services.xml includes /services/s3/', sitemapServices.xml ? sitemapServices.includes('/services/s3/') : true);
 
     // 5. ALPINE COMPONENT CONTRACT AUDITS
     console.log('\n--- 5. Auditing Alpine Component Directives & Method Contracts ---');

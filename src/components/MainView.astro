@@ -1,5 +1,7 @@
 ---
 import { getServiceColorClass, formatDescription, formatDate } from '../utils/formatting';
+import { TOP_INDEXABLE_SERVICES } from '../utils/serviceTelemetry';
+import trackData from '../../public/data/track.json';
 
 interface Props {
     initialChanges?: Array<{ category: string; description: string; type: string }>;
@@ -8,6 +10,9 @@ interface Props {
 }
 const { initialChanges = [], latestVersion = { id: '', date: '' }, allServices = [] } = Astro.props;
 const initialServices = Array.from(new Set(initialChanges.map((c: any) => c.category))).filter(Boolean);
+const popularHubServices = TOP_INDEXABLE_SERVICES.slice(0, 40);
+const recentReleasesHub = (trackData?.versions || []).slice(0, 12);
+const serviceCountsMap: Record<string, number> = trackData?.serviceCounts || {};
 ---
 
 <main id="mainScrollArea"
@@ -178,7 +183,7 @@ const initialServices = Array.from(new Set(initialChanges.map((c: any) => c.cate
                     </template>
 
                     <div class="flex items-center gap-2 mono text-slate-400 dark:text-slate-500 text-[10px] sm:ml-auto">
-                        <span>Showing <strong class="text-slate-900 dark:text-white font-bold" x-text="visibleServiceHistory.length"></strong> of <strong x-text="filteredServiceHistory.length"></strong></span>
+                        <span>Showing <strong class="text-slate-900 dark:text-white font-bold" x-text="visibleServiceHistory.length">40</strong> of <strong x-text="filteredServiceHistory.length">40</strong></span>
                         <button x-show="serviceHistorySearch || serviceHistoryFilter !== 'all' || serviceVersionFilter !== 'all'"
                                 x-cloak
                                 @click="serviceHistorySearch = ''; serviceHistoryFilter = 'all'; serviceVersionFilter = 'all'; serviceHistoryLimit = 40"
@@ -352,6 +357,63 @@ const initialServices = Array.from(new Set(initialChanges.map((c: any) => c.cate
                     </template>
                 </div>
             </div>
+
+            <!-- Pre-rendered Core Architecture: Popular AWS Services (Discovered by Googlebot without JS) -->
+            <section aria-label="Popular AWS Services" class="soft-card rounded-2xl p-4 sm:p-5 space-y-3">
+                <div class="flex items-center justify-between gap-2 flex-wrap">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 mono">
+                            Popular AWS Services &amp; Changelogs
+                        </h2>
+                    </div>
+                    <a href="/services/" class="text-xs mono font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
+                        Explore all 570+ &rarr;
+                    </a>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 pt-1">
+                    {popularHubServices.map((svc) => (
+                        <a href={`/services/${svc}/`}
+                           class="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-white/[0.03] hover:bg-indigo-50 dark:hover:bg-indigo-500/10 border border-black/[0.04] dark:border-white/[0.06] transition-all group">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <span class={`w-5 h-5 rounded flex items-center justify-center font-black mono text-[8.5px] uppercase shrink-0 ${getServiceColorClass(svc)}`}>
+                                    {svc.substring(0, 2)}
+                                </span>
+                                <span class="mono text-xs font-semibold text-slate-700 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 uppercase truncate">
+                                    {svc}
+                                </span>
+                            </div>
+                            <span class="text-[9px] mono text-slate-400 font-medium shrink-0 ml-1">
+                                {serviceCountsMap[svc] ? `${serviceCountsMap[svc]}u` : ''}
+                            </span>
+                        </a>
+                    ))}
+                </div>
+            </section>
+
+            <!-- Pre-rendered Core Architecture: Recent AWS Boto3 Releases -->
+            <section aria-label="Recent Boto3 Releases" class="soft-card rounded-2xl p-4 sm:p-5 space-y-3">
+                <div class="flex items-center justify-between gap-2 flex-wrap">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 mono">
+                            Recent AWS Boto3 SDK Releases
+                        </h2>
+                    </div>
+                    <a href="/releases/" class="text-xs mono font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
+                        View all 2,370+ &rarr;
+                    </a>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap pt-1">
+                    {recentReleasesHub.map((rel) => (
+                        <a href={`/releases/${rel.id}/`}
+                           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] hover:bg-indigo-50 dark:hover:bg-indigo-500/10 border border-black/[0.04] dark:border-white/[0.06] text-xs mono font-semibold text-slate-700 dark:text-slate-200 group">
+                            <span class="text-indigo-600 dark:text-indigo-400 font-bold">v{rel.id}</span>
+                            {rel.date && <span class="text-[10px] text-slate-400">({rel.date})</span>}
+                        </a>
+                    ))}
+                </div>
+            </section>
         </div>
 
         <div x-show="viewMode === 'service'" x-cloak class="space-y-4 flex-1 w-full max-w-full min-w-0" role="region" aria-label="Service changelog" aria-live="polite" aria-atomic="false">
