@@ -80,7 +80,7 @@ if (pageDescription.length > 155) {
 if (pageDescription.length > 155) {
     pageDescription = pageDescription.slice(0, 152).trim() + '...';
 }
-const canonicalUrl = `https://botoview.5goos.com/services/${service}`;
+const canonicalUrl = `https://botoview.5goos.com/services/${service}/`;
 
 const popularServices = ['s3', 'bedrock', 'dynamodb', 'lambda', 'ec2', 'iam', 'cloudwatch', 'sqs', 'rds', 'secretsmanager'].filter(s => s !== service);
 
@@ -97,7 +97,7 @@ const breadcrumbSchema = {
             "@type": "ListItem",
             "position": 2,
             "name": "Services",
-            "item": "https://botoview.5goos.com/services"
+            "item": "https://botoview.5goos.com/services/"
         },
         {
             "@type": "ListItem",
@@ -190,7 +190,7 @@ const serviceFaqSchema = {
                         <span class="text-xs sm:text-sm font-black italic tracking-tighter uppercase text-slate-900 dark:text-white leading-none">BotoView</span>
                     </a>
                     <span class="text-slate-300 dark:text-white/10 hidden sm:inline">/</span>
-                    <a href="/services" class="hidden sm:inline text-xs mono font-bold uppercase tracking-wider text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 transition-colors">
+                    <a href="/services/" class="hidden sm:inline text-xs mono font-bold uppercase tracking-wider text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 transition-colors">
                         Services
                     </a>
                     <span class="text-slate-300 dark:text-white/10">/</span>
@@ -226,7 +226,7 @@ const serviceFaqSchema = {
             <nav class="flex items-center gap-2 text-xs mono text-slate-400" aria-label="Breadcrumb">
                 <a href="/" class="hover:text-indigo-600 dark:hover:text-indigo-400">Home</a>
                 <span>/</span>
-                <a href="/services" class="hover:text-indigo-600 dark:hover:text-indigo-400">Services</a>
+                <a href="/services/" class="hover:text-indigo-600 dark:hover:text-indigo-400">Services</a>
                 <span>/</span>
                 <span class="text-slate-700 dark:text-slate-200 font-bold">{serviceUpper}</span>
             </nav>
@@ -294,7 +294,7 @@ const serviceFaqSchema = {
             </div>
 
             <section class="space-y-4">
-                <div x-show="!isClientHydrated" class="space-y-3" id="ssr-history">
+                <div x-show="!hasActiveFilter" class="space-y-3" id="ssr-history">
                     {changes.map((change, idx) => {
                         const date = versionDates[change.v];
                         const isFix = change.t.toLowerCase().includes('fix');
@@ -302,7 +302,7 @@ const serviceFaqSchema = {
                             <article class="soft-card rounded-2xl p-4 sm:p-5 group">
                                 <div class="flex items-center justify-between gap-2 mb-2 flex-wrap">
                                     <div class="flex items-center gap-2">
-                                        <a href={`/releases/${change.v}`} 
+                                        <a href={`/releases/${change.v}/`} 
                                            title={`AWS Boto3 release v${change.v}`}
                                            class="px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-600 hover:text-white mono text-[10px] font-bold transition-all active:scale-95 cursor-pointer">
                                             v{change.v}
@@ -332,13 +332,13 @@ const serviceFaqSchema = {
                     })}
                 </div>
 
-                <div x-show="isClientHydrated" x-cloak class="space-y-6">
+                <div x-show="hasActiveFilter" x-cloak class="space-y-6">
                     <div class="space-y-3">
                         <template x-for="(change, idx) in paginatedUpdates" :key="change.v + change.t">
                             <article class="soft-card rounded-2xl p-4 sm:p-5 group">
                                 <div class="flex items-center justify-between gap-2 mb-2 flex-wrap">
                                     <div class="flex items-center gap-2">
-                                        <a :href="'/releases/' + change.v" 
+                                        <a :href="'/releases/' + change.v + '/'" 
                                            :title="'AWS Boto3 release v' + change.v"
                                            class="px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-600 hover:text-white mono text-[10px] font-bold transition-all active:scale-95 cursor-pointer"
                                            x-html="'v' + highlight(change.v, searchQuery)">
@@ -418,12 +418,12 @@ const serviceFaqSchema = {
                 </h2>
                 <div class="flex flex-wrap gap-2">
                     {popularServices.map((pop) => (
-                        <a href={`/services/${pop}`} 
+                        <a href={`/services/${pop}/`} 
                            class="px-3.5 py-1.5 rounded-full bg-slate-100/80 dark:bg-white/5 text-xs mono font-bold text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-500/10 transition-all">
                             {pop.toUpperCase()}
                         </a>
                     ))}
-                    <a href="/services" class="px-3.5 py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-xs mono font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-600 hover:text-white transition-all">
+                    <a href="/services/" class="px-3.5 py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-xs mono font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-600 hover:text-white transition-all">
                         All 570+ Services &rarr;
                     </a>
                 </div>
@@ -477,8 +477,8 @@ const serviceFaqSchema = {
                 </div>
                 <div class="flex items-center gap-4 text-slate-500">
                     <a href="/" class="hover:text-indigo-600 dark:hover:text-indigo-400">Timeline Explorer</a>
-                    <a href="/services" class="hover:text-indigo-600 dark:hover:text-indigo-400">Services</a>
-                    <a href="/releases" class="hover:text-indigo-600 dark:hover:text-indigo-400">Releases</a>
+                    <a href="/services/" class="hover:text-indigo-600 dark:hover:text-indigo-400">Services</a>
+                    <a href="/releases/" class="hover:text-indigo-600 dark:hover:text-indigo-400">Releases</a>
                     <a href="https://github.com/5goos/botoview" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 dark:hover:text-indigo-400">GitHub</a>
                 </div>
             </div>
@@ -502,6 +502,10 @@ const serviceFaqSchema = {
             versionDates: versionDatesJson || {},
             serviceSlug,
             serviceUpper,
+
+            get hasActiveFilter() {
+                return Boolean((this.searchQuery && this.searchQuery.trim()) || this.activeFilter !== 'all' || this.currentPage > 1 || this.isShowingAll);
+            },
 
             async init() {
                 this.isDarkMode = document.documentElement.classList.contains('dark');

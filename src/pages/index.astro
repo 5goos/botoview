@@ -76,6 +76,15 @@ const canonicalUrl = "https://botoview.5goos.com/";
             serviceSort: 'popular',
             currentVersionData: initialChangesJson || [],
             isClientHydrated: true,
+            get hasActiveFilter() {
+                return Boolean(
+                    (this.versionSearch && this.versionSearch.trim()) ||
+                    this.activeFilter !== 'all' ||
+                    this.releaseServiceFilter ||
+                    this.selectedVersion !== initialLatestId ||
+                    this.viewMode !== 'release'
+                );
+            },
             serviceSearch: '',
             versionSearch: '',
             versionRailSearch: '',

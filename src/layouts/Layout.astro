@@ -10,6 +10,7 @@ interface Props {
 	bodyClass?: string;
 	robots?: string;
 	jsonLd?: Record<string, any> | Array<Record<string, any>>;
+	googleSiteVerification?: string;
 }
 const {
 	title = "BotoView — AWS Boto3 Changelog & Release Notes | 5goos",
@@ -20,9 +21,29 @@ const {
 	bodyClass = "min-h-screen w-full transition-colors duration-500",
 	robots = "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1",
 	jsonLd,
+	googleSiteVerification = process.env.GOOGLE_SITE_VERIFICATION || (import.meta.env as any)?.PUBLIC_GOOGLE_SITE_VERIFICATION,
 } = Astro.props;
 
-const canonicalUrl = canonical || new URL(Astro.url.pathname, Astro.site || 'https://botoview.5goos.com').href;
+const normalizeCanonical = (urlStr?: string): string => {
+	if (!urlStr) {
+		const rawPath = Astro.url.pathname;
+		const hasExt = /\.[a-zA-Z0-9]+$/.test(rawPath);
+		const normalizedPath = hasExt || rawPath.endsWith('/') ? rawPath : `${rawPath}/`;
+		return new URL(normalizedPath, Astro.site || 'https://botoview.5goos.com').href;
+	}
+	try {
+		const parsed = new URL(urlStr);
+		const hasExt = /\.[a-zA-Z0-9]+$/.test(parsed.pathname);
+		if (!hasExt && !parsed.pathname.endsWith('/')) {
+			parsed.pathname = `${parsed.pathname}/`;
+		}
+		return parsed.href;
+	} catch {
+		return urlStr.endsWith('/') ? urlStr : `${urlStr}/`;
+	}
+};
+
+const canonicalUrl = normalizeCanonical(canonical);
 
 const userGraph = Array.isArray(jsonLd) ? jsonLd : (jsonLd ? [jsonLd] : []);
 const hasCustomFaq = userGraph.some((node: any) => node?.["@type"] === "FAQPage");
@@ -128,6 +149,7 @@ const structuredData = {
 			})(window,document,'script','dataLayer','GTM-MVFTNMZL');
 		</script>
 		<meta name="msvalidate.01" content="EA96FCA4764C5D0B8E4B3EB0811BD6DE" />
+		{googleSiteVerification && <meta name="google-site-verification" content={googleSiteVerification} />}
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 		<title>{title}</title>
 		<meta name="description" content={description} />

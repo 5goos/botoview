@@ -27,7 +27,7 @@ const months = Object.keys(groupedByMonth).sort().reverse();
 
 const pageTitle = "AWS Boto3 Releases — All Versions & Changelogs | BotoView";
 const pageDescription = "Browse all AWS Boto3 releases, version updates, and changelogs. Track Python AWS SDK release dates, modified services, and breaking API changes.";
-const canonicalUrl = "https://botoview.5goos.com/releases";
+const canonicalUrl = "https://botoview.5goos.com/releases/";
 
 const breadcrumbSchema = {
     "@type": "BreadcrumbList",
@@ -60,7 +60,7 @@ const collectionSchema = {
             "@type": "ListItem",
             "position": index + 1,
             "name": `AWS Boto3 v${v.id}`,
-            "url": `https://botoview.5goos.com/releases/${v.id}`
+            "url": `https://botoview.5goos.com/releases/${v.id}/`
         }))
     }
 };
@@ -94,7 +94,7 @@ const collectionSchema = {
                 </div>
 
                 <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
-                    <a href="/services" class="text-xs mono font-bold uppercase tracking-wider text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 transition-colors mr-2 hidden sm:inline">
+                    <a href="/services/" class="text-xs mono font-bold uppercase tracking-wider text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 transition-colors mr-2 hidden sm:inline">
                         Services
                     </a>
                     <button @click="isDark = !isDark; document.documentElement.classList.toggle('dark', isDark); localStorage.setItem('theme', isDark ? 'dark' : 'light')"
@@ -153,7 +153,7 @@ const collectionSchema = {
                                 Released on {formatDate(latestVersion.date)}
                             </p>
                         </div>
-                        <a href={`/releases/${latestVersion.id}`}
+                        <a href={`/releases/${latestVersion.id}/`}
                            class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all active:scale-95 shadow-md shadow-indigo-500/20 self-start sm:self-auto">
                             <span>View Full v{latestVersion.id} Changelog</span>
                             <span>&rarr;</span>
@@ -179,7 +179,7 @@ const collectionSchema = {
 
                             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5">
                                 {monthVersions.map((v) => (
-                                    <a href={`/releases/${v.id}`}
+                                    <a href={`/releases/${v.id}/`}
                                        x-show={`!cleanSearch || '${v.id}'.includes(cleanSearch)`}
                                        class="soft-card p-3 rounded-xl flex flex-col justify-between hover:border-indigo-500/40 transition-all group active:scale-98">
                                         <div class="flex items-center justify-between mb-1">
@@ -223,8 +223,8 @@ const collectionSchema = {
                 </div>
                 <div class="flex items-center gap-4 text-slate-500">
                     <a href="/" class="hover:text-indigo-600 dark:hover:text-indigo-400">Interactive Explorer</a>
-                    <a href="/services" class="hover:text-indigo-600 dark:hover:text-indigo-400">Services Directory</a>
-                    <a href="/releases" class="text-indigo-600 dark:text-indigo-400 font-bold">Releases Directory</a>
+                    <a href="/services/" class="hover:text-indigo-600 dark:hover:text-indigo-400">Services Directory</a>
+                    <a href="/releases/" class="text-indigo-600 dark:text-indigo-400 font-bold">Releases Directory</a>
                     <a href="https://github.com/5goos/botoview" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 dark:hover:text-indigo-400">GitHub</a>
                 </div>
             </div>

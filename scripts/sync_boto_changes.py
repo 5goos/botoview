@@ -122,7 +122,10 @@ class BotoSync:
                 affected_services.setdefault(category, []).append({"v": version, "t": desc})
 
             self.save_json(VERSIONS_DIR / f"{version}.json", processed_changes)
-            new_entries.append({"id": version, "date": self.pypi_dates.get(version)})
+            version_date = self.pypi_dates.get(version)
+            if not version_date and new_entries:
+                version_date = new_entries[-1].get("date")
+            new_entries.append({"id": version, "date": version_date})
 
         self._update_service_files(affected_services)
         return new_entries

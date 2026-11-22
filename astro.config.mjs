@@ -8,6 +8,7 @@ import alpinejs from '@astrojs/alpinejs';
 
 export default defineConfig({
   site: 'https://botoview.5goos.com',
+  trailingSlash: 'always',
   build: {
     inlineStylesheets: 'always',
   },

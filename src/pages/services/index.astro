@@ -42,7 +42,7 @@ const popularList = services.filter(s => popularKeys.includes(s.id));
 
 const pageTitle = "AWS Boto3 Services Directory — 570+ Services | BotoView";
 const pageDescription = "Explore changelogs, release notes, and updates across 570+ AWS services in Boto3. Filter by service, inspect breaking changes, and track Python SDK updates.";
-const canonicalUrl = "https://botoview.5goos.com/services";
+const canonicalUrl = "https://botoview.5goos.com/services/";
 
 const breadcrumbSchema = {
     "@type": "BreadcrumbList",
@@ -71,7 +71,7 @@ const collectionSchema = {
     "hasPart": services.slice(0, 30).map(s => ({
         "@type": "TechArticle",
         "name": `AWS Boto3 ${s.name} Changelog`,
-        "url": `https://botoview.5goos.com/services/${s.id}`
+        "url": `https://botoview.5goos.com/services/${s.id}/`
     }))
 };
 ---
@@ -147,7 +147,7 @@ const collectionSchema = {
                 </h2>
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
                     {popularList.map((svc) => (
-                        <a href={`/services/${svc.id}`} 
+                        <a href={`/services/${svc.id}/`} 
                            class="p-3.5 rounded-2xl soft-card flex items-center justify-between group active:scale-[0.98]">
                             <div class="flex items-center gap-2.5 min-w-0">
                                 <div class={`w-8 h-8 rounded-xl flex items-center justify-center font-black mono text-xs ${getServiceColorClass(svc.id)}`}>
@@ -193,7 +193,7 @@ const collectionSchema = {
                             {groupedServices[letter].map((svc) => (
                                 <div x-show={`!search || '${svc.id}'.includes(search.toLowerCase().trim())`} 
                                      class="p-3.5 rounded-2xl soft-card flex items-center justify-between group active:scale-[0.98]">
-                                    <a href={`/services/${svc.id}`} class="flex items-center gap-2.5 min-w-0 flex-1">
+                                    <a href={`/services/${svc.id}/`} class="flex items-center gap-2.5 min-w-0 flex-1">
                                         <div class={`w-7 h-7 rounded-xl flex items-center justify-center font-black mono text-[10px] flex-shrink-0 ${getServiceColorClass(svc.id)}`}>
                                             {svc.id.substring(0, 2).toUpperCase()}
                                         </div>
@@ -257,7 +257,7 @@ const collectionSchema = {
                 </div>
                 <div class="flex items-center gap-4 text-slate-500">
                     <a href="/" class="hover:text-indigo-600 dark:hover:text-indigo-400">Timeline Explorer</a>
-                    <a href="/services" class="text-indigo-600 dark:text-indigo-400 font-bold">Services Directory</a>
+                    <a href="/services/" class="text-indigo-600 dark:text-indigo-400 font-bold">Services Directory</a>
                     <a href="https://github.com/5goos/botoview" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 dark:hover:text-indigo-400">GitHub</a>
                 </div>
             </div>

@@ -12,7 +12,7 @@ const popularServices = [
 
 const pageTitle = "404 — Page Not Found | BotoView";
 const pageDescription = "The requested AWS Boto3 release or service changelog could not be found. Search 570+ AWS services or explore all Boto3 releases.";
-const canonicalUrl = "https://botoview.5goos.com/404";
+const canonicalUrl = "https://botoview.5goos.com/404/";
 ---
 
 <Layout 
@@ -101,7 +101,7 @@ const canonicalUrl = "https://botoview.5goos.com/404";
                     </p>
                 </a>
 
-                <a href="/services" class="soft-card p-5 rounded-2xl space-y-2 group block hover:border-indigo-500/40 transition-all">
+                <a href="/services/" class="soft-card p-5 rounded-2xl space-y-2 group block hover:border-indigo-500/40 transition-all">
                     <div class="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center group-hover:scale-105 transition-transform">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
                     </div>
@@ -111,7 +111,7 @@ const canonicalUrl = "https://botoview.5goos.com/404";
                     </p>
                 </a>
 
-                <a href="/releases" class="soft-card p-5 rounded-2xl space-y-2 group block hover:border-indigo-500/40 transition-all">
+                <a href="/releases/" class="soft-card p-5 rounded-2xl space-y-2 group block hover:border-indigo-500/40 transition-all">
                     <div class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-105 transition-transform">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </div>
@@ -127,13 +127,13 @@ const canonicalUrl = "https://botoview.5goos.com/404";
                     <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 mono">
                         Popular AWS Services
                     </h3>
-                    <a href="/services" class="text-xs mono text-indigo-600 dark:text-indigo-400 font-bold hover:underline">
+                    <a href="/services/" class="text-xs mono text-indigo-600 dark:text-indigo-400 font-bold hover:underline">
                         View All 570+ &rarr;
                     </a>
                 </div>
                 <div class="flex items-center gap-1.5 flex-wrap pt-1">
                     {popularServices.map(svc => (
-                        <a href={`/services/${svc}`} 
+                        <a href={`/services/${svc}/`} 
                            title={`View ${svc.toUpperCase()} changelog`}
                            class={`inline-flex items-center px-3 py-1.5 rounded-xl text-xs mono font-bold uppercase transition-all hover:scale-105 active:scale-95 ${getServiceColorClass(svc)}`}>
                             {svc}
@@ -166,8 +166,8 @@ const canonicalUrl = "https://botoview.5goos.com/404";
                 </div>
                 <div class="flex items-center gap-4 text-slate-500">
                     <a href="/" class="hover:text-indigo-600 dark:hover:text-indigo-400">Timeline Explorer</a>
-                    <a href="/services" class="hover:text-indigo-600 dark:hover:text-indigo-400">Services</a>
-                    <a href="/releases" class="hover:text-indigo-600 dark:hover:text-indigo-400">Releases</a>
+                    <a href="/services/" class="hover:text-indigo-600 dark:hover:text-indigo-400">Services</a>
+                    <a href="/releases/" class="hover:text-indigo-600 dark:hover:text-indigo-400">Releases</a>
                     <a href="https://github.com/5goos/botoview" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 dark:hover:text-indigo-400">GitHub</a>
                 </div>
             </div>
@@ -200,10 +200,10 @@ const canonicalUrl = "https://botoview.5goos.com/404";
 
                 if (/^v?\d+\.\d+/.test(q)) {
                     const cleanVer = q.replace(/^v/, '');
-                    window.location.href = '/releases/' + cleanVer;
+                    window.location.href = '/releases/' + cleanVer + '/';
                 } else {
                     const cleanSvc = q.toLowerCase().replace(/[^a-z0-9\-]/g, '');
-                    window.location.href = '/services/' + cleanSvc;
+                    window.location.href = '/services/' + cleanSvc + '/';
                 }
             },
 
