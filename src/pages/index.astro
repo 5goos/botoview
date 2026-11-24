@@ -62,14 +62,25 @@ const canonicalUrl = "https://botoview.5goos.com/";
 
         <div class="flex h-full w-full">
             <LeftRail />
-            <MainView initialChanges={initialChanges} latestVersion={latestVersion} allServices={trackData.allServices} />
+            <MainView initialChanges={initialChanges} latestVersion={latestVersion} />
         </div>
     </div>
 </Layout>
 
-<script define:vars={{ initialLatestId: latestVersion.id, initialChangesJson: initialChanges, initialServiceCounts: trackData?.serviceCounts || {}, initialAllServices: trackData?.allServices || [] }}>
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('botoCore', () => ({
+<script is:inline define:vars={{ initialLatestId: latestVersion.id, initialChangesJson: initialChanges }}>
+    window.__BOTO_INIT__ = {
+        latestId: initialLatestId,
+        changes: initialChangesJson
+    };
+</script>
+
+<script>
+    function registerBotoCore() {
+        const initData = (window as any).__BOTO_INIT__ || {};
+        const initialLatestId = initData.latestId || '';
+        const initialChangesJson = initData.changes || [];
+
+        const factory = () => ({
             errorTitle: 'Connection Override',
             loadingText: 'Initializing Core...',
             sidebarTab: 'versions',
@@ -77,9 +88,10 @@ const canonicalUrl = "https://botoview.5goos.com/";
             selectedVersion: initialLatestId || '',
             navigatedFromVersion: null,
             versions: [],
-            allServices: initialAllServices || [],
-            serviceCounts: initialServiceCounts || {},
+            allServices: [],
+            serviceCounts: {},
             serviceSort: 'popular',
+            serviceLimit: 40,
             currentVersionData: initialChangesJson || [],
             isClientHydrated: true,
             get hasActiveFilter() {
@@ -661,7 +673,15 @@ const canonicalUrl = "https://botoview.5goos.com/";
                 }
             },
 
-            get filteredServices() {
+            get hasMoreServices() {
+                return this.serviceLimit < this._getFilteredServicesBase().length;
+            },
+
+            loadMoreServices() {
+                this.serviceLimit += 40;
+            },
+
+            _getFilteredServicesBase() {
                 let list = this.allServices || [];
                 if (this.serviceSearch) {
                     const s = this.serviceSearch.toLowerCase().trim();
@@ -676,6 +696,10 @@ const canonicalUrl = "https://botoview.5goos.com/";
                     });
                 }
                 return [...list].sort((a, b) => a.localeCompare(b));
+            },
+
+            get filteredServices() {
+                return this._getFilteredServicesBase().slice(0, this.serviceLimit);
             },
 
             _getFilteredVersionsBase() {
@@ -788,6 +812,16 @@ const canonicalUrl = "https://botoview.5goos.com/";
                     (i.description && i.description.toLowerCase().includes(s))
                 );
             }
-        }));
-    });
+        });
+
+        if ((window as any).Alpine) {
+            (window as any).Alpine.data('botoCore', factory);
+        } else {
+            document.addEventListener('alpine:init', () => {
+                (window as any).Alpine.data('botoCore', factory);
+            });
+        }
+    }
+
+    registerBotoCore();
 </script>

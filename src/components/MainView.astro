@@ -414,6 +414,42 @@ const serviceCountsMap: Record<string, number> = trackData?.serviceCounts || {};
                     ))}
                 </div>
             </section>
+
+            <!-- Visible FAQ Section matching FAQPage Schema for Google Indexing & Search Intent -->
+            <section aria-label="Frequently Asked Questions" class="soft-card rounded-2xl p-4 sm:p-5 space-y-3">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 mono">
+                        Frequently Asked Questions
+                    </h2>
+                </div>
+                <div class="space-y-3 pt-1">
+                    <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-black/[0.04] dark:border-white/[0.06]">
+                        <h3 class="text-xs font-bold text-slate-900 dark:text-white mb-1.5">
+                            What is BotoView?
+                        </h3>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                            BotoView is an interactive web application to track, filter, and explore AWS Boto3 changelogs and Botocore release notes. It provides a real-time searchable timeline of all AWS updates.
+                        </p>
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-black/[0.04] dark:border-white/[0.06]">
+                        <h3 class="text-xs font-bold text-slate-900 dark:text-white mb-1.5">
+                            How to filter boto3 changelog by service?
+                        </h3>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                            Using BotoView, you can easily filter boto3 changelogs by service (such as S3, Bedrock, Lambda, DynamoDB, and EC2) to track AWS SDK version updates, compare releases, and inspect breaking changes.
+                        </p>
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-black/[0.04] dark:border-white/[0.06]">
+                        <h3 class="text-xs font-bold text-slate-900 dark:text-white mb-1.5">
+                            Where can I find AWS Boto3 release notes and version updates?
+                        </h3>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                            BotoView provides comprehensive AWS Boto3 release notes and version updates, indexing all changes across Boto3 and Botocore with instant service-level filtering and fast search.
+                        </p>
+                    </div>
+                </div>
+            </section>
         </div>
 
         <div x-show="viewMode === 'service'" x-cloak class="space-y-4 flex-1 w-full max-w-full min-w-0" role="region" aria-label="Service changelog" aria-live="polite" aria-atomic="false">

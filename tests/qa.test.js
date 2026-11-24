@@ -78,6 +78,8 @@ async function runQASuite() {
         assert(`${page} has canonical pointing to https://botoview.5goos.com ending in /`, canonicalMatch && canonicalMatch[1].startsWith('https://botoview.5goos.com') && canonicalMatch[1].endsWith('/'), canonicalMatch ? canonicalMatch[1] : 'Missing');
 
         assert(`${page} has skip-to-content accessibility link`, text.includes('href="#mainScrollArea"') && text.includes('id="mainScrollArea"'));
+        assert(`${page} has Google site verification tag`, text.includes('name="google-site-verification"') && text.includes('content="yNlBXN3mZgfAx_NAuIyOfebJcgd9H0sczXDus8gfYPA"'));
+        assert(`${page} has NO GTM script or dataLayer`, !text.includes('GTM-MVFTNMZL') && !text.includes('dataLayer'));
 
         const jsonLdMatches = text.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g) || [];
         assert(`${page} has valid JSON-LD schemas`, jsonLdMatches.length > 0, `Found ${jsonLdMatches.length} blocks`);
