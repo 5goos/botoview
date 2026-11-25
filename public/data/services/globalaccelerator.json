@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.11",
+    "t": "AWS Global Accelerator supports Client IP Preservation for NLBs with TLS Listener endpoints."
+  },
+  {
     "v": "1.43.106",
     "t": "IpSets now include the Network Zone for each Static IP address."
   },
