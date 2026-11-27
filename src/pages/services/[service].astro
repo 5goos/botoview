@@ -2,8 +2,14 @@
 export const prerender = true;
 
 import Layout from '../../layouts/Layout.astro';
-import { getServiceColorClass, formatDescription, formatDate, slugifyService } from '../../utils/formatting';
-import { loadServiceUpdates, serviceModules } from '../../utils/data';
+import {
+    formatDate,
+    formatDescription,
+    getServiceColorClass,
+    normalizeChangeType,
+    trimDescription
+} from '../../utils/formatting';
+import { loadServiceUpdates, serviceModules, type ServiceUpdateItem } from '../../utils/data';
 import { computeServiceTelemetry } from '../../utils/serviceTelemetry';
 import trackData from '../../../public/data/track.json';
 
@@ -20,6 +26,13 @@ export async function getStaticPaths() {
         const service = match ? match[1] : '';
         const list = Array.isArray(changes) ? changes : [];
 
+        const scopedDates: Record<string, string> = {};
+        for (const item of list) {
+            if (item.v && versionDates[item.v]) {
+                scopedDates[item.v] = versionDates[item.v];
+            }
+        }
+
         const latestVersion = list[0]?.v || '';
         const latestDate = versionDates[latestVersion] || '';
 
@@ -28,7 +41,7 @@ export async function getStaticPaths() {
             props: {
                 service,
                 changes: list,
-                versionDates,
+                versionDates: scopedDates,
                 latestVersion,
                 latestDate,
                 totalUpdates: list.length
@@ -48,17 +61,24 @@ if (!versionDates && trackData?.versions) {
 }
 versionDates = versionDates || {};
 
-let changes: Array<{ v: string; t: string }> = Astro.props.changes;
+let changes: ServiceUpdateItem[] = Astro.props.changes;
 if (!changes || changes.length === 0) {
     changes = loadServiceUpdates(service);
 }
 changes = changes || [];
 
+const scopedVersionDates: Record<string, string> = {};
+for (const c of changes) {
+    if (c.v && versionDates[c.v]) {
+        scopedVersionDates[c.v] = versionDates[c.v];
+    }
+}
+
 const latestVersion = Astro.props.latestVersion || changes[0]?.v || '';
-const latestDate = Astro.props.latestDate || versionDates[latestVersion] || '';
+const latestDate = Astro.props.latestDate || scopedVersionDates[latestVersion] || '';
 const totalUpdates = Astro.props.totalUpdates || changes.length;
 
-const telemetry = computeServiceTelemetry(service, changes, versionDates);
+const telemetry = computeServiceTelemetry(service, changes, scopedVersionDates);
 const isIndexable = telemetry.isIndexable;
 const robots = isIndexable ? "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" : "noindex, follow";
 
@@ -76,36 +96,38 @@ if (pageTitle.length > 60) {
     pageTitle = `${serviceUpper.slice(0, 45)}... | BotoView`;
 }
 
-const pageDescription = `AWS Boto3 SDK updates for ${serviceUpper}. Explore ${totalUpdates} changes (${telemetry.updates365d} in past year), API diff breakdowns, client quickstart, and release history.`.slice(0, 155);
+const pageDescription = trimDescription(
+    `AWS Boto3 SDK updates for ${serviceUpper}. Explore ${totalUpdates} changes (${telemetry.updates365d} in past year), API diff breakdowns, client quickstart, and release history.`,
+    155
+);
 const canonicalUrl = `https://botoview.5goos.com/services/${service}/`;
 
-const popularServices = ['s3', 'bedrock', 'dynamodb', 'lambda', 'ec2', 'iam', 'cloudwatch', 'sqs', 'rds', 'secretsmanager'].filter(s => s !== service);
+const PAGE_SIZE = 30;
+const initialSsrUpdates = changes.slice(0, PAGE_SIZE);
+const popularServices = ['s3', 'bedrock', 'dynamodb', 'lambda', 'ec2', 'iam', 'cloudwatch', 'sqs', 'rds', 'secretsmanager'].filter((s) => s !== service);
+
+let apiCount = 0;
+let featureCount = 0;
+let enhancementCount = 0;
+let fixCount = 0;
+for (const c of changes) {
+    const key = normalizeChangeType('', c.t).key;
+    if (key === 'api-change') apiCount++;
+    else if (key === 'feature') featureCount++;
+    else if (key === 'enhancement') enhancementCount++;
+    else fixCount++;
+}
 
 const breadcrumbSchema = {
     "@type": "BreadcrumbList",
     "itemListElement": [
-        {
-            "@type": "ListItem",
-            "position": 1,
-            "name": "Home",
-            "item": "https://botoview.5goos.com/"
-        },
-        {
-            "@type": "ListItem",
-            "position": 2,
-            "name": "Services",
-            "item": "https://botoview.5goos.com/services/"
-        },
-        {
-            "@type": "ListItem",
-            "position": 3,
-            "name": serviceUpper,
-            "item": canonicalUrl
-        }
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://botoview.5goos.com/" },
+        { "@type": "ListItem", "position": 2, "name": "Services", "item": "https://botoview.5goos.com/services/" },
+        { "@type": "ListItem", "position": 3, "name": serviceUpper, "item": canonicalUrl }
     ]
 };
 
-const publishedDate = (changes.length > 0 && versionDates[changes[changes.length - 1]?.v]) || latestDate || "2020-01-01";
+const publishedDate = (changes.length > 0 && scopedVersionDates[changes[changes.length - 1]?.v]) || latestDate || "2020-01-01";
 
 const serviceArticleSchema = {
     "@type": "TechArticle",
@@ -114,28 +136,17 @@ const serviceArticleSchema = {
     "description": pageDescription,
     "url": canonicalUrl,
     "inLanguage": "en-US",
-    "mainEntityOfPage": {
-        "@type": "WebPage",
-        "@id": canonicalUrl
-    },
+    "mainEntityOfPage": { "@type": "WebPage", "@id": canonicalUrl },
     "image": "https://botoview.5goos.com/og-image.png",
     "datePublished": publishedDate,
     "dateModified": latestDate || new Date().toISOString().split('T')[0],
-    "author": {
-        "@type": "Organization",
-        "@id": "https://5goos.com/#organization",
-        "name": "5goos",
-        "url": "https://5goos.com/"
-    },
+    "author": { "@type": "Organization", "@id": "https://5goos.com/#organization", "name": "5goos", "url": "https://5goos.com/" },
     "publisher": {
         "@type": "Organization",
         "@id": "https://5goos.com/#organization",
         "name": "5goos",
         "url": "https://5goos.com/",
-        "logo": {
-            "@type": "ImageObject",
-            "url": "https://botoview.5goos.com/favicon.png"
-        }
+        "logo": { "@type": "ImageObject", "url": "https://botoview.5goos.com/favicon.png" }
     }
 };
 
@@ -147,7 +158,7 @@ const serviceFaqSchema = {
             "name": `What is the latest update for AWS ${serviceUpper} in Boto3?`,
             "acceptedAnswer": {
                 "@type": "Answer",
-                "text": changes[0] 
+                "text": changes[0]
                     ? `The latest update for ${serviceUpper} was added in Boto3 release ${changes[0].v}: ${changes[0].t}`
                     : `No recent changes logged for ${serviceUpper}.`
             }
@@ -179,31 +190,30 @@ const softwareAppSchema = {
     "operatingSystem": "Python / Cross-platform",
     "softwareVersion": latestVersion || trackData?.versions?.[0]?.id || "latest",
     "dateModified": latestDate || new Date().toISOString().split('T')[0],
-    "author": {
-        "@type": "Organization",
-        "name": "Amazon Web Services"
-    },
-    "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-    }
+    "author": { "@type": "Organization", "name": "Amazon Web Services" },
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
 };
 ---
 
-<Layout 
-    title={pageTitle} 
-    description={pageDescription} 
+<Layout
+    title={pageTitle}
+    description={pageDescription}
     canonical={canonicalUrl}
     robots={robots}
     includeDefaultApp={false}
-    bodyClass="min-h-screen w-full overflow-y-auto text-[var(--text-secondary)] transition-colors duration-500"
+    bodyClass="min-h-screen w-full overflow-y-auto text-[var(--text-secondary)] transition-colors duration-200"
     jsonLd={[breadcrumbSchema, serviceArticleSchema, softwareAppSchema, serviceFaqSchema]}
 >
-    <div class="min-h-screen flex flex-col bg-transparent" x-data="servicePage" @scroll.window="isScrolled = window.scrollY > 10" @keydown.window="handleKeydown($event)">
+    <div class="min-h-screen flex flex-col bg-transparent relative"
+         x-data="servicePage"
+         @scroll.window="isScrolled = window.scrollY > 10"
+         @boto:theme-changed.window="isDarkMode = $event.detail.isDark"
+         @keydown.window="handleKeydown($event)">
+        <div class="pointer-events-none fixed inset-0 z-0 ambient-glow" aria-hidden="true"></div>
+
         <header class="h-14 glass-header sticky top-0 z-40 flex items-center transition-all duration-200" :class="isScrolled ? 'glass-header-scrolled' : ''">
-            <div class="w-full max-w-5xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-3">
-                <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+            <div class="w-full max-w-5xl mx-auto px-3 sm:px-6 flex items-center justify-between gap-2 min-w-0">
+                <div class="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
                     <a href="/" class="flex items-center gap-2 group cursor-pointer shrink-0" aria-label="BotoView Home">
                         <img src="/favicon.svg" width="22" height="22" alt="BotoView logo" class="w-5 h-5 group-hover:scale-105 transition-transform" />
                         <span class="text-[15px] font-semibold tracking-tight text-slate-900 dark:text-slate-100 leading-none">BotoView</span>
@@ -213,92 +223,118 @@ const softwareAppSchema = {
                         Services
                     </a>
                     <span class="text-slate-300 dark:text-white/10">/</span>
-                    <span class="text-xs mono font-bold uppercase text-indigo-600 dark:text-indigo-400 truncate max-w-[120px] sm:max-w-none">
+                    <span class="text-xs mono font-bold uppercase text-indigo-600 dark:text-indigo-400 truncate max-w-[100px] sm:max-w-none">
                         {service}
                     </span>
                 </div>
 
-                <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
-                    <a href={`/?s=${service}`} 
-                       title="Open this service in interactive 3-column explorer"
-                       class="inline-flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full text-xs font-bold transition-all active:scale-95 shadow-sm shadow-indigo-500/25 shrink-0">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                        <span class="hidden sm:inline">Interactive Explorer</span>
+                <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
+                    <button type="button"
+                            @click="openPalette()"
+                            aria-label="Open command search (Cmd/Ctrl+K)"
+                            title="Quick jump (Cmd/Ctrl + K)"
+                            class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium text-slate-600 dark:text-slate-300 bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.08] dark:hover:bg-white/[0.1] transition-colors cursor-pointer shrink-0 min-h-[40px] sm:min-h-0">
+                        <svg class="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        <kbd class="kbd-badge hidden sm:inline-flex">⌘K</kbd>
+                    </button>
+
+                    <a href={`/?s=${service}`}
+                       title="Open this service in interactive explorer"
+                       class="inline-flex items-center gap-1 px-2.5 sm:px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full text-xs font-semibold transition-all active:scale-95 shadow-sm shadow-indigo-500/25 shrink-0">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        <span class="hidden sm:inline">Explorer</span>
                         <span class="sm:hidden text-[11px]">App</span>
                     </a>
 
-                    <button @click="toggleTheme()" 
+                    <button type="button"
+                            @click="toggleTheme()"
                             aria-label="Toggle dark mode"
-                            class="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-white/10 transition-all cursor-pointer shrink-0">
-                        <svg x-show="!isDarkMode" class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-                        <svg x-show="isDarkMode" x-cloak class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                            title="Toggle dark / light theme (t)"
+                            class="rounded-full text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-black/[0.04] dark:hover:bg-white/[0.07] transition-colors cursor-pointer shrink-0 tap-target flex items-center justify-center">
+                        <svg x-show="!isDarkMode" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                        <svg x-show="isDarkMode" class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                     </button>
 
-                    <a href="https://github.com/5goos/botoview" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository" class="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-white/10 transition-all shrink-0">
+                    <a href="https://github.com/5goos/botoview" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository" class="hidden sm:flex rounded-full text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-black/[0.04] dark:hover:bg-white/[0.07] transition-colors shrink-0 tap-target items-center justify-center">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
                     </a>
                 </div>
             </div>
         </header>
 
-        <main id="mainScrollArea" tabindex="-1" class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-6">
-            <nav class="flex items-center gap-2 text-xs mono text-slate-400" aria-label="Breadcrumb">
+        <main id="mainScrollArea" tabindex="-1" class="relative z-10 flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-6 min-w-0">
+            <nav class="flex items-center gap-2 text-xs mono text-slate-500 dark:text-slate-400" aria-label="Breadcrumb">
                 <a href="/" class="hover:text-indigo-600 dark:hover:text-indigo-400">Home</a>
                 <span>/</span>
                 <a href="/services/" class="hover:text-indigo-600 dark:hover:text-indigo-400">Services</a>
                 <span>/</span>
-                <span class="text-slate-700 dark:text-slate-200 font-bold">{serviceUpper}</span>
+                <span class="text-slate-800 dark:text-slate-200 font-bold truncate">{serviceUpper}</span>
             </nav>
 
             <header class="soft-card p-5 sm:p-6 rounded-2xl space-y-4">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div class="space-y-1">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 min-w-0">
+                    <div class="space-y-1 min-w-0">
                         <div class="flex items-center gap-2.5 flex-wrap">
-                            <div class={`w-8 h-8 rounded-xl flex items-center justify-center font-bold mono text-xs ${getServiceColorClass(service)}`}>
+                            <div class={`w-8 h-8 rounded-xl flex items-center justify-center font-bold mono text-xs shrink-0 ${getServiceColorClass(service)}`}>
                                 {service.substring(0, 2).toUpperCase()}
                             </div>
-                            <h1 class="text-2xl sm:text-3xl font-bold mono text-slate-900 dark:text-white tracking-tight">
+                            <h1 class="text-2xl sm:text-3xl font-bold mono text-slate-900 dark:text-white tracking-tight break-words">
                                 AWS {serviceUpper}
                             </h1>
-                            <span class="px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 text-xs mono font-semibold">
+                            <span class="px-2.5 py-0.5 rounded-full bg-indigo-500/12 text-indigo-700 dark:text-indigo-300 text-xs mono font-semibold">
                                 {totalUpdates} updates
                             </span>
                         </div>
                         {latestVersion && (
                             <p class="text-xs sm:text-sm mono text-slate-500 dark:text-slate-400">
                                 Latest release: <strong class="text-slate-700 dark:text-slate-300 font-semibold">v{latestVersion}</strong>
-                                {latestDate && <span class="ml-1">({formatDate(latestDate)})</span>}
+                                {latestDate && <time datetime={latestDate} class="ml-1">({formatDate(latestDate)})</time>}
                             </p>
                         )}
                     </div>
 
-                    <div class="flex items-center gap-2 p-1.5 pl-3 bg-slate-100/90 dark:bg-white/[0.04] rounded-xl mono text-xs self-start sm:self-auto">
-                        <span class="text-slate-500 select-none">$</span>
-                        <code class="text-indigo-600 dark:text-indigo-400 font-semibold select-all">pip install --upgrade boto3</code>
+                    <div class="inline-flex items-center gap-1 p-1 bg-black/[0.04] dark:bg-white/[0.05] rounded-xl mono text-xs self-start md:self-auto max-w-full overflow-x-auto hide-scrollbar">
+                        <button type="button"
+                                @click="pinTool = pinTool === 'pip' ? 'uv' : 'pip'"
+                                title="Switch package manager"
+                                class="px-2 py-1 rounded-lg text-[10px] mono font-semibold uppercase bg-black/[0.05] dark:bg-white/[0.08] text-slate-600 dark:text-slate-300 cursor-pointer shrink-0">
+                            <span x-text="pinTool">pip</span>
+                        </button>
+                        <code class="px-1.5 text-indigo-700 dark:text-indigo-300 font-semibold whitespace-nowrap select-all"
+                              x-text="pinTool === 'uv' ? 'uv add boto3==' + (latestVersion || 'latest') : 'pip install --upgrade boto3'">
+                            pip install --upgrade boto3
+                        </code>
+                        <button type="button"
+                                @click="copyInstallCmd()"
+                                aria-label="Copy install command"
+                                class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10.5px] mono font-medium text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-300 cursor-pointer shrink-0">
+                            <svg x-show="!pinCopied" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                            <span x-show="pinCopied" x-cloak class="text-emerald-600 dark:text-emerald-400 font-semibold">Copied</span>
+                        </button>
                     </div>
                 </div>
             </header>
 
             <section aria-label="AWS SDK Telemetry" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div class="soft-card p-4 rounded-2xl space-y-1">
-                    <span class="text-[10px] mono uppercase font-semibold text-slate-400">Total Updates</span>
-                    <p class="text-xl sm:text-2xl font-bold mono text-indigo-600 dark:text-indigo-400">{telemetry.totalUpdates}</p>
-                    <span class="text-[10px] text-slate-500 block truncate">{telemetry.cadenceText}</span>
+                <div class="soft-card p-4 rounded-2xl space-y-1 min-w-0">
+                    <span class="text-[10px] mono uppercase font-semibold text-slate-500 dark:text-slate-400">Total Updates</span>
+                    <p class="text-xl sm:text-2xl font-bold mono text-indigo-600 dark:text-indigo-400 tabular-nums">{telemetry.totalUpdates}</p>
+                    <span class="text-[10px] text-slate-500 dark:text-slate-400 block truncate">{telemetry.cadenceText}</span>
                 </div>
-                <div class="soft-card p-4 rounded-2xl space-y-1">
-                    <span class="text-[10px] mono uppercase font-semibold text-slate-400">Last 30 Days</span>
-                    <p class="text-xl sm:text-2xl font-bold mono text-emerald-600 dark:text-emerald-400">+{telemetry.updates30d}</p>
-                    <span class="text-[10px] text-slate-500 block">+{telemetry.updates90d} in 90 days</span>
+                <div class="soft-card p-4 rounded-2xl space-y-1 min-w-0">
+                    <span class="text-[10px] mono uppercase font-semibold text-slate-500 dark:text-slate-400">Last 30 Days</span>
+                    <p class="text-xl sm:text-2xl font-bold mono text-emerald-600 dark:text-emerald-400 tabular-nums">+{telemetry.updates30d}</p>
+                    <span class="text-[10px] text-slate-500 dark:text-slate-400 block">+{telemetry.updates90d} in 90 days</span>
                 </div>
-                <div class="soft-card p-4 rounded-2xl space-y-1">
-                    <span class="text-[10px] mono uppercase font-semibold text-slate-400">Past 12 Months</span>
-                    <p class="text-xl sm:text-2xl font-bold mono text-sky-600 dark:text-sky-400">+{telemetry.updates365d}</p>
-                    <span class="text-[10px] text-slate-500 block">Annual velocity</span>
+                <div class="soft-card p-4 rounded-2xl space-y-1 min-w-0">
+                    <span class="text-[10px] mono uppercase font-semibold text-slate-500 dark:text-slate-400">Past 12 Months</span>
+                    <p class="text-xl sm:text-2xl font-bold mono text-sky-600 dark:text-sky-400 tabular-nums">+{telemetry.updates365d}</p>
+                    <span class="text-[10px] text-slate-500 dark:text-slate-400 block">Annual velocity</span>
                 </div>
-                <div class="soft-card p-4 rounded-2xl space-y-1">
-                    <span class="text-[10px] mono uppercase font-semibold text-slate-400">Release Span</span>
+                <div class="soft-card p-4 rounded-2xl space-y-1 min-w-0">
+                    <span class="text-[10px] mono uppercase font-semibold text-slate-500 dark:text-slate-400">Release Span</span>
                     <p class="text-xs sm:text-sm font-bold mono text-slate-800 dark:text-slate-200 truncate">v{telemetry.firstVersion} &rarr; v{telemetry.latestVersion}</p>
-                    <span class="text-[10px] text-slate-500 block truncate">{telemetry.firstDate ? `${formatDate(telemetry.firstDate)}` : 'Historical'}</span>
+                    <span class="text-[10px] text-slate-500 dark:text-slate-400 block truncate">{telemetry.firstDate ? formatDate(telemetry.firstDate) : 'Historical'}</span>
                 </div>
             </section>
 
@@ -307,56 +343,64 @@ const softwareAppSchema = {
                     <h2 class="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 mono">
                         API Diff Composition &amp; Update Types
                     </h2>
-                    <span class="text-[10px] mono text-slate-400">Parsed from upstream Boto3 commits</span>
+                    <span class="text-[10px] mono text-slate-500 dark:text-slate-400">Parsed from upstream Boto3 commits</span>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                     <div class="p-3 rounded-xl bg-emerald-500/10 flex items-center justify-between">
                         <div>
                             <span class="text-xs font-bold text-emerald-700 dark:text-emerald-300 block">Features &amp; API Changes</span>
-                            <span class="text-[10px] text-emerald-600/80 dark:text-emerald-400/80">New operations &amp; models</span>
+                            <span class="text-[10px] text-emerald-700/80 dark:text-emerald-400/80">New operations &amp; models</span>
                         </div>
-                        <span class="text-lg font-bold mono text-emerald-700 dark:text-emerald-300">{telemetry.featuresCount}</span>
+                        <span class="text-lg font-bold mono text-emerald-700 dark:text-emerald-300 tabular-nums">{telemetry.featuresCount}</span>
                     </div>
                     <div class="p-3 rounded-xl bg-rose-500/10 flex items-center justify-between">
                         <div>
                             <span class="text-xs font-bold text-rose-700 dark:text-rose-300 block">Fixes &amp; Patches</span>
-                            <span class="text-[10px] text-rose-600/80 dark:text-rose-400/80">Bug fixes &amp; resolutions</span>
+                            <span class="text-[10px] text-rose-700/80 dark:text-rose-400/80">Bug fixes &amp; resolutions</span>
                         </div>
-                        <span class="text-lg font-bold mono text-rose-700 dark:text-rose-300">{telemetry.fixesCount}</span>
+                        <span class="text-lg font-bold mono text-rose-700 dark:text-rose-300 tabular-nums">{telemetry.fixesCount}</span>
                     </div>
                     <div class="p-3 rounded-xl bg-sky-500/10 flex items-center justify-between">
                         <div>
                             <span class="text-xs font-bold text-sky-700 dark:text-sky-300 block">Enhancements &amp; Docs</span>
-                            <span class="text-[10px] text-sky-600/80 dark:text-sky-400/80">Documentation &amp; SDK core</span>
+                            <span class="text-[10px] text-sky-700/80 dark:text-sky-400/80">Documentation &amp; SDK core</span>
                         </div>
-                        <span class="text-lg font-bold mono text-sky-700 dark:text-sky-300">{telemetry.enhancementsCount}</span>
+                        <span class="text-lg font-bold mono text-sky-700 dark:text-sky-300 tabular-nums">{telemetry.enhancementsCount}</span>
                     </div>
                 </div>
             </section>
 
-            <section aria-label="Developer Quickstart" class="soft-card p-4 sm:p-5 rounded-2xl space-y-3">
+            <section aria-label="Developer Quickstart" class="soft-card p-4 sm:p-5 rounded-2xl space-y-3 min-w-0">
                 <h2 class="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 mono">
                     Python Developer Quickstart for AWS {serviceUpper}
                 </h2>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 pt-1">
-                    <div class="space-y-1.5">
-                        <span class="text-[10px] mono text-slate-400 font-semibold uppercase">Client Initialization</span>
-                        <pre class="p-3 rounded-xl bg-slate-900 text-slate-100 font-mono text-[11px] overflow-x-auto select-all"><code>{telemetry.clientSnippet}</code></pre>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 pt-1 min-w-0">
+                    <div class="space-y-1.5 min-w-0">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] mono text-slate-500 dark:text-slate-400 font-semibold uppercase">Client Initialization</span>
+                            <button type="button"
+                                    @click="copySnippet()"
+                                    class="text-[10px] mono font-semibold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer">
+                                <span x-show="!snippetCopied">Copy snippet</span>
+                                <span x-show="snippetCopied" x-cloak class="text-emerald-600 dark:text-emerald-400">Copied</span>
+                            </button>
+                        </div>
+                        <pre class="p-3 rounded-xl bg-[#0d111a] text-slate-100 font-mono text-[11px] overflow-x-auto max-w-full select-all"><code>{telemetry.clientSnippet}</code></pre>
                     </div>
-                    <div class="space-y-2">
-                        <div class="space-y-1.5">
-                            <span class="text-[10px] mono text-slate-400 font-semibold uppercase">Exact Boto3 Pin</span>
-                            <div class="p-2.5 rounded-xl bg-slate-100/90 dark:bg-white/[0.04] flex items-center justify-between gap-2">
-                                <code class="text-xs mono font-semibold text-indigo-600 dark:text-indigo-400 select-all">{telemetry.installSnippet}</code>
+                    <div class="space-y-2.5 min-w-0">
+                        <div class="space-y-1.5 min-w-0">
+                            <span class="text-[10px] mono text-slate-500 dark:text-slate-400 font-semibold uppercase">Exact Boto3 Pin</span>
+                            <div class="p-2.5 rounded-xl bg-black/[0.04] dark:bg-white/[0.04] flex items-center justify-between gap-2 overflow-x-auto hide-scrollbar">
+                                <code class="text-xs mono font-semibold text-indigo-700 dark:text-indigo-300 whitespace-nowrap select-all">{telemetry.installSnippet}</code>
                             </div>
                         </div>
                         {telemetry.relatedServices.length > 0 && (
-                            <div class="space-y-1.5 pt-1">
-                                <span class="text-[10px] mono text-slate-400 font-semibold uppercase">Related AWS Services</span>
+                            <div class="space-y-1.5 pt-1 min-w-0">
+                                <span class="text-[10px] mono text-slate-500 dark:text-slate-400 font-semibold uppercase">Related AWS Services</span>
                                 <div class="flex items-center gap-1.5 flex-wrap">
                                     {telemetry.relatedServices.map((rel) => (
                                         <a href={`/services/${rel}/`}
-                                           class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 dark:bg-white/[0.05] dark:hover:bg-indigo-500/15 mono text-[10.5px] uppercase font-bold text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                                           class="px-2.5 py-1 rounded-lg bg-black/[0.04] hover:bg-indigo-500/12 dark:bg-white/[0.05] dark:hover:bg-indigo-500/15 mono text-[10.5px] uppercase font-bold text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
                                             {rel} &rarr;
                                         </a>
                                     ))}
@@ -367,68 +411,93 @@ const softwareAppSchema = {
                 </div>
             </section>
 
-            <div class="soft-card p-2.5 sm:p-3 rounded-2xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
-                <div class="relative flex-1 group">
-                    <input type="text" 
-                           x-model.debounce.150ms="searchQuery" 
+            <div class="soft-card p-2.5 sm:p-3 rounded-2xl flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-2.5">
+                <div class="relative flex-1 group min-w-0">
+                    <input type="text"
+                           id="serviceFilterSearch"
+                           x-model.debounce.150ms="searchQuery"
                            @input="currentPage = 1"
-                           placeholder={`Filter ${totalUpdates} updates in ${serviceUpper} (e.g. fix, ami, v1.44)...`} 
+                           placeholder={`Filter ${totalUpdates} updates in ${serviceUpper} (e.g. fix, ami, v1.44)...`}
                            aria-label={`Filter updates in ${serviceUpper}`}
-                           class="w-full glass-input rounded-xl py-1.5 pl-8 pr-7 text-[11px] focus:outline-none text-slate-900 dark:text-white placeholder:text-slate-400 font-medium transition-all" />
-                    <svg class="absolute left-2.5 top-[8px] w-3.5 h-3.5 text-slate-400 group-focus-within:text-indigo-500 transition-colors pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    <button x-show="searchQuery" x-cloak @click="searchQuery = ''; currentPage = 1" aria-label="Clear filter" class="absolute right-2 top-[7px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 cursor-pointer">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                           class="w-full glass-input rounded-xl py-2 sm:py-1.5 pl-8 pr-8 text-xs focus:outline-none text-slate-900 dark:text-white placeholder:text-slate-400 font-medium transition-all" />
+                    <svg class="absolute left-2.5 top-[10px] sm:top-[8px] w-3.5 h-3.5 text-slate-400 group-focus-within:text-indigo-500 transition-colors pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <button type="button" x-show="searchQuery" x-cloak @click="searchQuery = ''; currentPage = 1" aria-label="Clear filter" class="absolute right-2 top-[8px] sm:top-[6px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 cursor-pointer">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
 
-                <div class="flex items-center gap-1 p-0.5 glass-segmented rounded-xl mono text-[9.5px] shrink-0">
-                    <button @click="activeFilter = 'all'; currentPage = 1" 
-                            :class="activeFilter === 'all' ? 'bg-indigo-500/14 dark:bg-white/10 text-indigo-700 dark:text-indigo-400 font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-900/[0.04] dark:hover:bg-white/[0.05]'"
-                            class="px-2.5 py-1 rounded-lg uppercase transition-all cursor-pointer">
+                <div class="flex items-center gap-1 p-0.5 glass-segmented rounded-xl mono text-[10px] shrink-0 overflow-x-auto hide-scrollbar max-w-full">
+                    <button type="button"
+                            @click="activeFilter = 'all'; currentPage = 1"
+                            :class="activeFilter === 'all' ? 'bg-indigo-500/14 dark:bg-white/10 text-indigo-700 dark:text-white font-semibold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                            class="px-2.5 py-1.5 sm:py-1 rounded-lg uppercase transition-all cursor-pointer whitespace-nowrap">
                         All (<span x-text="serviceCounts.total">{totalUpdates}</span>)
                     </button>
-                    <button @click="activeFilter = 'feature'; currentPage = 1" 
-                            :class="activeFilter === 'feature' ? 'bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-900/[0.04] dark:hover:bg-white/[0.05]'"
-                            class="px-2.5 py-1 rounded-lg uppercase transition-all cursor-pointer">
-                        Features (<span x-text="serviceCounts.features"></span>)
+                    <button type="button"
+                            @click="activeFilter = 'api-change'; currentPage = 1"
+                            :class="activeFilter === 'api-change' ? 'bg-teal-500/15 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                            class="px-2.5 py-1.5 sm:py-1 rounded-lg uppercase transition-all cursor-pointer whitespace-nowrap">
+                        API (<span x-text="serviceCounts.apiChanges">{apiCount}</span>)
                     </button>
-                    <button @click="activeFilter = 'fix'; currentPage = 1" 
-                            :class="activeFilter === 'fix' ? 'bg-rose-500/15 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400 font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-900/[0.04] dark:hover:bg-white/[0.05]'"
-                            class="px-2.5 py-1 rounded-lg uppercase transition-all cursor-pointer">
-                        Fixes (<span x-text="serviceCounts.fixes"></span>)
+                    <button type="button"
+                            @click="activeFilter = 'feature'; currentPage = 1"
+                            :class="activeFilter === 'feature' ? 'bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                            class="px-2.5 py-1.5 sm:py-1 rounded-lg uppercase transition-all cursor-pointer whitespace-nowrap">
+                        Features (<span x-text="serviceCounts.features">{featureCount}</span>)
+                    </button>
+                    <button type="button"
+                            @click="activeFilter = 'enhancement'; currentPage = 1"
+                            :class="activeFilter === 'enhancement' ? 'bg-sky-500/15 dark:bg-sky-500/20 text-sky-700 dark:text-sky-300 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                            class="px-2.5 py-1.5 sm:py-1 rounded-lg uppercase transition-all cursor-pointer whitespace-nowrap">
+                        Enhance (<span x-text="serviceCounts.enhancements">{enhancementCount}</span>)
+                    </button>
+                    <button type="button"
+                            @click="activeFilter = 'bugfix'; currentPage = 1"
+                            :class="activeFilter === 'bugfix' ? 'bg-rose-500/15 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                            class="px-2.5 py-1.5 sm:py-1 rounded-lg uppercase transition-all cursor-pointer whitespace-nowrap">
+                        Fixes (<span x-text="serviceCounts.fixes">{fixCount}</span>)
                     </button>
                 </div>
             </div>
 
-            <section class="space-y-4">
+            <section id="changelog-feed" class="space-y-4">
                 <div x-show="!hasActiveFilter" class="space-y-3" id="ssr-history">
-                    {changes.map((change, idx) => {
-                        const date = versionDates[change.v];
-                        const isFix = change.t.toLowerCase().includes('fix');
+                    {initialSsrUpdates.map((change, idx) => {
+                        const date = scopedVersionDates[change.v];
+                        const meta = normalizeChangeType('', change.t);
+                        const anchorId = `v${change.v.replace(/\./g, '-')}-${idx}`;
                         return (
-                            <article class="changelog-card rounded-2xl p-4 sm:p-5 group">
+                            <article id={anchorId} class="changelog-card rounded-2xl p-4 sm:p-5 group scroll-mt-24 content-auto">
                                 <div class="flex items-center justify-between gap-2 mb-2 flex-wrap">
                                     <div class="flex items-center gap-2">
-                                        <a href={`/releases/${change.v}/`} 
+                                        <a href={`/releases/${change.v}/`}
                                            title={`AWS Boto3 release v${change.v}`}
-                                           class="px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-600 hover:text-white mono text-[10px] font-bold transition-all active:scale-95 cursor-pointer">
+                                           class="px-2.5 py-0.5 rounded-full bg-indigo-500/12 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-600 hover:text-white mono text-[10.5px] font-bold transition-all active:scale-95 cursor-pointer">
                                             v{change.v}
                                         </a>
-                                        <div class={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] mono font-bold uppercase tracking-wider ${isFix ? 'text-rose-600 dark:text-rose-400 bg-rose-500/10' : 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10'}`}>
-                                            <span class={`w-1.5 h-1.5 rounded-full ${isFix ? 'bg-rose-500' : 'bg-emerald-500'}`}></span>
-                                            <span>{isFix ? 'Fix' : 'Feature / API'}</span>
+                                        <div class={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] mono font-semibold uppercase tracking-wider ${meta.badgeClass}`}>
+                                            <span class={`w-1.5 h-1.5 rounded-full ${meta.dotClass}`}></span>
+                                            <span>{meta.label}</span>
                                         </div>
                                     </div>
-                                    <div class="flex items-center gap-2 shrink-0">
+                                    <div class="flex items-center gap-1.5 shrink-0">
                                         {date && (
-                                            <time class="text-[11px] mono text-slate-400 dark:text-slate-500 tabular-nums">
+                                            <time datetime={date} class="text-[11px] mono text-slate-500 dark:text-slate-400 tabular-nums">
                                                 {formatDate(date)}
                                             </time>
                                         )}
-                                        <button @click={`allUpdates[${idx}] && copyUpdate(serviceUpper + ': ' + allUpdates[${idx}].t + ' (' + allUpdates[${idx}].v + ')', ${idx})`}
+                                        <button type="button"
+                                                @click={`copyAnchorLink('${anchorId}')`}
+                                                title="Copy deep link"
+                                                aria-label="Copy deep link"
+                                                class="tap-target sm:opacity-45 group-hover:opacity-100 focus:opacity-100 inline-flex items-center justify-center rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-all cursor-pointer mono text-xs">
+                                            #
+                                        </button>
+                                        <button type="button"
+                                                @click={`allUpdates[${idx}] && copyUpdate(serviceUpper + ': ' + allUpdates[${idx}].t + ' (' + allUpdates[${idx}].v + ')', ${idx})`}
                                                 title="Copy change entry"
                                                 aria-label="Copy change entry"
-                                                class="inline-flex items-center gap-1 p-1.5 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-black/[0.04] dark:hover:bg-white/[0.08] transition-colors cursor-pointer">
+                                                class="tap-target sm:opacity-45 group-hover:opacity-100 focus:opacity-100 inline-flex items-center justify-center gap-1 px-2 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors cursor-pointer">
                                             <svg x-show={`copiedIndex !== ${idx}`} class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                                             <span x-show={`copiedIndex === ${idx}`} x-cloak class="inline-flex items-center gap-1 text-[10.5px] mono font-semibold text-emerald-600 dark:text-emerald-400">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
@@ -437,92 +506,124 @@ const softwareAppSchema = {
                                         </button>
                                     </div>
                                 </div>
-                                <div class="text-slate-700 dark:text-slate-200 leading-relaxed text-[13.5px] sm:text-[14px] font-normal break-words" set:html={formatDescription(change.t)}></div>
+                                <div class="space-y-2">
+                                    <div :class={change.t.length > 280 ? `!isExpanded('ssr-${idx}') ? 'line-clamp-3' : ''` : undefined}
+                                         class="text-slate-700 dark:text-slate-200 leading-relaxed text-[14px] font-normal break-words"
+                                         set:html={formatDescription(change.t)}></div>
+                                    {change.t.length > 280 && (
+                                        <button type="button"
+                                                @click={`toggleExpand('ssr-${idx}')`}
+                                                class="text-[11px] mono font-semibold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+                                                x-text={`isExpanded('ssr-${idx}') ? 'Show less' : 'Expand full diff'`}>
+                                            Expand full diff
+                                        </button>
+                                    )}
+                                </div>
                             </article>
                         );
                     })}
                 </div>
 
-                <div x-show="hasActiveFilter" x-cloak class="space-y-6">
-                    <div class="space-y-3">
-                        <template x-for="(change, idx) in paginatedUpdates" :key="serviceSlug + '-' + change.v + '-' + idx">
-                            <article class="changelog-card rounded-2xl p-4 sm:p-5 group">
-                                <div class="flex items-center justify-between gap-2 mb-2 flex-wrap">
-                                    <div class="flex items-center gap-2">
-                                        <a :href="'/releases/' + change.v + '/'" 
-                                           :title="'AWS Boto3 release v' + change.v"
-                                           class="px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-600 hover:text-white mono text-[10px] font-bold transition-all active:scale-95 cursor-pointer"
-                                           x-html="'v' + highlight(change.v, searchQuery)">
-                                        </a>
+                <div x-show="hasActiveFilter" x-cloak class="space-y-3">
+                    <template x-for="(change, idx) in paginatedUpdates" :key="serviceSlug + '-' + change.v + '-' + idx">
+                        <article :id="'v' + change.v.replace(/\./g, '-') + '-p-' + idx" class="changelog-card rounded-2xl p-4 sm:p-5 group scroll-mt-24">
+                            <div class="flex items-center justify-between gap-2 mb-2 flex-wrap">
+                                <div class="flex items-center gap-2">
+                                    <a :href="'/releases/' + change.v + '/'"
+                                       :title="'AWS Boto3 release v' + change.v"
+                                       class="px-2.5 py-0.5 rounded-full bg-indigo-500/12 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-600 hover:text-white mono text-[10.5px] font-bold transition-all active:scale-95 cursor-pointer"
+                                       x-html="'v' + highlight(change.v, searchQuery)">
+                                    </a>
 
-                                        <div :class="change.t.toLowerCase().includes('fix') ? 'text-rose-600 dark:text-rose-400 bg-rose-500/10' : 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10'"
-                                             class="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] mono font-bold uppercase tracking-wider">
-                                            <span :class="change.t.toLowerCase().includes('fix') ? 'bg-rose-500' : 'bg-emerald-500'" class="w-1.5 h-1.5 rounded-full"></span>
-                                            <span x-text="change.t.toLowerCase().includes('fix') ? 'Fix' : 'Feature / API'"></span>
-                                        </div>
-                                    </div>
-
-                                    <div class="flex items-center gap-2 shrink-0">
-                                        <time class="text-[11px] mono text-slate-400 dark:text-slate-500 tabular-nums" x-text="formatDateStr(versionDates[change.v])"></time>
-
-                                        <button @click="copyUpdate(serviceUpper + ': ' + change.t + ' (' + change.v + ')', idx)"
-                                                title="Copy change entry"
-                                                aria-label="Copy change entry"
-                                                class="inline-flex items-center gap-1 p-1.5 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-black/[0.04] dark:hover:bg-white/[0.08] transition-colors cursor-pointer">
-                                            <svg x-show="copiedIndex !== idx" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                                            <span x-show="copiedIndex === idx" x-cloak class="inline-flex items-center gap-1 text-[10.5px] mono font-semibold text-emerald-600 dark:text-emerald-400">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
-                                                Copied
-                                            </span>
-                                        </button>
+                                    <div :class="getTypeMeta('', change.t).badgeClass"
+                                         class="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] mono font-semibold uppercase tracking-wider">
+                                        <span :class="getTypeMeta('', change.t).dotClass" class="w-1.5 h-1.5 rounded-full"></span>
+                                        <span x-text="getTypeMeta('', change.t).label"></span>
                                     </div>
                                 </div>
-                                <div class="text-slate-700 dark:text-slate-200 leading-relaxed text-[13.5px] sm:text-[14px] font-normal break-words" x-html="renderDescription(change.t, searchQuery)"></div>
-                            </article>
-                        </template>
 
-                        <template x-if="filteredUpdates.length === 0">
-                            <div class="py-20 text-center soft-card rounded-2xl p-6">
-                                <div class="w-16 h-16 bg-slate-100 dark:bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4 opacity-50">
-                                    <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                <div class="flex items-center gap-1.5 shrink-0">
+                                    <time :datetime="versionDates[change.v] || ''" class="text-[11px] mono text-slate-500 dark:text-slate-400 tabular-nums" x-text="formatDateStr(versionDates[change.v])"></time>
+
+                                    <button type="button"
+                                            @click="copyAnchorLink('v' + change.v.replace(/\./g, '-') + '-p-' + idx)"
+                                            title="Copy deep link"
+                                            aria-label="Copy deep link"
+                                            class="tap-target sm:opacity-45 group-hover:opacity-100 focus:opacity-100 inline-flex items-center justify-center rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-all cursor-pointer mono text-xs">
+                                        #
+                                    </button>
+                                    <button type="button"
+                                            @click="copyUpdate(serviceUpper + ': ' + change.t + ' (' + change.v + ')', 'p-' + idx)"
+                                            title="Copy change entry"
+                                            aria-label="Copy change entry"
+                                            class="tap-target sm:opacity-45 group-hover:opacity-100 focus:opacity-100 inline-flex items-center justify-center gap-1 px-2 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors cursor-pointer">
+                                        <svg x-show="copiedIndex !== 'p-' + idx" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                        <span x-show="copiedIndex === 'p-' + idx" x-cloak class="inline-flex items-center gap-1 text-[10.5px] mono font-semibold text-emerald-600 dark:text-emerald-400">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                                            Copied
+                                        </span>
+                                    </button>
                                 </div>
-                                <h3 class="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">No Matches Found</h3>
-                                <p class="text-xs text-slate-400 mt-1">No updates match your search criteria for {serviceUpper}.</p>
-                                <button @click="searchQuery = ''; activeFilter = 'all'" class="mt-4 px-4 py-1.5 rounded-full bg-indigo-600 text-white text-xs font-bold cursor-pointer">
-                                    Reset Search
-                                </button>
                             </div>
-                        </template>
+                            <div class="space-y-2">
+                                <div :class="change.t.length > 280 && !isExpanded('p-' + idx) ? 'line-clamp-3' : ''"
+                                     class="text-slate-700 dark:text-slate-200 leading-relaxed text-[14px] font-normal break-words"
+                                     x-html="formatDescription(change.t, searchQuery)"></div>
+                                <template x-if="change.t.length > 280">
+                                    <button type="button"
+                                            @click="toggleExpand('p-' + idx)"
+                                            class="text-[11px] mono font-semibold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+                                            x-text="isExpanded('p-' + idx) ? 'Show less' : 'Expand full diff'">
+                                    </button>
+                                </template>
+                            </div>
+                        </article>
+                    </template>
+
+                    <template x-if="filteredUpdates.length === 0">
+                        <div class="py-20 text-center soft-card rounded-2xl p-6">
+                            <div class="w-16 h-16 bg-black/[0.04] dark:bg-white/[0.05] rounded-2xl flex items-center justify-center mx-auto mb-4 opacity-70">
+                                <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                            </div>
+                            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">No Matches Found</h2>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">No updates match your search criteria for {serviceUpper}.</p>
+                            <button type="button" @click="searchQuery = ''; activeFilter = 'all'; currentPage = 1" class="mt-4 px-4 py-2 rounded-full bg-indigo-600 text-white text-xs font-semibold cursor-pointer">
+                                Reset Search
+                            </button>
+                        </div>
+                    </template>
+                </div>
+
+                <div x-show="totalPages > 1" x-cloak class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-3">
+                    <div class="text-xs mono text-slate-500 dark:text-slate-400 tabular-nums">
+                        Page <strong class="text-slate-900 dark:text-white" x-text="currentPage">1</strong> of <strong class="text-slate-900 dark:text-white" x-text="totalPages"></strong>
                     </div>
 
-                    <div x-show="totalPages > 1 && !isShowingAll" class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
-                        <div class="text-xs mono text-slate-500 dark:text-slate-400">
-                            Page <strong class="text-slate-900 dark:text-white" x-text="currentPage"></strong> of <strong class="text-slate-900 dark:text-white" x-text="totalPages"></strong>
-                        </div>
+                    <div class="flex items-center gap-1.5 flex-wrap justify-center">
+                        <button type="button"
+                                @click="prevPage()"
+                                :disabled="currentPage === 1"
+                                :class="currentPage === 1 ? 'opacity-40 cursor-not-allowed' : 'hover:bg-black/[0.06] dark:hover:bg-white/10 active:scale-95 cursor-pointer'"
+                                class="px-3.5 py-2 sm:py-1.5 rounded-full bg-black/[0.04] dark:bg-white/[0.06] text-xs mono font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1 transition-all">
+                            &larr; Prev
+                        </button>
 
-                        <div class="flex items-center gap-1.5">
-                            <button @click="prevPage()" 
-                                    :disabled="currentPage === 1"
-                                    :class="currentPage === 1 ? 'opacity-40 cursor-not-allowed' : 'hover:bg-slate-200 dark:hover:bg-white/10 active:scale-95 cursor-pointer'"
-                                    class="px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-white/5 text-xs mono font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1 transition-all">
-                                &larr; Prev
+                        <template x-for="p in visiblePageNumbers" :key="p">
+                            <button type="button"
+                                    @click="setPage(p)"
+                                    :class="currentPage === p ? 'bg-indigo-600 text-white font-bold shadow-xs' : 'bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.08] dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 font-medium'"
+                                    class="w-9 h-9 sm:w-8 sm:h-8 rounded-full text-xs mono transition-all active:scale-95 cursor-pointer flex items-center justify-center"
+                                    x-text="p">
                             </button>
+                        </template>
 
-                            <template x-for="p in visiblePageNumbers" :key="p">
-                                <button @click="setPage(p)"
-                                        :class="currentPage === p ? 'bg-indigo-600 text-white font-bold shadow-xs' : 'bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 font-medium'"
-                                        class="w-8 h-8 rounded-full text-xs mono transition-all active:scale-95 cursor-pointer flex items-center justify-center"
-                                        x-text="p">
-                                </button>
-                            </template>
-
-                            <button @click="nextPage()" 
-                                    :disabled="currentPage === totalPages"
-                                    :class="currentPage === totalPages ? 'opacity-40 cursor-not-allowed' : 'hover:bg-slate-200 dark:hover:bg-white/10 active:scale-95 cursor-pointer'"
-                                    class="px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-white/5 text-xs mono font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1 transition-all">
-                                Next &rarr;
-                            </button>
-                        </div>
+                        <button type="button"
+                                @click="nextPage()"
+                                :disabled="currentPage === totalPages"
+                                :class="currentPage === totalPages ? 'opacity-40 cursor-not-allowed' : 'hover:bg-black/[0.06] dark:hover:bg-white/10 active:scale-95 cursor-pointer'"
+                                class="px-3.5 py-2 sm:py-1.5 rounded-full bg-black/[0.04] dark:bg-white/[0.06] text-xs mono font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1 transition-all">
+                            Next &rarr;
+                        </button>
                     </div>
                 </div>
             </section>
@@ -533,13 +634,13 @@ const softwareAppSchema = {
                 </h2>
                 <div class="flex flex-wrap gap-2">
                     {popularServices.map((pop) => (
-                        <a href={`/services/${pop}/`} 
-                           class="px-3.5 py-1.5 rounded-full bg-slate-100/80 dark:bg-white/5 text-xs mono font-bold text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-500/10 transition-all">
+                        <a href={`/services/${pop}/`}
+                           class="px-3.5 py-1.5 rounded-full bg-black/[0.04] dark:bg-white/[0.05] text-xs mono font-semibold text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-500/12 transition-all">
                             {pop.toUpperCase()}
                         </a>
                     ))}
-                    <a href="/services/" class="px-3.5 py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-xs mono font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-600 hover:text-white transition-all">
-                        All 570+ Services &rarr;
+                    <a href="/services/" class="px-3.5 py-1.5 rounded-full bg-indigo-500/12 text-xs mono font-semibold text-indigo-700 dark:text-indigo-300 hover:bg-indigo-600 hover:text-white transition-all">
+                        All Services &rarr;
                     </a>
                 </div>
             </section>
@@ -553,7 +654,7 @@ const softwareAppSchema = {
                         <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-2">
                             What is the latest update for AWS {serviceUpper} in Boto3?
                         </h3>
-                        <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                        <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed break-words">
                             {changes[0] ? `The latest update for ${serviceUpper} was added in Boto3 release ${changes[0].v}: ${changes[0].t}` : `No recent changes logged for ${serviceUpper}.`}
                         </p>
                     </div>
@@ -562,7 +663,7 @@ const softwareAppSchema = {
                         <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-2">
                             How do I filter Boto3 release notes for {serviceUpper}?
                         </h3>
-                        <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                        <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed break-words">
                             Use BotoView at <a href={`/?s=${service}`} class="text-indigo-600 dark:text-indigo-400 underline font-semibold">botoview.5goos.com/?s={service}</a> to search, filter, and compare all {serviceUpper} SDK changes across Boto3 and Botocore.
                         </p>
                     </div>
@@ -573,7 +674,7 @@ const softwareAppSchema = {
                         </h3>
                         <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                             Upgrade your Python Boto3 library using pip:
-                            <code class="block mt-2 p-2.5 rounded-xl bg-slate-100 dark:bg-white/5 mono text-xs text-indigo-700 dark:text-indigo-300 font-medium">
+                            <code class="block mt-2 p-2.5 rounded-xl bg-black/[0.04] dark:bg-white/[0.05] mono text-xs text-indigo-700 dark:text-indigo-300 font-medium overflow-x-auto">
                                 pip install --upgrade boto3
                             </code>
                         </p>
@@ -582,15 +683,15 @@ const softwareAppSchema = {
             </section>
         </main>
 
-        <footer class="mt-auto py-8 px-4 sm:px-6 bg-transparent">
+        <footer class="relative z-10 mt-auto py-8 px-4 sm:px-6 bg-transparent">
             <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono">
                 <div class="flex items-center gap-2">
                     <img src="/favicon.svg" width="18" height="18" alt="BotoView" class="w-4 h-4 opacity-80" />
                     <span class="font-bold text-slate-700 dark:text-slate-300">BotoView</span>
-                    <span class="text-slate-400">by <a href="https://5goos.com/" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold underline decoration-slate-300 dark:decoration-slate-700 underline-offset-2">5goos</a></span>
-                    <span class="text-slate-400">&copy; {new Date().getFullYear()}</span>
+                    <span class="text-slate-500 dark:text-slate-400">by <a href="https://5goos.com/" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold underline decoration-slate-300 dark:decoration-slate-700 underline-offset-2">5goos</a></span>
+                    <span class="text-slate-500 dark:text-slate-400">&copy; {new Date().getFullYear()}</span>
                 </div>
-                <div class="flex items-center gap-4 text-slate-500">
+                <div class="flex items-center gap-4 text-slate-500 dark:text-slate-400 flex-wrap justify-center">
                     <a href="/" class="hover:text-indigo-600 dark:hover:text-indigo-400">Timeline Explorer</a>
                     <a href="/services/" class="hover:text-indigo-600 dark:hover:text-indigo-400">Services</a>
                     <a href="/releases/" class="hover:text-indigo-600 dark:hover:text-indigo-400">Releases</a>
@@ -601,256 +702,275 @@ const softwareAppSchema = {
     </div>
 </Layout>
 
-<script define:vars={{ initialUpdatesJson: changes, versionDatesJson: versionDates, serviceSlug: service, serviceUpper }}>
-    function servicePageData() {
-        return {
-            isClientHydrated: true,
-            isHydrated: true,
-            isScrolled: false,
-            isDarkMode: false,
-            searchQuery: '',
-            activeFilter: 'all',
-            pageSize: 30,
-            currentPage: 1,
-            isShowingAll: false,
-            copiedIndex: null,
-            allUpdates: initialUpdatesJson || [],
-            versionDates: versionDatesJson || {},
-            serviceSlug,
-            serviceUpper,
+<script is:inline id="boto-service-init" type="application/json" set:html={JSON.stringify({ initialUpdatesJson: changes, versionDatesJson: scopedVersionDates, serviceSlug: service, serviceUpper, latestVersion, clientSnippet: telemetry.clientSnippet })} />
 
-            get hasActiveFilter() {
-                return Boolean((this.searchQuery && this.searchQuery.trim()) || this.activeFilter !== 'all' || this.currentPage > 1 || this.isShowingAll);
-            },
+<script>
+    import {
+        copyToClipboardText,
+        emitToast,
+        formatDate,
+        formatDescription,
+        highlightText,
+        isTypingTarget,
+        normalizeChangeType,
+        openCommandPalette,
+        readPageData,
+        registerAlpineComponent,
+        toggleThemeState
+    } from '../../utils/client';
+    import type { ServiceUpdateItem } from '../../utils/data';
 
-            async init() {
-                this.isDarkMode = document.documentElement.classList.contains('dark');
-                if (!this.allUpdates || this.allUpdates.length === 0) {
-                    try {
-                        const res = await fetch(`/data/services/${this.serviceSlug}.json`);
-                        if (res.ok) {
-                            this.allUpdates = await res.json();
-                        }
-                    } catch(e) {}
-                }
-            },
-
-            toggleTheme() {
-                this.isDarkMode = !this.isDarkMode;
-                document.documentElement.classList.toggle('dark', this.isDarkMode);
-                try {
-                    localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
-                } catch(e) {}
-                const themeColor = this.isDarkMode ? '#0b0e14' : '#f4f6fa';
-                document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute('content', themeColor));
-            },
-
-            handleKeydown(e) {
-                const isInput = ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName);
-                if (!isInput) {
-                    if (e.key === '/') {
-                        e.preventDefault();
-                        document.querySelector('input[type="text"]')?.focus();
-                    } else if (e.key === 't' || e.key === 'T') {
-                        e.preventDefault();
-                        this.toggleTheme();
-                    }
-                } else {
-                    if (e.key === 'Escape') {
-                        e.target.blur();
-                        if (this.searchQuery) this.searchQuery = '';
-                    }
-                }
-            },
-
-            get serviceCounts() {
-                let features = 0;
-                let fixes = 0;
-                for (const u of this.allUpdates) {
-                    if (u && u.t && u.t.toLowerCase().includes('fix')) {
-                        fixes++;
-                    } else {
-                        features++;
-                    }
-                }
-                return {
-                    total: this.allUpdates.length,
-                    features,
-                    fixes
-                };
-            },
-
-            toggleShowAll() {
-                this.isShowingAll = !this.isShowingAll;
-                if (!this.isShowingAll) {
-                    this.currentPage = 1;
-                }
-            },
-
-            get filteredUpdates() {
-                let list = this.allUpdates;
-                if (this.activeFilter === 'feature') {
-                    list = list.filter(u => !(u.t && u.t.toLowerCase().includes('fix')));
-                } else if (this.activeFilter === 'fix') {
-                    list = list.filter(u => u.t && u.t.toLowerCase().includes('fix'));
-                }
-                if (this.searchQuery && this.searchQuery.trim()) {
-                    const q = this.searchQuery.toLowerCase().trim();
-                    list = list.filter(u => (u.v && u.v.toLowerCase().includes(q)) || (u.t && u.t.toLowerCase().includes(q)));
-                }
-                return list;
-            },
-
-            get totalPages() {
-                return Math.max(1, Math.ceil(this.filteredUpdates.length / this.pageSize));
-            },
-
-            get paginatedUpdates() {
-                if (this.isShowingAll) return this.filteredUpdates;
-                const start = (this.currentPage - 1) * this.pageSize;
-                return this.filteredUpdates.slice(start, start + this.pageSize);
-            },
-
-            get showingRangeText() {
-                if (this.isShowingAll) {
-                    return `1 – ${this.filteredUpdates.length}`;
-                }
-                if (this.filteredUpdates.length === 0) return '0';
-                const start = (this.currentPage - 1) * this.pageSize + 1;
-                const end = Math.min(start + this.pageSize - 1, this.filteredUpdates.length);
-                return `${start} – ${end}`;
-            },
-
-            get visiblePageNumbers() {
-                const total = this.totalPages;
-                const cur = this.currentPage;
-                if (total <= 5) {
-                    return Array.from({ length: total }, (_, i) => i + 1);
-                }
-                let start = Math.max(1, cur - 2);
-                let end = Math.min(total, start + 4);
-                if (end - start < 4) {
-                    start = Math.max(1, end - 4);
-                }
-                const pages = [];
-                for (let i = start; i <= end; i++) pages.push(i);
-                return pages;
-            },
-
-            nextPage() {
-                if (this.currentPage < this.totalPages) {
-                    this.currentPage++;
-                    this.scrollToFeed();
-                }
-            },
-
-            prevPage() {
-                if (this.currentPage > 1) {
-                    this.currentPage--;
-                    this.scrollToFeed();
-                }
-            },
-
-            setPage(p) {
-                this.currentPage = p;
-                this.scrollToFeed();
-            },
-
-            scrollToFeed() {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            },
-
-            formatDateStr(dateStr) {
-                if (!dateStr) return '';
-                try {
-                    const parts = dateStr.split('-');
-                    if (parts.length === 3) {
-                        const date = new Date(Date.UTC(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2])));
-                        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
-                    }
-                    return dateStr;
-                } catch(e) {
-                    return dateStr;
-                }
-            },
-
-            highlight(text, search) {
-                if (!text) return '';
-                let escaped = String(text)
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(/"/g, '&quot;')
-                    .replace(/'/g, '&#39;');
-                if (!search || !search.trim()) return escaped;
-                const s = search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                const regex = new RegExp(`(${s})`, 'gi');
-                return escaped.replace(regex, '<mark class="search-highlight">$1</mark>');
-            },
-
-            renderDescription(text, search) {
-                if (!text) return '';
-                let escaped = String(text)
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(/"/g, '&quot;')
-                    .replace(/'/g, '&#39;');
-
-                escaped = escaped.replace(
-                    /`([^`]+?)\s*&lt;(https?:\/\/[^&>]+?)&gt;`_+/g,
-                    '<a href="$2" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-0.5 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold underline decoration-indigo-400/40 hover:decoration-indigo-500 transition-colors">$1</a>'
-                );
-
-                escaped = escaped.replace(
-                    /``([^`]+?)``/g,
-                    '<code class="px-1.5 py-0.5 rounded-md bg-slate-200/50 dark:bg-white/10 text-[11px] mono text-indigo-700 dark:text-indigo-300 font-medium">$1</code>'
-                );
-
-                escaped = escaped.replace(
-                    /`([^`]+?)`/g,
-                    '<code class="px-1.5 py-0.5 rounded-md bg-slate-200/50 dark:bg-white/10 text-[11px] mono text-indigo-700 dark:text-indigo-300 font-medium">$1</code>'
-                );
-
-                escaped = escaped.replace(
-                    /(^|[^"'])(https?:\/\/[a-zA-Z0-9\-\._~:\/\?#\[\]@!$&'()*+,;=%]+)/g,
-                    '$1<a href="$2" target="_blank" rel="noopener noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:underline font-medium break-all">$2</a>'
-                );
-
-                if (search && search.trim()) {
-                    const s = search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                    const regex = new RegExp(`(?![^<]*>)(${s})`, 'gi');
-                    escaped = escaped.replace(regex, '<mark class="search-highlight">$1</mark>');
-                }
-
-                return escaped;
-            },
-
-            async copyUpdate(text, idx) {
-                try {
-                    await navigator.clipboard.writeText(text);
-                    this.copiedIndex = idx;
-                    setTimeout(() => {
-                        if (this.copiedIndex === idx) this.copiedIndex = null;
-                    }, 2000);
-                } catch(e) {}
-            }
-        };
+    interface ServiceInitPayload {
+        initialUpdatesJson: ServiceUpdateItem[];
+        versionDatesJson: Record<string, string>;
+        serviceSlug: string;
+        serviceUpper: string;
+        latestVersion: string;
+        clientSnippet: string;
     }
 
-    window.servicePageData = servicePageData;
-
-    if (window.Alpine) {
-        window.Alpine.data('servicePage', servicePageData);
-    } else {
-        document.addEventListener('alpine:init', () => {
-            window.Alpine.data('servicePage', servicePageData);
-        });
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        if (window.Alpine) {
-            window.Alpine.data('servicePage', servicePageData);
-        }
+    const payload = readPageData<ServiceInitPayload>('boto-service-init', {
+        initialUpdatesJson: [],
+        versionDatesJson: {},
+        serviceSlug: '',
+        serviceUpper: '',
+        latestVersion: '',
+        clientSnippet: ''
     });
+
+    registerAlpineComponent('servicePage', () => ({
+        isScrolled: false,
+        isDarkMode: document.documentElement.classList.contains('dark'),
+        searchQuery: '',
+        activeFilter: 'all',
+        pageSize: 30,
+        currentPage: 1,
+        copiedIndex: null as string | number | null,
+        pinTool: 'pip' as 'pip' | 'uv',
+        pinCopied: false,
+        snippetCopied: false,
+        expandedMap: {} as Record<string, boolean>,
+        allUpdates: payload.initialUpdatesJson || [],
+        versionDates: payload.versionDatesJson || {},
+        serviceSlug: payload.serviceSlug,
+        serviceUpper: payload.serviceUpper,
+        latestVersion: payload.latestVersion,
+
+        get hasActiveFilter(): boolean {
+            return Boolean((this.searchQuery && this.searchQuery.trim()) || this.activeFilter !== 'all' || this.currentPage > 1);
+        },
+
+        async init() {
+            this.isDarkMode = document.documentElement.classList.contains('dark');
+            const params = new URLSearchParams(window.location.search);
+            const q = params.get('q');
+            const type = params.get('type');
+            const p = Number(params.get('page'));
+            if (q) this.searchQuery = q;
+            if (type && ['all', 'api-change', 'feature', 'enhancement', 'bugfix'].includes(type)) {
+                this.activeFilter = type;
+            }
+            if (p > 1 && Number.isFinite(p)) {
+                this.currentPage = p;
+            }
+
+            if (!this.allUpdates || this.allUpdates.length === 0) {
+                try {
+                    const res = await fetch(`/data/services/${this.serviceSlug}.json`);
+                    if (res.ok) {
+                        this.allUpdates = await res.json();
+                    }
+                } catch {}
+            }
+
+            const syncUrl = () => this.syncQueryParams();
+            const watchable = this as unknown as { $watch: (k: string, cb: () => void) => void };
+            watchable.$watch('searchQuery', syncUrl);
+            watchable.$watch('activeFilter', syncUrl);
+            watchable.$watch('currentPage', syncUrl);
+        },
+
+        syncQueryParams() {
+            const params = new URLSearchParams();
+            if (this.activeFilter !== 'all') params.set('type', this.activeFilter);
+            if (this.searchQuery.trim()) params.set('q', this.searchQuery.trim());
+            if (this.currentPage > 1) params.set('page', String(this.currentPage));
+            const qs = params.toString();
+            const nextUrl = qs ? `?${qs}${window.location.hash}` : `${window.location.pathname}${window.location.hash}`;
+            window.history.replaceState(window.history.state, '', nextUrl);
+        },
+
+        toggleTheme() {
+            this.isDarkMode = toggleThemeState();
+        },
+
+        openPalette() {
+            openCommandPalette('');
+        },
+
+        isExpanded(key: string): boolean {
+            return Boolean(this.expandedMap[key]);
+        },
+
+        toggleExpand(key: string) {
+            this.expandedMap[key] = !this.expandedMap[key];
+        },
+
+        async copyInstallCmd() {
+            const cmd = this.pinTool === 'uv'
+                ? `uv add boto3==${this.latestVersion || 'latest'}`
+                : 'pip install --upgrade boto3';
+            const ok = await copyToClipboardText(cmd);
+            if (ok) {
+                this.pinCopied = true;
+                emitToast(`Copied ${cmd}`);
+                setTimeout(() => {
+                    this.pinCopied = false;
+                }, 2000);
+            }
+        },
+
+        async copySnippet() {
+            const ok = await copyToClipboardText(payload.clientSnippet);
+            if (ok) {
+                this.snippetCopied = true;
+                emitToast('Copied Python quickstart');
+                setTimeout(() => {
+                    this.snippetCopied = false;
+                }, 2000);
+            }
+        },
+
+        async copyAnchorLink(anchorId: string) {
+            const url = new URL(window.location.href);
+            url.hash = anchorId;
+            window.history.replaceState(window.history.state, '', url.toString());
+            const ok = await copyToClipboardText(url.toString());
+            if (ok) emitToast('Copied deep link');
+        },
+
+        handleKeydown(e: KeyboardEvent) {
+            if (e.metaKey || e.ctrlKey) return;
+            if (!isTypingTarget(e.target)) {
+                if (e.key === '/') {
+                    e.preventDefault();
+                    document.getElementById('serviceFilterSearch')?.focus();
+                } else if (e.key === 't' || e.key === 'T') {
+                    e.preventDefault();
+                    this.toggleTheme();
+                }
+            } else if (e.key === 'Escape') {
+                (e.target as HTMLElement).blur();
+                if (this.searchQuery) this.searchQuery = '';
+            }
+        },
+
+        get serviceCounts() {
+            let apiChanges = 0;
+            let features = 0;
+            let enhancements = 0;
+            let fixes = 0;
+            for (const u of this.allUpdates) {
+                const key = normalizeChangeType('', u?.t).key;
+                if (key === 'api-change') apiChanges++;
+                else if (key === 'feature') features++;
+                else if (key === 'enhancement') enhancements++;
+                else fixes++;
+            }
+            return {
+                total: this.allUpdates.length,
+                apiChanges,
+                features,
+                enhancements,
+                fixes
+            };
+        },
+
+        getTypeMeta(rawType?: string, description?: string) {
+            return normalizeChangeType(rawType, description);
+        },
+
+        get filteredUpdates(): ServiceUpdateItem[] {
+            let list = this.allUpdates;
+            if (this.activeFilter !== 'all') {
+                list = list.filter((u) => normalizeChangeType('', u.t).key === this.activeFilter);
+            }
+            if (this.searchQuery && this.searchQuery.trim()) {
+                const q = this.searchQuery.toLowerCase().trim();
+                list = list.filter((u) => (u.v && u.v.toLowerCase().includes(q)) || (u.t && u.t.toLowerCase().includes(q)));
+            }
+            return list;
+        },
+
+        get totalPages(): number {
+            return Math.max(1, Math.ceil(this.filteredUpdates.length / this.pageSize));
+        },
+
+        get paginatedUpdates(): ServiceUpdateItem[] {
+            const start = (this.currentPage - 1) * this.pageSize;
+            return this.filteredUpdates.slice(start, start + this.pageSize);
+        },
+
+        get visiblePageNumbers(): number[] {
+            const total = this.totalPages;
+            const cur = this.currentPage;
+            if (total <= 5) {
+                return Array.from({ length: total }, (_, i) => i + 1);
+            }
+            let start = Math.max(1, cur - 2);
+            const end = Math.min(total, start + 4);
+            if (end - start < 4) {
+                start = Math.max(1, end - 4);
+            }
+            const pages: number[] = [];
+            for (let i = start; i <= end; i++) pages.push(i);
+            return pages;
+        },
+
+        nextPage() {
+            if (this.currentPage < this.totalPages) {
+                this.currentPage++;
+                this.scrollToFeed();
+            }
+        },
+
+        prevPage() {
+            if (this.currentPage > 1) {
+                this.currentPage--;
+                this.scrollToFeed();
+            }
+        },
+
+        setPage(p: number) {
+            this.currentPage = p;
+            this.scrollToFeed();
+        },
+
+        scrollToFeed() {
+            document.getElementById('changelog-feed')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        },
+
+        formatDateStr(dateStr: string): string {
+            return formatDate(dateStr);
+        },
+
+        highlight(text: string, search?: string): string {
+            return highlightText(text, search);
+        },
+
+        formatDescription(text: string, search?: string): string {
+            return formatDescription(text, search);
+        },
+
+        async copyUpdate(text: string, idx: string | number) {
+            const ok = await copyToClipboardText(text);
+            if (ok) {
+                this.copiedIndex = idx;
+                emitToast('Copied changelog entry');
+                setTimeout(() => {
+                    if (this.copiedIndex === idx) this.copiedIndex = null;
+                }, 2000);
+            }
+        }
+    }));
 </script>

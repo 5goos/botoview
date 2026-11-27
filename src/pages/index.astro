@@ -5,17 +5,15 @@ import Layout from '../layouts/Layout.astro';
 import LeftRail from '../components/LeftRail.astro';
 import MainView from '../components/MainView.astro';
 import trackData from '../../public/data/track.json';
+import { loadReleaseChanges } from '../utils/data';
 
 const latestVersion = trackData?.versions?.[0] || { id: 'latest', date: '' };
 const totalVersionsCount = trackData?.versions?.length || 0;
 const totalServicesCount = trackData?.allServices?.length || 0;
+const initialChanges = loadReleaseChanges(latestVersion.id);
 
-const versionModules = import.meta.glob<Array<{ category: string; description: string; type: string }>>('../../public/data/versions/*.json', { eager: true, import: 'default' });
-
-const latestKey = `../../public/data/versions/${latestVersion.id}.json`;
-const initialChanges = versionModules[latestKey] || [];
 const pageTitle = "BotoView — AWS Boto3 Changelogs & Release Notes";
-const pageDescription = "Browse AWS Boto3 changelogs and release notes by service with BotoView. Search API changes, bug fixes, and SDK updates across 570+ AWS services.";
+const pageDescription = `Browse AWS Boto3 changelogs and release notes by service with BotoView. Search API changes, bug fixes, and SDK updates across ${totalServicesCount}+ AWS services.`;
 const canonicalUrl = "https://botoview.5goos.com/";
 
 const homeWebPageSchema = {
@@ -44,841 +42,814 @@ const homeWebPageSchema = {
 ---
 
 <Layout title={pageTitle} description={pageDescription} canonical={canonicalUrl} jsonLd={homeWebPageSchema}>
-    <div class="flex h-screen w-full overflow-hidden bg-transparent text-[var(--text-secondary)] transition-all" 
+    <div class="flex h-screen w-full overflow-hidden bg-transparent text-[var(--text-secondary)] transition-all"
          style="height: 100dvh;"
-         x-data="botoCore" 
-         @keydown.window="handleGlobalKeydown($event)">
-        
-        <div x-show="showMobileVersions" 
+         x-data="botoCore"
+         @keydown.window="handleGlobalKeydown($event)"
+         @boto:palette-select.window="handlePaletteSelection($event.detail)"
+         @boto:theme-changed.window="isDarkMode = $event.detail.isDark">
+
+        <div x-show="showMobileVersions"
              x-cloak
-             x-transition:enter="transition-opacity ease-out duration-300"
+             x-transition:enter="transition-opacity ease-out duration-200"
              x-transition:enter-start="opacity-0"
              x-transition:enter-end="opacity-100"
-             x-transition:leave="transition-opacity ease-in duration-200"
+             x-transition:leave="transition-opacity ease-in duration-150"
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
-             class="fixed inset-0 bg-slate-900/30 dark:bg-black/60 backdrop-blur-xs z-40 lg:hidden" 
+             class="fixed inset-0 bg-slate-900/40 dark:bg-black/65 backdrop-blur-xs z-40 lg:hidden"
              @click="showMobileVersions = false"></div>
 
         <template x-if="error">
-            <div class="fixed inset-0 z-[150] flex items-center justify-center p-6 bg-[#050505]/90 backdrop-blur-xl">
-                <div class="bg-white dark:bg-[#0e131f] border border-red-500/20 text-slate-900 dark:text-white p-8 sm:p-10 rounded-[28px] max-w-lg w-full text-center shadow-2xl relative overflow-hidden">
-                    <div class="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-red-500/20">
-                        <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            <div class="fixed inset-0 z-[150] flex items-center justify-center p-6 bg-slate-950/80 backdrop-blur-xl">
+                <div class="command-modal text-slate-900 dark:text-white p-8 rounded-3xl max-w-md w-full text-center relative overflow-hidden space-y-5">
+                    <div class="w-14 h-14 bg-rose-500/12 rounded-2xl flex items-center justify-center mx-auto">
+                        <svg class="w-7 h-7 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                     </div>
-                    <div class="text-2xl font-black italic uppercase tracking-tight mb-2" x-text="errorTitle"></div>
-                    <p class="text-slate-500 dark:text-slate-400 mb-8 leading-relaxed text-sm mono" x-text="error"></p>
-                    <button @click="location.reload()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3.5 px-6 rounded-xl transition-all active:scale-95 shadow-md shadow-indigo-500/25 uppercase tracking-wider text-xs cursor-pointer">
-                        Reboot Application
+                    <div class="space-y-1.5">
+                        <div class="text-lg font-semibold tracking-tight" x-text="errorTitle"></div>
+                        <p class="text-slate-500 dark:text-slate-400 leading-relaxed text-xs mono" x-text="error"></p>
+                    </div>
+                    <button type="button" @click="location.reload()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-xl transition-all active:scale-95 text-xs cursor-pointer">
+                        Retry Loading
                     </button>
                 </div>
             </div>
         </template>
 
-        <template x-if="loading">
-            <div class="fixed inset-0 z-[140] flex flex-col items-center justify-center bg-[#f4f6fa] dark:bg-[#0b0e14] transition-colors duration-500">
-                <div class="relative w-16 h-16 mb-6">
-                    <div class="absolute inset-0 border-3 border-indigo-500/15 rounded-2xl"></div>
-                    <div class="absolute inset-0 border-3 border-t-indigo-600 dark:border-t-indigo-400 rounded-2xl animate-spin"></div>
-                    <img src="/favicon.svg" class="absolute inset-0 m-auto w-7 h-7 opacity-80 animate-pulse" alt="Loading" />
-                </div>
-                <span class="text-xs mono uppercase tracking-widest text-slate-400 font-bold" x-text="loadingText"></span>
-            </div>
-        </template>
-
-        <div class="flex h-full w-full">
+        <div class="flex h-full w-full min-w-0">
             <LeftRail />
             <MainView initialChanges={initialChanges} latestVersion={latestVersion} />
         </div>
     </div>
 </Layout>
 
-<script is:inline define:vars={{ initialLatestId: latestVersion.id, initialChangesJson: initialChanges }}>
-    window.__BOTO_INIT__ = {
-        latestId: initialLatestId,
-        changes: initialChangesJson
-    };
-</script>
+<script is:inline id="boto-home-init" type="application/json" set:html={JSON.stringify({ latestId: latestVersion.id, changes: initialChanges })} />
 
 <script>
-    function registerBotoCore() {
-        const initData = (window as any).__BOTO_INIT__ || {};
-        const initialLatestId = initData.latestId || '';
-        const initialChangesJson = initData.changes || [];
-
-        const factory = () => ({
-            errorTitle: 'Connection Override',
-            loadingText: 'Initializing Core...',
-            sidebarTab: 'versions',
-            viewMode: 'release',
-            selectedVersion: initialLatestId || '',
-            navigatedFromVersion: null,
-            versions: [],
-            allServices: [],
-            serviceCounts: {},
-            serviceSort: 'popular',
-            serviceLimit: 40,
-            currentVersionData: initialChangesJson || [],
-            isClientHydrated: true,
-            get hasActiveFilter() {
-                return Boolean(
-                    (this.versionSearch && this.versionSearch.trim()) ||
-                    this.activeFilter !== 'all' ||
-                    this.releaseServiceFilter ||
-                    this.selectedVersion !== initialLatestId ||
-                    this.viewMode !== 'release'
-                );
-            },
-            serviceSearch: '',
-            versionSearch: '',
-            versionRailSearch: '',
-            releaseServiceFilter: '',
-            activeFilter: 'all',
-            railLimit: 50,
-            activeService: null,
-            serviceHistory: [],
-            serviceHistorySearch: '',
-            serviceHistoryFilter: 'all',
-            serviceVersionFilter: 'all',
-            serviceHistoryLimit: 40,
-            serviceHistoryLoading: false,
-            showMobileVersions: false,
-            showBackToTop: false,
-            isScrolled: false,
-            error: null,
-            loading: false,
-            versionCache: initialLatestId ? { [initialLatestId]: initialChangesJson } : {},
-            copyStatus: false,
-            copiedItemIndex: null,
-            showPipCopied: false,
-            isDarkMode: false,
-            _versionDateMap: null,
-            _serviceColorCache: {},
-            stats: {
-                avgReleasesPerWeek: 0,
-                recentChangesCount: 0
-            },
-
-            toggleTheme() {
-                this.isDarkMode = !this.isDarkMode;
-                document.documentElement.classList.toggle('dark', this.isDarkMode);
-                try {
-                    localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
-                } catch(e) {}
-                const themeColor = this.isDarkMode ? '#0b0e14' : '#f4f6fa';
-                document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute('content', themeColor));
-            },
-
-            isMobile(breakpoint = 768) {
-                return window.matchMedia(`(max-width: ${breakpoint-1}px)`).matches;
-            },
-
-            escapeHtml(str) {
-                if (!str) return '';
-                return String(str)
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(/"/g, '&quot;')
-                    .replace(/'/g, '&#39;');
-            },
-
-            highlight(text, search) {
-                if (!text) return '';
-                let escaped = this.escapeHtml(text);
-                if (!search || !search.trim()) return escaped;
-                const s = search.trim();
-                const regex = new RegExp(`(${s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-                return escaped.replace(regex, '<mark class="search-highlight">$1</mark>');
-            },
-
-            formatDescription(text, search) {
-                if (!text) return '';
-                let formatted = this.escapeHtml(text);
-
-                formatted = formatted.replace(
-                    /`([^`]+?)\s*&lt;(https?:\/\/[^&>]+?)&gt;`_+/g,
-                    '<a href="$2" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-0.5 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold underline decoration-indigo-400/40 hover:decoration-indigo-500 transition-colors">$1<svg class="w-2.5 h-2.5 opacity-70 inline ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg></a>'
-                );
-
-                formatted = formatted.replace(
-                    /``([^`]+?)``/g,
-                    '<code class="px-1.5 py-0.5 rounded-md bg-indigo-500/[0.08] dark:bg-white/[0.08] text-[11.5px] mono text-indigo-700 dark:text-indigo-300 font-medium">$1</code>'
-                );
-
-                formatted = formatted.replace(
-                    /`([^`]+?)`/g,
-                    '<code class="px-1.5 py-0.5 rounded-md bg-indigo-500/[0.08] dark:bg-white/[0.08] text-[11.5px] mono text-indigo-700 dark:text-indigo-300 font-medium">$1</code>'
-                );
-
-                formatted = formatted.replace(
-                    /(^|[^"'])(https?:\/\/[a-zA-Z0-9\-\._~:\/\?#\[\]@!$&'()*+,;=%]+)/g,
-                    '$1<a href="$2" target="_blank" rel="noopener noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:underline font-medium break-all">$2</a>'
-                );
-
-                if (search && search.trim()) {
-                    const s = search.trim();
-                    const escapedSearch = s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                    const regex = new RegExp(`(?![^<]*>)(${escapedSearch})`, 'gi');
-                    formatted = formatted.replace(regex, '<mark class="search-highlight">$1</mark>');
-                }
-
-                return formatted;
-            },
-
-            slugifyService(name) {
-                if (!name) return '';
-                return String(name)
-                    .toLowerCase()
-                    .trim()
-                    .replace(/[\._\s]+/g, '-')
-                    .replace(/-+/g, '-')
-                    .replace(/^-|-$/g, '');
-            },
-
-            async copyPipCommand() {
-                try {
-                    const ver = this.selectedVersion || initialLatestId;
-                    await navigator.clipboard.writeText(`pip install boto3==${ver}`);
-                    this.showPipCopied = true;
-                    setTimeout(() => { this.showPipCopied = false; }, 2000);
-                } catch (e) {}
-            },
-
-            async copyItem(item, index) {
-                try {
-                    const cat = (item.category || '').toUpperCase();
-                    const ver = item.version || this.selectedVersion || initialLatestId;
-                    const text = `${cat}: ${item.description} (${ver})`;
-                    await navigator.clipboard.writeText(text);
-                    this.copiedItemIndex = index;
-                    setTimeout(() => {
-                        if (this.copiedItemIndex === index) this.copiedItemIndex = null;
-                    }, 2000);
-                } catch (e) {}
-            },
-
-            get versionCounts() {
-                let features = 0;
-                let fixes = 0;
-                for (const i of this.currentVersionData) {
-                    if (i.type && i.type.toLowerCase().includes('fix')) {
-                        fixes++;
-                    } else {
-                        features++;
-                    }
-                }
-                return {
-                    total: this.currentVersionData.length,
-                    features,
-                    fixes
-                };
-            },
-
-            get serviceHistoryCounts() {
-                let features = 0;
-                let fixes = 0;
-                for (const item of this.serviceHistory) {
-                    const text = (item.t || '').toLowerCase();
-                    if (text.includes('fix')) {
-                        fixes++;
-                    } else {
-                        features++;
-                    }
-                }
-                return {
-                    total: this.serviceHistory.length,
-                    features,
-                    fixes
-                };
-            },
-
-            get currentActiveFilter() {
-                return this.viewMode === 'release' ? this.activeFilter : this.serviceHistoryFilter;
-            },
-
-            get currentActiveCounts() {
-                return this.viewMode === 'release' ? this.versionCounts : this.serviceHistoryCounts;
-            },
-
-            setMainFilter(filter) {
-                if (this.viewMode === 'release') {
-                    this.activeFilter = filter;
-                } else {
-                    this.serviceHistoryFilter = filter;
-                    this.serviceHistoryLimit = 40;
-                }
-            },
-
-            switchSidebarTab(tab) {
-                this.sidebarTab = tab;
-                if (tab === 'versions' && this.viewMode === 'service') {
-                    this.backToRelease();
-                } else if (tab === 'services' && this.viewMode === 'release' && this.activeService) {
-                    this.openService(this.activeService, true, false);
-                }
-            },
-
-            get currentVersionServices() {
-                const s = new Set();
-                for (const c of this.currentVersionData) {
-                    if (c && c.category) s.add(c.category.toLowerCase().trim());
-                }
-                return s;
-            },
-
-            get adjacentVersions() {
-                if (!this.versions.length || !this.selectedVersion) return { newer: null, older: null };
-                const idx = this.versions.findIndex(v => v.id === this.selectedVersion);
-                if (idx === -1) return { newer: null, older: null };
-                return {
-                    newer: idx > 0 ? this.versions[idx - 1].id : null,
-                    older: idx < this.versions.length - 1 ? this.versions[idx + 1].id : null
-                };
-            },
-
-            handleGlobalKeydown(e) {
-                if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName) || e.target.isContentEditable) {
-                    if (e.key === 'Escape') {
-                        e.target.blur();
-                    }
-                    return;
-                }
-
-                if (e.key === 'Escape') {
-                    this.showMobileVersions = false;
-                    if (this.viewMode === 'service') {
-                        this.backToRelease();
-                    }
-                    return;
-                }
-
-                if (e.key === 't' || e.key === 'T') {
-                    e.preventDefault();
-                    this.toggleTheme();
-                    return;
-                }
-
-                if (e.key === 'j' || e.key === 'ArrowDown') {
-                    if (this.adjacentVersions.older) {
-                        e.preventDefault();
-                        this.selectVersion(this.adjacentVersions.older, true);
-                    }
-                    return;
-                }
-
-                if (e.key === 'k' || e.key === 'ArrowUp') {
-                    if (this.adjacentVersions.newer) {
-                        e.preventDefault();
-                        this.selectVersion(this.adjacentVersions.newer, true);
-                    }
-                    return;
-                }
-
-                if (e.key === '/') {
-                    e.preventDefault();
-                    const searchId = this.viewMode === 'service' ? 'serviceHistorySearch' : 'versionSearch';
-                    const searchInput = document.getElementById(searchId);
-                    if (searchInput) searchInput.focus();
-                    return;
-                }
-            },
-
-            get selectedDate() {
-                return this.getVersionDate(this.selectedVersion);
-            },
-
-            getVersionDate(id) {
-                if (!id || !this._versionDateMap) return '';
-                return this._versionDateMap.get(id) || '';
-            },
-
-            getRelativeDate(dateStr) {
-                if (!dateStr) return '';
-                const parts = dateStr.split('-');
-                if (parts.length !== 3) return '';
-                const dateUtc = Date.UTC(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
-                const now = new Date();
-                const todayUtc = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
-                const diffDays = Math.max(0, Math.floor((todayUtc - dateUtc) / (1000 * 60 * 60 * 24)));
-                
-                if (diffDays === 0) return 'Today';
-                if (diffDays === 1) return 'Yesterday';
-                if (diffDays < 7) return `${diffDays}d ago`;
-                if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
-                if (diffDays < 365) return `${Math.floor(diffDays / 30)}mo ago`;
-                return `${Math.floor(diffDays / 365)}y ago`;
-            },
-
-            formatDate(dateStr) {
-                if (!dateStr) return '';
-                try {
-                    const parts = dateStr.split('-');
-                    if (parts.length === 3) {
-                        const date = new Date(Date.UTC(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2])));
-                        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
-                    }
-                    return dateStr;
-                } catch (e) {
-                    return dateStr;
-                }
-            },
-
-            getMonthYear(dateStr) {
-                if (!dateStr) return 'Unknown Date';
-                const parts = dateStr.split('-');
-                if (parts.length === 3) {
-                    const date = new Date(Date.UTC(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2])));
-                    return date.toLocaleString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
-                }
-                return 'Unknown Date';
-            },
-
-            getServiceColorClass(serviceName) {
-                if (!serviceName) return 'bg-slate-500/10 text-slate-700 dark:text-slate-300';
-                if (this._serviceColorCache[serviceName]) return this._serviceColorCache[serviceName];
-                const classes = [
-                    'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-500/18',
-                    'bg-violet-500/10 text-violet-700 dark:text-violet-300 hover:bg-violet-500/18',
-                    'bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 hover:bg-cyan-500/18',
-                    'bg-teal-500/10 text-teal-700 dark:text-teal-300 hover:bg-teal-500/18',
-                    'bg-slate-500/10 text-slate-700 dark:text-slate-300 hover:bg-slate-500/18'
-                ];
-                let hash = 0;
-                for (let i = 0; i < serviceName.length; i++) {
-                    hash = serviceName.charCodeAt(i) + ((hash << 5) - hash);
-                }
-                const result = classes[Math.abs(hash) % classes.length];
-                this._serviceColorCache[serviceName] = result;
-                return result;
-            },
-
-            async copyToClipboard(text) {
-                try {
-                    await navigator.clipboard.writeText(text);
-                    this.copyStatus = true;
-                    setTimeout(() => this.copyStatus = false, 2000);
-                } catch (err) {}
-            },
-
-            async prefetchVersion(id) {
-                if (this.versionCache[id] || this.selectedVersion === id) return;
-                try {
-                    const res = await fetch(`/data/versions/${id}.json`);
-                    if (res.ok) {
-                        this.versionCache[id] = await res.json();
-                    }
-                } catch (e) {}
-            },
-
-            async prefetchService(svc) {
-                const serviceId = this.slugifyService(svc);
-                if (!serviceId) return;
-                const cacheKey = `svc_${serviceId}`;
-                if (this.versionCache[cacheKey]) return;
-                try {
-                    const res = await fetch(`/data/services/${serviceId}.json`);
-                    if (res.ok) {
-                        this.versionCache[cacheKey] = await res.json();
-                    }
-                } catch (e) {}
-            },
-
-            async init() {
-                this.isDarkMode = document.documentElement.classList.contains('dark');
-                try {
-                    const res = await fetch('/data/track.json');
-                    if (!res.ok) throw new Error('Primary track data missing');
-                    const data = await res.json();
-                    this.versions = data.versions;
-                    this.allServices = data.allServices;
-                    if (data.serviceCounts) {
-                        this.serviceCounts = data.serviceCounts;
-                    }
-
-                    this._versionDateMap = new Map();
-                    for (const v of this.versions) {
-                        this._versionDateMap.set(v.id, v.date || '');
-                    }
-
-                    this.calculateStats();
-
-                    const params = new URLSearchParams(window.location.search);
-                    const vParam = params.get('v');
-                    const sParam = params.get('s');
-                    const sSlug = sParam ? this.slugifyService(sParam) : '';
-
-                    if (sSlug && this.allServices.includes(sSlug)) {
-                        await this.openService(sSlug, false, vParam || null);
-                    } else if (sParam && sParam.trim()) {
-                        this.versionSearch = sParam.trim();
-                    } else if (vParam && vParam !== initialLatestId && this.versions.find(v => v.id === vParam)) {
-                        await this.selectVersion(vParam, false);
-                    } else if (vParam === initialLatestId) {
-                        this.selectedVersion = initialLatestId;
-                        this.currentVersionData = initialChangesJson;
-                    } else if (this.versions.length > 0 && !this.selectedVersion) {
-                        await this.selectVersion(this.versions[0].id, false);
-                    }
-
-                    window.addEventListener('popstate', (e) => {
-                        const curParams = new URLSearchParams(window.location.search);
-                        const v = curParams.get('v') || (this.versions[0] ? this.versions[0].id : null);
-                        const s = curParams.get('s');
-                        const sPopSlug = s ? this.slugifyService(s) : '';
-                        if (sPopSlug && this.allServices.includes(sPopSlug)) {
-                            this.openService(sPopSlug, false, curParams.get('v') || (e.state && e.state.navigatedFromVersion) || null);
-                        } else if (v) {
-                            this.viewMode = 'release';
-                            this.navigatedFromVersion = null;
-                            this.selectVersion(v, false);
-                        }
-                    });
-                } catch (e) {
-                    this.error = e.message;
-                } finally {
-                    this.loading = false;
-                }
-            },
-
-            calculateStats() {
-                if (!this.versions.length) return;
-                
-                const now = new Date();
-                const threeMonthsAgo = new Date();
-                threeMonthsAgo.setDate(now.getDate() - 90);
-                
-                const recentVersions = this.versions.filter(v => new Date(v.date) >= threeMonthsAgo);
-                const weeks = 90 / 7;
-                this.stats.avgReleasesPerWeek = (recentVersions.length / weeks).toFixed(1);
-
-                const thirtyDaysAgo = new Date();
-                thirtyDaysAgo.setDate(now.getDate() - 30);
-                this.stats.recentChangesCount = this.versions.filter(v => new Date(v.date) >= thirtyDaysAgo).length;
-            },
-
-            updateUrl(push = false) {
-                const params = new URLSearchParams();
-                if (this.viewMode === 'service') {
-                    if (this.activeService) params.set('s', this.activeService);
-                    if (this.navigatedFromVersion) params.set('v', this.navigatedFromVersion);
-                } else {
-                    if (this.selectedVersion && this.versions[0] && this.selectedVersion !== this.versions[0].id) {
-                        params.set('v', this.selectedVersion);
-                    }
-                }
-                const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname;
-                if (push) {
-                    window.history.pushState({ v: this.selectedVersion, s: this.activeService, navigatedFromVersion: this.navigatedFromVersion, viewMode: this.viewMode }, '', newUrl);
-                } else {
-                    window.history.replaceState({ v: this.selectedVersion, s: this.activeService, navigatedFromVersion: this.navigatedFromVersion, viewMode: this.viewMode }, '', newUrl);
-                }
-            },
-
-            backToRelease() {
-                const targetVersion = this.navigatedFromVersion || this.selectedVersion || (this.versions[0] ? this.versions[0].id : '');
-                this.viewMode = 'release';
-                this.activeService = null;
-                this.navigatedFromVersion = null;
-                this.sidebarTab = 'versions';
-                if (targetVersion && targetVersion !== this.selectedVersion) {
-                    this.selectVersion(targetVersion, true);
-                } else {
-                    this.updateUrl(true);
-                    document.title = `AWS Boto3 v${this.selectedVersion} Changelog & Release Notes | BotoView`;
-                    const mainArea = document.getElementById('mainScrollArea');
-                    if (mainArea) mainArea.scrollTo({ top: 0, behavior: 'instant' });
-                    this.syncIndicator(this.selectedVersion, true);
-                }
-            },
-
-            prefetchAdjacent(currentIndex) {
-                if (currentIndex === -1) return;
-                if (currentIndex > 0 && this.versions[currentIndex - 1]) {
-                    this.prefetchVersion(this.versions[currentIndex - 1].id);
-                }
-                if (currentIndex < this.versions.length - 1 && this.versions[currentIndex + 1]) {
-                    this.prefetchVersion(this.versions[currentIndex + 1].id);
-                }
-            },
-
-            async selectVersion(id, push = true) {
-                if (this.isMobile(1024)) this.showMobileVersions = false;
-                this.viewMode = 'release';
-                this.sidebarTab = 'versions';
-                this.activeService = null;
-                this.navigatedFromVersion = null;
-                this.releaseServiceFilter = '';
-                if (this.selectedVersion === id && this.currentVersionData.length > 0) {
-                    this.updateUrl(push);
-                    return;
-                }
-                
-                const prevVersion = this.selectedVersion;
-                this.selectedVersion = id;
-
-                const idx = this.versions.findIndex(v => v.id === id);
-                if (idx !== -1 && idx >= this.railLimit) {
-                    this.railLimit = idx + 20;
-                }
-
-                this.updateUrl(push);
-
-                if (this.versionCache[id]) {
-                    this.currentVersionData = this.versionCache[id];
-                    document.title = `AWS Boto3 v${id} Changelog & Release Notes | BotoView`;
-                    this.syncIndicator(id);
-                    this.prefetchAdjacent(idx);
-                    return;
-                }
-
-                this.currentVersionData = []; 
-                document.title = `AWS Boto3 v${id} Changelog & Release Notes | BotoView`;
-                this.syncIndicator(id, false); 
-
-                try {
-                    const res = await fetch(`/data/versions/${id}.json`);
-                    if (!res.ok) throw new Error(`Release dossier ${id} missing`);
-                    const data = await res.json();
-                    this.versionCache[id] = data;
-                    
-                    if (this.selectedVersion === id) {
-                        this.currentVersionData = data;
-                        this.syncIndicator(id, true);
-                        this.prefetchAdjacent(idx);
-                    }
-                } catch (e) { 
-                    this.error = `Connection lost: ${id}`;
-                    this.selectedVersion = prevVersion;
-                    if (prevVersion && this.versionCache[prevVersion]) {
-                        this.currentVersionData = this.versionCache[prevVersion];
-                    }
-                    this.updateUrl(false);
-                }
-            },
-
-            syncIndicator(id, scroll = true) {
-                if (scroll) {
-                    const mainContent = document.getElementById('mainScrollArea');
-                    if (mainContent) mainContent.scrollTo({ top: 0, behavior: 'instant' });
-                }
-
-                requestAnimationFrame(() => {
-                    this.$nextTick(() => {
-                        const active = document.querySelector(`a[data-version="${id}"]`);
-                        if (active) {
-                            active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-                        }
-                    });
-                });
-            },
-
-            async openService(svc, push = true, fromVersion = null) {
-                this.activeService = svc;
-                this.viewMode = 'service';
-                this.sidebarTab = 'services';
-                if (typeof fromVersion === 'string') {
-                    this.navigatedFromVersion = fromVersion;
-                } else if (fromVersion === true) {
-                    this.navigatedFromVersion = this.selectedVersion || null;
-                } else if (fromVersion === false) {
-                    this.navigatedFromVersion = null;
-                }
-                this.serviceHistoryFilter = 'all';
-                this.serviceVersionFilter = 'all';
-                this.serviceHistoryLimit = 40;
-                this.serviceHistorySearch = '';
-                this.serviceHistory = [];
-                this.serviceHistoryLoading = true;
-                this.updateUrl(push);
-
-                document.title = `AWS Boto3 ${svc.toUpperCase()} Changelog | BotoView`;
-
-                const mainArea = document.getElementById('mainScrollArea');
-                if (mainArea) mainArea.scrollTo({ top: 0, behavior: 'instant' });
-
-                requestAnimationFrame(() => {
-                    this.$nextTick(() => {
-                        const activeSvcEl = document.querySelector(`[data-service="${svc.toLowerCase().trim()}"]`);
-                        if (activeSvcEl) {
-                            activeSvcEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-                        }
-                    });
-                });
-
-                const serviceId = this.slugifyService(svc);
-                const cacheKey = `svc_${serviceId}`;
-
-                if (this.versionCache[cacheKey]) {
-                    this.serviceHistory = this.versionCache[cacheKey];
-                    this.serviceHistoryLoading = false;
-                    return;
-                }
-                
-                try {
-                    const res = await fetch(`/data/services/${serviceId}.json`);
-                    if (!res.ok) throw new Error('Service data unavailable');
-                    const data = await res.json();
-                    this.versionCache[cacheKey] = data;
-                    if (this.activeService === svc) {
-                        this.serviceHistory = data;
-                    }
-                } catch (e) { 
-                    if (this.activeService === svc) this.serviceHistory = []; 
-                } finally {
-                    if (this.activeService === svc) this.serviceHistoryLoading = false;
-                }
-            },
-
-            get hasMoreServices() {
-                return this.serviceLimit < this._getFilteredServicesBase().length;
-            },
-
-            loadMoreServices() {
-                this.serviceLimit += 40;
-            },
-
-            _getFilteredServicesBase() {
-                let list = this.allServices || [];
-                if (this.serviceSearch) {
-                    const s = this.serviceSearch.toLowerCase().trim();
-                    list = list.filter(svc => svc.toLowerCase().includes(s));
-                }
-                if (this.serviceSort === 'popular') {
-                    return [...list].sort((a, b) => {
-                        const countA = this.serviceCounts[a] || 0;
-                        const countB = this.serviceCounts[b] || 0;
-                        if (countB !== countA) return countB - countA;
-                        return a.localeCompare(b);
-                    });
-                }
-                return [...list].sort((a, b) => a.localeCompare(b));
-            },
-
-            get filteredServices() {
-                return this._getFilteredServicesBase().slice(0, this.serviceLimit);
-            },
-
-            _getFilteredVersionsBase() {
-                const s = this.versionRailSearch.toLowerCase();
-                if (!s) return this.versions;
-                return this.versions.filter(v => {
-                    const monthYear = this.getMonthYear(v.date).toLowerCase();
-                    return v.id.includes(s) || monthYear.includes(s);
-                });
-            },
-
-            get filteredRailVersions() {
-                return this._getFilteredVersionsBase().slice(0, this.railLimit);
-            },
-
-            get groupedRailVersions() {
-                const groups = [];
-                const versions = this.filteredRailVersions;
-                
-                versions.forEach(v => {
-                    const label = this.getMonthYear(v.date);
-                    let group = groups.find(g => g.label === label);
-                    if (!group) {
-                        group = { label, versions: [] };
-                        groups.push(group);
-                    }
-                    group.versions.push(v);
-                });
-                
-                return groups;
-            },
-
-            get hasMoreVersions() {
-                return this.railLimit < this._getFilteredVersionsBase().length;
-            },
-
-            loadMoreVersions() {
-                this.railLimit += 50;
-            },
-
-            get availableServiceVersionPrefixes() {
-                const s = new Set();
-                for (const item of this.serviceHistory) {
-                    if (item.v) {
-                        const parts = item.v.split('.');
-                        if (parts.length >= 2) {
-                            s.add(`${parts[0]}.${parts[1]}`);
-                        }
-                    }
-                }
-                return Array.from(s).slice(0, 10);
-            },
-
-            get filteredServiceHistory() {
-                let list = this.serviceHistory;
-                if (this.serviceHistoryFilter === 'feature') {
-                    list = list.filter(item => !(item.t && item.t.toLowerCase().includes('fix')));
-                } else if (this.serviceHistoryFilter === 'fix') {
-                    list = list.filter(item => item.t && item.t.toLowerCase().includes('fix'));
-                }
-
-                if (this.serviceVersionFilter && this.serviceVersionFilter !== 'all') {
-                    list = list.filter(item => item.v && item.v.startsWith(this.serviceVersionFilter));
-                }
-
-                if (!this.serviceHistorySearch || !this.serviceHistorySearch.trim()) {
-                    return list;
-                }
-                const s = this.serviceHistorySearch.toLowerCase().trim();
-                return list.filter(log => (log.v && log.v.toLowerCase().includes(s)) || (log.t && log.t.toLowerCase().includes(s)));
-            },
-
-            get visibleServiceHistory() {
-                return this.filteredServiceHistory.slice(0, this.serviceHistoryLimit);
-            },
-
-            get hasMoreServiceHistory() {
-                return this.serviceHistoryLimit < this.filteredServiceHistory.length;
-            },
-
-            loadMoreServiceHistory() {
-                this.serviceHistoryLimit += 40;
-            },
-
-            toggleReleaseServiceFilter(svc) {
-                if (this.releaseServiceFilter === svc) {
-                    this.releaseServiceFilter = '';
-                } else {
-                    this.releaseServiceFilter = svc;
-                }
-            },
-
-            get filteredVersionData() {
-                let data = this.currentVersionData;
-                if (this.activeFilter === 'feature') {
-                    data = data.filter(i => !(i.type && i.type.toLowerCase().includes('fix')));
-                } else if (this.activeFilter === 'fix') {
-                    data = data.filter(i => i.type && i.type.toLowerCase().includes('fix'));
-                }
-
-                if (this.releaseServiceFilter) {
-                    const s = this.releaseServiceFilter.toLowerCase().trim();
-                    data = data.filter(i => i.category && i.category.toLowerCase().trim() === s);
-                }
-
-                if (!this.versionSearch || !this.versionSearch.trim()) return data;
-                const s = this.versionSearch.toLowerCase().trim();
-                return data.filter(i => 
-                    (i.category && i.category.toLowerCase().includes(s)) || 
-                    (i.description && i.description.toLowerCase().includes(s))
-                );
-            }
-        });
-
-        if ((window as any).Alpine) {
-            (window as any).Alpine.data('botoCore', factory);
-        } else {
-            document.addEventListener('alpine:init', () => {
-                (window as any).Alpine.data('botoCore', factory);
-            });
-        }
+    import {
+        copyToClipboardText,
+        emitToast,
+        formatDate,
+        formatDescription,
+        getMonthYear,
+        getRelativeDate,
+        getServiceColorClass,
+        highlightText,
+        isTypingTarget,
+        loadTrackIndex,
+        makeEntryAnchorId,
+        normalizeChangeType,
+        openCommandPalette,
+        readPageData,
+        registerAlpineComponent,
+        slugifyService,
+        toggleThemeState
+    } from '../utils/client';
+    import type { ChangelogItem, ServiceUpdateItem } from '../utils/data';
+
+    interface HomeInitPayload {
+        latestId: string;
+        changes: ChangelogItem[];
     }
 
-    registerBotoCore();
+    const initData = readPageData<HomeInitPayload>('boto-home-init', { latestId: '', changes: [] });
+    const initialLatestId = initData.latestId || '';
+    const initialChangesJson = initData.changes || [];
+
+    registerAlpineComponent('botoCore', () => ({
+        errorTitle: 'Unable to load release data',
+        sidebarTab: 'versions',
+        viewMode: 'release' as 'release' | 'service',
+        selectedVersion: initialLatestId,
+        navigatedFromVersion: null as string | null,
+        versions: [] as Array<{ id: string; date: string }>,
+        allServices: [] as string[],
+        serviceCounts: {} as Record<string, number>,
+        serviceSort: 'popular' as 'popular' | 'alpha',
+        serviceLimit: 40,
+        currentVersionData: initialChangesJson as ChangelogItem[],
+        isClientHydrated: true,
+        serviceSearch: '',
+        versionSearch: '',
+        versionRailSearch: '',
+        releaseServiceFilter: '',
+        activeFilter: 'all',
+        railLimit: 50,
+        activeService: null as string | null,
+        serviceHistory: [] as ServiceUpdateItem[],
+        serviceHistorySearch: '',
+        serviceHistoryFilter: 'all',
+        serviceVersionFilter: 'all',
+        serviceHistoryLimit: 40,
+        serviceHistoryLoading: false,
+        showMobileVersions: false,
+        showBackToTop: false,
+        isScrolled: false,
+        error: null as string | null,
+        versionCache: (initialLatestId ? { [initialLatestId]: initialChangesJson } : {}) as Record<string, unknown>,
+        copiedItemIndex: null as string | number | null,
+        showPipCopied: false,
+        pinTool: 'pip' as 'pip' | 'uv',
+        expandedEntries: {} as Record<string, boolean>,
+        isDarkMode: document.documentElement.classList.contains('dark'),
+        _versionDateMap: null as Map<string, string> | null,
+        _serviceColorCache: {} as Record<string, string>,
+
+        get hasActiveFilter(): boolean {
+            return Boolean(
+                (this.versionSearch && this.versionSearch.trim()) ||
+                this.activeFilter !== 'all' ||
+                this.releaseServiceFilter ||
+                this.selectedVersion !== initialLatestId ||
+                this.viewMode !== 'release'
+            );
+        },
+
+        toggleTheme() {
+            this.isDarkMode = toggleThemeState();
+        },
+
+        openPalette() {
+            this.syncPaletteEntries();
+            openCommandPalette('');
+        },
+
+        handlePaletteSelection(detail?: { type: string; value: string }) {
+            if (!detail) return;
+            if (detail.type === 'service') {
+                this.openService(detail.value, true, false);
+            } else if (detail.type === 'version') {
+                this.selectVersion(detail.value, true);
+            }
+        },
+
+        syncPaletteEntries() {
+            const win = window as unknown as {
+                __BOTO_ACTIVE_ENTRIES__?: Array<{ id: string; label: string; text: string; anchor: string }>;
+            };
+            if (this.viewMode === 'release') {
+                win.__BOTO_ACTIVE_ENTRIES__ = this.currentVersionData.map((c, idx) => ({
+                    id: `${idx}`,
+                    label: c.category || 'core',
+                    text: c.description || '',
+                    anchor: makeEntryAnchorId(c.category, idx)
+                }));
+            } else {
+                win.__BOTO_ACTIVE_ENTRIES__ = this.serviceHistory.slice(0, 120).map((item, idx) => ({
+                    id: `${idx}`,
+                    label: `v${item.v}`,
+                    text: item.t || '',
+                    anchor: `svc-${item.v.replace(/\./g, '-')}-${idx}`
+                }));
+            }
+        },
+
+        isMobile(breakpoint = 768): boolean {
+            return window.matchMedia(`(max-width: ${breakpoint - 1}px)`).matches;
+        },
+
+        highlight(text: string, search?: string): string {
+            return highlightText(text, search);
+        },
+
+        formatDescription(text: string, search?: string): string {
+            return formatDescription(text, search);
+        },
+
+        slugifyService(name: string): string {
+            return slugifyService(name);
+        },
+
+        makeEntryAnchorId(prefix: string, idx: number): string {
+            return makeEntryAnchorId(prefix, idx);
+        },
+
+        getTypeMeta(rawType?: string, description?: string) {
+            return normalizeChangeType(rawType, description);
+        },
+
+        isLongText(text?: string): boolean {
+            return Boolean(text && text.length > 280);
+        },
+
+        isExpanded(key: string): boolean {
+            return Boolean(this.expandedEntries[key]);
+        },
+
+        toggleExpand(key: string) {
+            this.expandedEntries[key] = !this.expandedEntries[key];
+        },
+
+        async copyPipCommand() {
+            const ver = this.selectedVersion || initialLatestId;
+            const cmd = this.pinTool === 'uv' ? `uv add boto3==${ver}` : `pip install boto3==${ver}`;
+            const ok = await copyToClipboardText(cmd);
+            if (ok) {
+                this.showPipCopied = true;
+                emitToast(`Copied ${cmd}`);
+                setTimeout(() => {
+                    this.showPipCopied = false;
+                }, 2000);
+            }
+        },
+
+        async copyReleaseLink() {
+            const url = new URL(window.location.href);
+            url.hash = '';
+            const ok = await copyToClipboardText(url.toString());
+            if (ok) emitToast(`Copied link to v${this.selectedVersion || initialLatestId}`);
+        },
+
+        async copyAnchorLink(anchorId: string) {
+            const url = new URL(window.location.href);
+            url.hash = anchorId;
+            window.history.replaceState(window.history.state, '', url.toString());
+            const ok = await copyToClipboardText(url.toString());
+            if (ok) emitToast('Copied deep link');
+        },
+
+        async copyItem(item: { category?: string; description: string; version?: string }, index: string | number) {
+            const cat = (item.category || '').toUpperCase();
+            const ver = item.version || this.selectedVersion || initialLatestId;
+            const text = `${cat}: ${item.description} (${ver})`;
+            const ok = await copyToClipboardText(text);
+            if (ok) {
+                this.copiedItemIndex = index;
+                emitToast('Copied changelog entry');
+                setTimeout(() => {
+                    if (this.copiedItemIndex === index) this.copiedItemIndex = null;
+                }, 2000);
+            }
+        },
+
+        resetReleaseFilters() {
+            this.versionSearch = '';
+            this.activeFilter = 'all';
+            this.releaseServiceFilter = '';
+        },
+
+        get versionCounts() {
+            let apiChanges = 0;
+            let features = 0;
+            let enhancements = 0;
+            let fixes = 0;
+            for (const item of this.currentVersionData) {
+                const key = normalizeChangeType(item.type, item.description).key;
+                if (key === 'api-change') apiChanges++;
+                else if (key === 'feature') features++;
+                else if (key === 'enhancement') enhancements++;
+                else fixes++;
+            }
+            return {
+                total: this.currentVersionData.length,
+                apiChanges,
+                features,
+                enhancements,
+                fixes
+            };
+        },
+
+        get serviceHistoryCounts() {
+            let apiChanges = 0;
+            let features = 0;
+            let enhancements = 0;
+            let fixes = 0;
+            for (const item of this.serviceHistory) {
+                const key = normalizeChangeType('', item.t).key;
+                if (key === 'api-change') apiChanges++;
+                else if (key === 'feature') features++;
+                else if (key === 'enhancement') enhancements++;
+                else fixes++;
+            }
+            return {
+                total: this.serviceHistory.length,
+                apiChanges,
+                features,
+                enhancements,
+                fixes
+            };
+        },
+
+        switchSidebarTab(tab: string) {
+            this.sidebarTab = tab;
+            if (tab === 'versions' && this.viewMode === 'service') {
+                this.backToRelease();
+            } else if (tab === 'services' && this.viewMode === 'release' && this.activeService) {
+                this.openService(this.activeService, true, false);
+            }
+        },
+
+        get currentVersionServices() {
+            const s = new Set<string>();
+            for (const c of this.currentVersionData) {
+                if (c && c.category) s.add(c.category.toLowerCase().trim());
+            }
+            return s;
+        },
+
+        get adjacentVersions() {
+            if (!this.versions.length || !this.selectedVersion) return { newer: null, older: null };
+            const idx = this.versions.findIndex((v) => v.id === this.selectedVersion);
+            if (idx === -1) return { newer: null, older: null };
+            return {
+                newer: idx > 0 ? this.versions[idx - 1].id : null,
+                older: idx < this.versions.length - 1 ? this.versions[idx + 1].id : null
+            };
+        },
+
+        handleGlobalKeydown(e: KeyboardEvent) {
+            if (e.metaKey || e.ctrlKey) return;
+
+            if (isTypingTarget(e.target)) {
+                if (e.key === 'Escape') {
+                    (e.target as HTMLElement).blur();
+                }
+                return;
+            }
+
+            if (e.key === 'Escape') {
+                this.showMobileVersions = false;
+                if (this.viewMode === 'service') {
+                    this.backToRelease();
+                }
+                return;
+            }
+
+            if (e.key === 't' || e.key === 'T') {
+                e.preventDefault();
+                this.toggleTheme();
+                return;
+            }
+
+            if (e.key === 'j' || e.key === 'ArrowDown') {
+                if (this.adjacentVersions.older) {
+                    e.preventDefault();
+                    this.selectVersion(this.adjacentVersions.older, true);
+                }
+                return;
+            }
+
+            if (e.key === 'k' || e.key === 'ArrowUp') {
+                if (this.adjacentVersions.newer) {
+                    e.preventDefault();
+                    this.selectVersion(this.adjacentVersions.newer, true);
+                }
+                return;
+            }
+
+            if (e.key === '/') {
+                e.preventDefault();
+                const searchId = this.viewMode === 'service' ? 'serviceHistorySearch' : 'versionSearch';
+                document.getElementById(searchId)?.focus();
+            }
+        },
+
+        get selectedDate(): string {
+            return this.getVersionDate(this.selectedVersion);
+        },
+
+        getVersionDate(id: string): string {
+            if (!id || !this._versionDateMap) return '';
+            return this._versionDateMap.get(id) || '';
+        },
+
+        getRelativeDate(dateStr: string): string {
+            return getRelativeDate(dateStr);
+        },
+
+        formatDate(dateStr: string): string {
+            return formatDate(dateStr);
+        },
+
+        getMonthYear(dateStr: string): string {
+            return getMonthYear(dateStr);
+        },
+
+        getServiceColorClass(serviceName: string): string {
+            if (!serviceName) return 'bg-slate-500/10 text-slate-700 dark:text-slate-300';
+            if (this._serviceColorCache[serviceName]) return this._serviceColorCache[serviceName];
+            const result = getServiceColorClass(serviceName);
+            this._serviceColorCache[serviceName] = result;
+            return result;
+        },
+
+        async prefetchVersion(id: string) {
+            if (this.versionCache[id] || this.selectedVersion === id) return;
+            try {
+                const res = await fetch(`/data/versions/${id}.json`);
+                if (res.ok) {
+                    this.versionCache[id] = await res.json();
+                }
+            } catch {}
+        },
+
+        async prefetchService(svc: string) {
+            const serviceId = this.slugifyService(svc);
+            if (!serviceId) return;
+            const cacheKey = `svc_${serviceId}`;
+            if (this.versionCache[cacheKey]) return;
+            try {
+                const res = await fetch(`/data/services/${serviceId}.json`);
+                if (res.ok) {
+                    this.versionCache[cacheKey] = await res.json();
+                }
+            } catch {}
+        },
+
+        async init() {
+            this.isDarkMode = document.documentElement.classList.contains('dark');
+            try {
+                const data = await loadTrackIndex();
+                this.versions = data.versions || [];
+                this.allServices = data.allServices || [];
+                this.serviceCounts = data.serviceCounts || {};
+
+                this._versionDateMap = new Map();
+                for (const v of this.versions) {
+                    this._versionDateMap.set(v.id, v.date || '');
+                }
+
+                await this.applyUrlParams(window.location.search);
+                this.syncPaletteEntries();
+
+                const syncWatcher = () => {
+                    this.updateUrl(false);
+                };
+                const watchable = this as unknown as { $watch: (k: string, cb: () => void) => void };
+                watchable.$watch('versionSearch', syncWatcher);
+                watchable.$watch('activeFilter', syncWatcher);
+                watchable.$watch('releaseServiceFilter', syncWatcher);
+                watchable.$watch('serviceHistorySearch', syncWatcher);
+                watchable.$watch('serviceHistoryFilter', syncWatcher);
+                watchable.$watch('serviceVersionFilter', syncWatcher);
+
+                window.addEventListener('popstate', () => {
+                    this.applyUrlParams(window.location.search);
+                });
+            } catch (e) {
+                this.error = e instanceof Error ? e.message : 'Unable to fetch changelog index.';
+            }
+        },
+
+        async applyUrlParams(searchStr: string) {
+            const params = new URLSearchParams(searchStr);
+            const vParam = params.get('v');
+            const sParam = params.get('s');
+            const svcParam = params.get('svc');
+            const typeParam = params.get('type');
+            const qParam = params.get('q');
+            const sSlug = sParam ? this.slugifyService(sParam) : '';
+
+            if (sSlug && this.allServices.includes(sSlug)) {
+                await this.openService(sSlug, false, vParam || null);
+                if (typeParam && ['all', 'api-change', 'feature', 'enhancement', 'bugfix'].includes(typeParam)) {
+                    this.serviceHistoryFilter = typeParam;
+                }
+                if (qParam) {
+                    this.serviceHistorySearch = qParam;
+                }
+            } else {
+                this.viewMode = 'release';
+                this.activeService = null;
+                this.navigatedFromVersion = null;
+                if (vParam && vParam !== this.selectedVersion && this.versions.find((v) => v.id === vParam)) {
+                    await this.selectVersion(vParam, false);
+                } else if (!vParam && this.versions.length > 0 && this.selectedVersion !== this.versions[0].id) {
+                    await this.selectVersion(this.versions[0].id, false);
+                }
+                if (svcParam) {
+                    this.releaseServiceFilter = this.slugifyService(svcParam);
+                } else {
+                    this.releaseServiceFilter = '';
+                }
+                if (typeParam && ['all', 'api-change', 'feature', 'enhancement', 'bugfix'].includes(typeParam)) {
+                    this.activeFilter = typeParam;
+                } else {
+                    this.activeFilter = 'all';
+                }
+                if (qParam) {
+                    this.versionSearch = qParam;
+                } else if (sParam && sParam.trim()) {
+                    this.versionSearch = sParam.trim();
+                } else {
+                    this.versionSearch = '';
+                }
+            }
+        },
+
+        updateUrl(push = false) {
+            const params = new URLSearchParams();
+            if (this.viewMode === 'service') {
+                if (this.activeService) params.set('s', this.activeService);
+                if (this.navigatedFromVersion) params.set('v', this.navigatedFromVersion);
+                if (this.serviceHistoryFilter !== 'all') params.set('type', this.serviceHistoryFilter);
+                if (this.serviceHistorySearch.trim()) params.set('q', this.serviceHistorySearch.trim());
+            } else {
+                if (this.selectedVersion && this.versions[0] && this.selectedVersion !== this.versions[0].id) {
+                    params.set('v', this.selectedVersion);
+                }
+                if (this.releaseServiceFilter) params.set('svc', this.releaseServiceFilter);
+                if (this.activeFilter !== 'all') params.set('type', this.activeFilter);
+                if (this.versionSearch.trim()) params.set('q', this.versionSearch.trim());
+            }
+            const qs = params.toString();
+            const hash = window.location.hash || '';
+            const newUrl = qs ? `?${qs}${hash}` : `${window.location.pathname}${hash}`;
+            const state = {
+                v: this.selectedVersion,
+                s: this.activeService,
+                navigatedFromVersion: this.navigatedFromVersion,
+                viewMode: this.viewMode
+            };
+            if (push) {
+                window.history.pushState(state, '', newUrl);
+            } else {
+                window.history.replaceState(state, '', newUrl);
+            }
+        },
+
+        backToRelease() {
+            const targetVersion = this.navigatedFromVersion || this.selectedVersion || (this.versions[0]?.id ?? '');
+            this.viewMode = 'release';
+            this.activeService = null;
+            this.navigatedFromVersion = null;
+            this.sidebarTab = 'versions';
+            if (targetVersion && targetVersion !== this.selectedVersion) {
+                this.selectVersion(targetVersion, true);
+            } else {
+                this.updateUrl(true);
+                document.title = `AWS Boto3 v${this.selectedVersion} Changelog & Release Notes | BotoView`;
+                document.getElementById('mainScrollArea')?.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+                this.syncIndicator(this.selectedVersion, true);
+                this.syncPaletteEntries();
+            }
+        },
+
+        prefetchAdjacent(currentIndex: number) {
+            if (currentIndex === -1) return;
+            if (currentIndex > 0 && this.versions[currentIndex - 1]) {
+                this.prefetchVersion(this.versions[currentIndex - 1].id);
+            }
+            if (currentIndex < this.versions.length - 1 && this.versions[currentIndex + 1]) {
+                this.prefetchVersion(this.versions[currentIndex + 1].id);
+            }
+        },
+
+        async selectVersion(id: string, push = true) {
+            if (this.isMobile(1024)) this.showMobileVersions = false;
+            this.viewMode = 'release';
+            this.sidebarTab = 'versions';
+            this.activeService = null;
+            this.navigatedFromVersion = null;
+            this.releaseServiceFilter = '';
+            this.expandedEntries = {};
+
+            if (this.selectedVersion === id && this.currentVersionData.length > 0) {
+                this.updateUrl(push);
+                this.syncPaletteEntries();
+                return;
+            }
+
+            const prevVersion = this.selectedVersion;
+            this.selectedVersion = id;
+
+            const idx = this.versions.findIndex((v) => v.id === id);
+            if (idx !== -1 && idx >= this.railLimit) {
+                this.railLimit = idx + 20;
+            }
+
+            this.updateUrl(push);
+
+            if (this.versionCache[id]) {
+                this.currentVersionData = this.versionCache[id] as ChangelogItem[];
+                document.title = `AWS Boto3 v${id} Changelog & Release Notes | BotoView`;
+                this.syncIndicator(id);
+                this.prefetchAdjacent(idx);
+                this.syncPaletteEntries();
+                return;
+            }
+
+            this.currentVersionData = [];
+            document.title = `AWS Boto3 v${id} Changelog & Release Notes | BotoView`;
+            this.syncIndicator(id, false);
+
+            try {
+                const res = await fetch(`/data/versions/${id}.json`);
+                if (!res.ok) throw new Error(`Release ${id} unavailable`);
+                const data = (await res.json()) as ChangelogItem[];
+                this.versionCache[id] = data;
+
+                if (this.selectedVersion === id) {
+                    this.currentVersionData = data;
+                    this.syncIndicator(id, true);
+                    this.prefetchAdjacent(idx);
+                    this.syncPaletteEntries();
+                }
+            } catch {
+                this.error = `Failed to load release v${id}`;
+                this.selectedVersion = prevVersion;
+                if (prevVersion && this.versionCache[prevVersion]) {
+                    this.currentVersionData = this.versionCache[prevVersion] as ChangelogItem[];
+                }
+                this.updateUrl(false);
+            }
+        },
+
+        syncIndicator(id: string, scroll = true) {
+            if (scroll) {
+                document.getElementById('mainScrollArea')?.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+            }
+
+            requestAnimationFrame(() => {
+                const active = document.querySelector(`a[data-version="${id}"]`);
+                active?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+            });
+        },
+
+        async openService(svc: string, push = true, fromVersion: string | boolean | null = null) {
+            this.activeService = svc;
+            this.viewMode = 'service';
+            this.sidebarTab = 'services';
+            this.expandedEntries = {};
+
+            if (typeof fromVersion === 'string') {
+                this.navigatedFromVersion = fromVersion;
+            } else if (fromVersion === true) {
+                this.navigatedFromVersion = this.selectedVersion || null;
+            } else if (fromVersion === false) {
+                this.navigatedFromVersion = null;
+            }
+
+            this.serviceHistoryFilter = 'all';
+            this.serviceVersionFilter = 'all';
+            this.serviceHistoryLimit = 40;
+            this.serviceHistorySearch = '';
+            this.serviceHistory = [];
+            this.serviceHistoryLoading = true;
+            this.updateUrl(push);
+
+            document.title = `AWS Boto3 ${svc.toUpperCase()} Changelog | BotoView`;
+            document.getElementById('mainScrollArea')?.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+
+            requestAnimationFrame(() => {
+                const activeSvcEl = document.querySelector(`[data-service="${svc.toLowerCase().trim()}"]`);
+                activeSvcEl?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+            });
+
+            const serviceId = this.slugifyService(svc);
+            const cacheKey = `svc_${serviceId}`;
+
+            if (this.versionCache[cacheKey]) {
+                this.serviceHistory = this.versionCache[cacheKey] as ServiceUpdateItem[];
+                this.serviceHistoryLoading = false;
+                this.syncPaletteEntries();
+                return;
+            }
+
+            try {
+                const res = await fetch(`/data/services/${serviceId}.json`);
+                if (!res.ok) throw new Error('Service data unavailable');
+                const data = (await res.json()) as ServiceUpdateItem[];
+                this.versionCache[cacheKey] = data;
+                if (this.activeService === svc) {
+                    this.serviceHistory = data;
+                    this.syncPaletteEntries();
+                }
+            } catch {
+                if (this.activeService === svc) this.serviceHistory = [];
+            } finally {
+                if (this.activeService === svc) this.serviceHistoryLoading = false;
+            }
+        },
+
+        get hasMoreServices(): boolean {
+            return this.serviceLimit < this._getFilteredServicesBase().length;
+        },
+
+        loadMoreServices() {
+            this.serviceLimit += 40;
+        },
+
+        _getFilteredServicesBase(): string[] {
+            let list = this.allServices || [];
+            if (this.serviceSearch) {
+                const s = this.serviceSearch.toLowerCase().trim();
+                list = list.filter((svc) => svc.toLowerCase().includes(s));
+            }
+            if (this.serviceSort === 'popular') {
+                return [...list].sort((a, b) => {
+                    const countA = this.serviceCounts[a] || 0;
+                    const countB = this.serviceCounts[b] || 0;
+                    if (countB !== countA) return countB - countA;
+                    return a.localeCompare(b);
+                });
+            }
+            return [...list].sort((a, b) => a.localeCompare(b));
+        },
+
+        get filteredServices(): string[] {
+            return this._getFilteredServicesBase().slice(0, this.serviceLimit);
+        },
+
+        _getFilteredVersionsBase() {
+            const s = this.versionRailSearch.toLowerCase();
+            if (!s) return this.versions;
+            return this.versions.filter((v) => {
+                const monthYear = this.getMonthYear(v.date).toLowerCase();
+                return v.id.includes(s) || monthYear.includes(s);
+            });
+        },
+
+        get filteredRailVersions() {
+            return this._getFilteredVersionsBase().slice(0, this.railLimit);
+        },
+
+        get groupedRailVersions() {
+            const groups: Array<{ label: string; versions: Array<{ id: string; date: string }> }> = [];
+            for (const v of this.filteredRailVersions) {
+                const label = this.getMonthYear(v.date);
+                let group = groups.find((g) => g.label === label);
+                if (!group) {
+                    group = { label, versions: [] };
+                    groups.push(group);
+                }
+                group.versions.push(v);
+            }
+            return groups;
+        },
+
+        get hasMoreVersions(): boolean {
+            return this.railLimit < this._getFilteredVersionsBase().length;
+        },
+
+        loadMoreVersions() {
+            this.railLimit += 50;
+        },
+
+        get availableServiceVersionPrefixes(): string[] {
+            const s = new Set<string>();
+            for (const item of this.serviceHistory) {
+                if (item.v) {
+                    const parts = item.v.split('.');
+                    if (parts.length >= 2) {
+                        s.add(`${parts[0]}.${parts[1]}`);
+                    }
+                }
+            }
+            return Array.from(s).slice(0, 10);
+        },
+
+        get filteredServiceHistory(): ServiceUpdateItem[] {
+            let list = this.serviceHistory;
+            if (this.serviceHistoryFilter !== 'all') {
+                list = list.filter((item) => normalizeChangeType('', item.t).key === this.serviceHistoryFilter);
+            }
+
+            if (this.serviceVersionFilter && this.serviceVersionFilter !== 'all') {
+                list = list.filter((item) => item.v && item.v.startsWith(this.serviceVersionFilter));
+            }
+
+            if (!this.serviceHistorySearch || !this.serviceHistorySearch.trim()) {
+                return list;
+            }
+            const s = this.serviceHistorySearch.toLowerCase().trim();
+            return list.filter((log) => (log.v && log.v.toLowerCase().includes(s)) || (log.t && log.t.toLowerCase().includes(s)));
+        },
+
+        get visibleServiceHistory(): ServiceUpdateItem[] {
+            return this.filteredServiceHistory.slice(0, this.serviceHistoryLimit);
+        },
+
+        get hasMoreServiceHistory(): boolean {
+            return this.serviceHistoryLimit < this.filteredServiceHistory.length;
+        },
+
+        loadMoreServiceHistory() {
+            this.serviceHistoryLimit += 40;
+        },
+
+        toggleReleaseServiceFilter(svc: string) {
+            this.releaseServiceFilter = this.releaseServiceFilter === svc ? '' : svc;
+        },
+
+        get filteredVersionData(): ChangelogItem[] {
+            let data = this.currentVersionData;
+            if (this.activeFilter !== 'all') {
+                data = data.filter((item) => normalizeChangeType(item.type, item.description).key === this.activeFilter);
+            }
+
+            if (this.releaseServiceFilter) {
+                const s = this.releaseServiceFilter.toLowerCase().trim();
+                data = data.filter((i) => i.category && i.category.toLowerCase().trim() === s);
+            }
+
+            if (!this.versionSearch || !this.versionSearch.trim()) return data;
+            const s = this.versionSearch.toLowerCase().trim();
+            return data.filter((i) =>
+                (i.category && i.category.toLowerCase().includes(s)) ||
+                (i.description && i.description.toLowerCase().includes(s))
+            );
+        }
+    }));
 </script>

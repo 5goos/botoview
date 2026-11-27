@@ -4,7 +4,7 @@
   "description": "Track and filter AWS Boto3 changelogs and release notes by service.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#07090e",
+  "background_color": "#090b10",
   "theme_color": "#4f46e5",
   "icons": [
     {

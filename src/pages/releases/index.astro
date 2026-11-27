@@ -79,42 +79,55 @@ const collectionSchema = {
 };
 ---
 
-<Layout 
-    title={pageTitle} 
-    description={pageDescription} 
+<Layout
+    title={pageTitle}
+    description={pageDescription}
     canonical={canonicalUrl}
-    bodyClass="min-h-screen w-full overflow-y-auto text-[var(--text-secondary)] transition-colors duration-500"
+    bodyClass="min-h-screen w-full overflow-y-auto text-[var(--text-secondary)] transition-colors duration-200"
     jsonLd={[breadcrumbSchema, collectionSchema]}
 >
-    <div class="min-h-screen flex flex-col bg-transparent" 
-         x-data="releasesDirectory" 
+    <div class="min-h-screen flex flex-col bg-transparent relative"
+         x-data="releasesDirectory"
          @scroll.window="isScrolled = window.scrollY > 10"
-         @keydown.window="if(!['INPUT','TEXTAREA'].includes($event.target.tagName) && $event.key === '/') { $event.preventDefault(); $el.querySelector('input')?.focus(); }">
+         @boto:theme-changed.window="isDark = $event.detail.isDark"
+         @keydown.window="handleKeydown($event)">
+        <div class="pointer-events-none fixed inset-0 z-0 ambient-glow" aria-hidden="true"></div>
+
         <header class="h-14 glass-header sticky top-0 z-40 flex items-center transition-all duration-200" :class="isScrolled ? 'glass-header-scrolled' : ''">
-            <div class="w-full max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-3">
+            <div class="w-full max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-2 min-w-0">
                 <div class="flex items-center gap-2 sm:gap-3 min-w-0">
                     <a href="/" class="flex items-center gap-2 group cursor-pointer shrink-0" aria-label="BotoView Home">
                         <img src="/favicon.svg" width="22" height="22" alt="BotoView logo" class="w-5 h-5 group-hover:scale-105 transition-transform" />
                         <span class="text-[15px] font-semibold tracking-tight text-slate-900 dark:text-slate-100 leading-none">BotoView</span>
                     </a>
                     <span class="text-slate-300 dark:text-white/10 hidden sm:inline">/</span>
-                    <span class="text-xs mono font-semibold text-indigo-600 dark:text-indigo-400 truncate max-w-[140px] sm:max-w-none">
+                    <span class="text-xs mono font-semibold text-indigo-600 dark:text-indigo-400 truncate">
                         Releases
                     </span>
                 </div>
 
-                <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
-                    <a href="/services/" class="px-3 py-1.5 rounded-full text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors">
+                <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
+                    <a href="/services/" class="px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors">
                         Services
                     </a>
-                    <button @click="toggleTheme()"
-                            aria-label="Toggle dark mode"
-                            class="p-2 rounded-full text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-black/[0.04] dark:hover:bg-white/[0.07] transition-colors cursor-pointer shrink-0">
-                        <svg x-show="!isDark" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-                        <svg x-show="isDark" x-cloak class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <button type="button"
+                            @click="openPalette()"
+                            aria-label="Open command search (Cmd/Ctrl+K)"
+                            title="Quick jump (Cmd/Ctrl + K)"
+                            class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium text-slate-600 dark:text-slate-300 bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.08] dark:hover:bg-white/[0.1] transition-colors cursor-pointer shrink-0 min-h-[40px] sm:min-h-0">
+                        <svg class="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        <kbd class="kbd-badge hidden sm:inline-flex">⌘K</kbd>
                     </button>
-                    <a href="/" 
-                       class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full text-xs font-semibold transition-all active:scale-95 shrink-0">
+                    <button type="button"
+                            @click="toggleTheme()"
+                            aria-label="Toggle dark mode"
+                            title="Toggle dark / light theme (t)"
+                            class="rounded-full text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-black/[0.04] dark:hover:bg-white/[0.07] transition-colors cursor-pointer shrink-0 tap-target flex items-center justify-center">
+                        <svg x-show="!isDark" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                        <svg x-show="isDark" class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    </button>
+                    <a href="/"
+                       class="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full text-xs font-semibold transition-all active:scale-95 shrink-0">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                         <span class="hidden sm:inline">Explorer</span>
                         <span class="sm:hidden">App</span>
@@ -123,7 +136,7 @@ const collectionSchema = {
             </div>
         </header>
 
-        <main id="mainScrollArea" tabindex="-1" class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-6">
+        <main id="mainScrollArea" tabindex="-1" class="relative z-10 flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-6 min-w-0">
             <div class="max-w-2xl">
                 <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white leading-tight mb-2">
                     AWS Boto3 Releases
@@ -133,14 +146,15 @@ const collectionSchema = {
                 </p>
 
                 <div class="relative mt-4 max-w-md">
-                    <input type="text" 
-                           x-model.debounce.150ms="search" 
+                    <input type="text"
+                           id="releasesArchiveSearch"
+                           x-model.debounce.150ms="search"
                            @input="ensureArchiveLoaded()"
-                           placeholder="Filter all 2,370+ versions (e.g. 1.44, 1.10.26, 2024)..." 
+                           placeholder={`Filter all ${allVersions.length.toLocaleString('en-US')} versions (e.g. 1.44, 1.10.26, 2024)...`}
                            aria-label="Filter releases"
-                           class="w-full glass-input rounded-xl py-2 pl-9 pr-8 text-xs focus:outline-none text-slate-900 dark:text-white font-medium transition-all" />
-                    <svg class="absolute left-3 top-2.5 w-4 h-4 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    <button x-show="search" x-cloak @click="search = ''" aria-label="Clear search" class="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
+                           class="w-full glass-input rounded-2xl py-2.5 sm:py-2 pl-9 pr-9 text-xs focus:outline-none text-slate-900 dark:text-white font-medium transition-all" />
+                    <svg class="absolute left-3 top-[12px] sm:top-2.5 w-4 h-4 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <button type="button" x-show="search" x-cloak @click="search = ''" aria-label="Clear search" class="absolute right-2.5 top-[9px] sm:top-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 cursor-pointer">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
@@ -148,24 +162,24 @@ const collectionSchema = {
 
             <section aria-label="Release archive telemetry" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div class="soft-card p-4 rounded-2xl space-y-1">
-                    <span class="text-[10px] mono uppercase font-semibold text-slate-400">Total Releases</span>
+                    <span class="text-[10px] mono uppercase font-semibold text-slate-500 dark:text-slate-400">Total Releases</span>
                     <p class="text-xl sm:text-2xl font-bold mono text-indigo-600 dark:text-indigo-400 tabular-nums">{allVersions.length.toLocaleString('en-US')}</p>
-                    <span class="text-[10px] text-slate-500 block">Since {earliestVersion.date?.substring(0, 4) || '2016'}</span>
+                    <span class="text-[10px] text-slate-500 dark:text-slate-400 block">Since {earliestVersion.date?.substring(0, 4) || '2016'}</span>
                 </div>
                 <div class="soft-card p-4 rounded-2xl space-y-1">
-                    <span class="text-[10px] mono uppercase font-semibold text-slate-400">Latest Version</span>
+                    <span class="text-[10px] mono uppercase font-semibold text-slate-500 dark:text-slate-400">Latest Version</span>
                     <p class="text-xl sm:text-2xl font-bold mono text-emerald-600 dark:text-emerald-400">v{latestVersion.id}</p>
-                    <span class="text-[10px] text-slate-500 block">{formatDate(latestVersion.date)}</span>
+                    <span class="text-[10px] text-slate-500 dark:text-slate-400 block">{formatDate(latestVersion.date)}</span>
                 </div>
                 <div class="soft-card p-4 rounded-2xl space-y-1">
-                    <span class="text-[10px] mono uppercase font-semibold text-slate-400">Last 30 Days</span>
+                    <span class="text-[10px] mono uppercase font-semibold text-slate-500 dark:text-slate-400">Last 30 Days</span>
                     <p class="text-xl sm:text-2xl font-bold mono text-sky-600 dark:text-sky-400 tabular-nums">+{releases30d}</p>
-                    <span class="text-[10px] text-slate-500 block">SDK releases</span>
+                    <span class="text-[10px] text-slate-500 dark:text-slate-400 block">SDK releases</span>
                 </div>
                 <div class="soft-card p-4 rounded-2xl space-y-1">
-                    <span class="text-[10px] mono uppercase font-semibold text-slate-400">Past 12 Months</span>
+                    <span class="text-[10px] mono uppercase font-semibold text-slate-500 dark:text-slate-400">Past 12 Months</span>
                     <p class="text-xl sm:text-2xl font-bold mono text-violet-600 dark:text-violet-400 tabular-nums">+{releases365d}</p>
-                    <span class="text-[10px] text-slate-500 block">Annual cadence</span>
+                    <span class="text-[10px] text-slate-500 dark:text-slate-400 block">Annual cadence</span>
                 </div>
             </section>
 
@@ -174,15 +188,15 @@ const collectionSchema = {
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div class="space-y-1">
                             <div class="flex items-center gap-2">
-                                <span class="px-2.5 py-0.5 rounded-full text-[10px] mono font-semibold uppercase bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] mono font-semibold uppercase bg-emerald-500/15 text-emerald-700 dark:text-emerald-400">
                                     Latest Release
                                 </span>
                                 <h2 class="text-xl font-bold mono text-slate-900 dark:text-white">
                                     v{latestVersion.id}
                                 </h2>
                             </div>
-                            <p class="text-xs mono text-slate-400">
-                                Released on {formatDate(latestVersion.date)}
+                            <p class="text-xs mono text-slate-500 dark:text-slate-400">
+                                Released on <time datetime={latestVersion.date}>{formatDate(latestVersion.date)}</time>
                             </p>
                         </div>
                         <div class="flex items-center gap-2 flex-wrap">
@@ -201,17 +215,19 @@ const collectionSchema = {
             )}
 
             <nav aria-label="Filter releases by year" class="sticky top-[62px] z-30 p-2 rounded-2xl glass-toolbar flex items-center justify-between gap-2 overflow-x-auto hide-scrollbar">
-                <span class="text-[10px] mono uppercase font-semibold text-slate-400 px-2 flex-shrink-0">Archive Year:</span>
+                <span class="text-[10px] mono uppercase font-semibold text-slate-500 dark:text-slate-400 px-2 shrink-0">Archive Year:</span>
                 <div class="flex items-center gap-1">
-                    <button @click="selectYear('recent')"
-                            :class="selectedYear === 'recent' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-white/10'"
-                            class="px-2.5 py-1 rounded-xl text-xs mono font-semibold transition-all flex-shrink-0 cursor-pointer">
+                    <button type="button"
+                            @click="selectYear('recent')"
+                            :class="selectedYear === 'recent' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-300 hover:bg-black/[0.05] dark:hover:bg-white/10'"
+                            class="px-3 py-1.5 rounded-xl text-xs mono font-semibold transition-all shrink-0 cursor-pointer">
                         Last 12 Mo
                     </button>
                     {years.map((year) => (
-                        <button @click={`selectYear('${year}')`}
-                                :class={`selectedYear === '${year}' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-white/10'`}
-                                class="px-2.5 py-1 rounded-xl text-xs mono font-semibold transition-all flex-shrink-0 cursor-pointer">
+                        <button type="button"
+                                @click={`selectYear('${year}')`}
+                                :class={`selectedYear === '${year}' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-300 hover:bg-black/[0.05] dark:hover:bg-white/10'`}
+                                class="px-3 py-1.5 rounded-xl text-xs mono font-semibold transition-all shrink-0 cursor-pointer">
                             {year}
                         </button>
                     ))}
@@ -228,12 +244,12 @@ const collectionSchema = {
                                     <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
                                     <span>{month}</span>
                                 </h2>
-                                <span class="text-xs mono text-slate-400 tabular-nums">
+                                <span class="text-xs mono text-slate-500 dark:text-slate-400 tabular-nums">
                                     {monthVersions.length} releases
                                 </span>
                             </div>
 
-                            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5">
                                 {monthVersions.map((v) => (
                                     <a href={`/releases/${v.id}/`} class="rel-card">
                                         <span class="rel-ver">v{v.id}</span>
@@ -249,7 +265,7 @@ const collectionSchema = {
             <div x-show="selectedYear !== 'recent' || cleanSearch" x-cloak class="space-y-8">
                 <template x-if="archiveLoading">
                     <div class="py-12 text-center soft-card rounded-2xl p-6">
-                        <p class="text-xs mono text-slate-400">Loading release archive...</p>
+                        <p class="text-xs mono text-slate-500 dark:text-slate-400">Loading release archive...</p>
                     </div>
                 </template>
 
@@ -260,10 +276,10 @@ const collectionSchema = {
                                 <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
                                 <span x-text="group.month"></span>
                             </h2>
-                            <span class="text-xs mono text-slate-400 tabular-nums" x-text="group.items.length + ' releases'"></span>
+                            <span class="text-xs mono text-slate-500 dark:text-slate-400 tabular-nums" x-text="group.items.length + ' releases'"></span>
                         </div>
 
-                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5">
                             <template x-for="v in group.items" :key="v.id">
                                 <a :href="'/releases/' + v.id + '/'" class="rel-card">
                                     <span class="rel-ver" x-text="'v' + v.id"></span>
@@ -275,9 +291,9 @@ const collectionSchema = {
                 </template>
 
                 <div x-show="!archiveLoading && archiveGroups.length === 0" class="py-16 text-center soft-card rounded-2xl p-6">
-                    <h3 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">No Releases Found</h3>
-                    <p class="text-xs text-slate-400 mt-1">No Boto3 release version matches "<span class="mono font-bold" x-text="search"></span>".</p>
-                    <button @click="search = ''; selectedYear = 'recent'" class="mt-4 px-4 py-1.5 rounded-full bg-indigo-600 text-white text-xs font-semibold cursor-pointer">
+                    <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">No Releases Found</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">No Boto3 release version matches "<span class="mono font-bold" x-text="search"></span>".</p>
+                    <button type="button" @click="search = ''; selectedYear = 'recent'" class="mt-4 px-4 py-2 rounded-full bg-indigo-600 text-white text-xs font-semibold cursor-pointer">
                         Reset Filter
                     </button>
                 </div>
@@ -292,21 +308,21 @@ const collectionSchema = {
                         AWS publishes new <strong>Boto3</strong> and <strong>Botocore</strong> patch versions on nearly every business day as Amazon Web Services ships new service endpoints, API parameters, and bug fixes.
                     </p>
                     <p>
-                        Every release listed in this archive corresponds to an immutable Botocore changelog file and PyPI release timestamp. Click any version card to inspect the exact modified AWS services, copy a pinned <code>pip install boto3==...</code> command, or jump directly to a service's full timeline in the <a href="/services/" class="text-indigo-600 dark:text-indigo-400 underline font-semibold">Services Directory</a>.
+                        Every release listed in this archive corresponds to an immutable Botocore changelog file and PyPI release timestamp. Click any version card to inspect the exact modified AWS services, copy a pinned <code>pip install boto3==...</code> or <code>uv add boto3==...</code> command, or jump directly to a service's full timeline in the <a href="/services/" class="text-indigo-600 dark:text-indigo-400 underline font-semibold">Services Directory</a>.
                     </p>
                 </div>
             </section>
         </main>
 
-        <footer class="mt-auto py-10 px-4 sm:px-8 bg-transparent">
+        <footer class="relative z-10 mt-auto py-10 px-4 sm:px-8 bg-transparent">
             <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
                 <div class="flex items-center gap-2">
                     <img src="/favicon.svg" width="18" height="18" alt="BotoView" class="w-4 h-4 opacity-80" />
                     <span class="font-bold text-slate-700 dark:text-slate-300">BotoView</span>
-                    <span class="text-slate-400">by <a href="https://5goos.com/" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold underline decoration-slate-300 dark:decoration-slate-700 underline-offset-2">5goos</a></span>
-                    <span class="text-slate-400">&copy; {new Date().getFullYear()}</span>
+                    <span class="text-slate-500 dark:text-slate-400">by <a href="https://5goos.com/" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold underline decoration-slate-300 dark:decoration-slate-700 underline-offset-2">5goos</a></span>
+                    <span class="text-slate-500 dark:text-slate-400">&copy; {new Date().getFullYear()}</span>
                 </div>
-                <div class="flex items-center gap-4 text-slate-500">
+                <div class="flex items-center gap-4 text-slate-500 dark:text-slate-400 flex-wrap justify-center">
                     <a href="/" class="hover:text-indigo-600 dark:hover:text-indigo-400">Interactive Explorer</a>
                     <a href="/services/" class="hover:text-indigo-600 dark:hover:text-indigo-400">Services Directory</a>
                     <a href="/releases/" class="text-indigo-600 dark:text-indigo-400 font-bold">Releases Directory</a>
@@ -317,120 +333,105 @@ const collectionSchema = {
     </div>
 </Layout>
 
-<style>
-    .rel-card {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        padding: 0.75rem 0.875rem;
-        border-radius: 1rem;
-        background: var(--card-surface);
-        backdrop-filter: blur(16px) saturate(155%);
-        -webkit-backdrop-filter: blur(16px) saturate(155%);
-        box-shadow: var(--shadow-card);
-        transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
-    }
-    .rel-card:hover {
-        background: var(--card-hover);
-        box-shadow: var(--shadow-card-hover);
-        transform: translateY(-1px);
-    }
-    .rel-ver {
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 0.75rem;
-        font-weight: 700;
-        color: var(--text-primary);
-        margin-bottom: 0.15rem;
-    }
-    .rel-card:hover .rel-ver {
-        color: var(--accent-primary);
-    }
-    .rel-date {
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 9.5px;
-        color: var(--text-muted);
-    }
-</style>
+<script is:inline id="boto-releases-init" type="application/json" set:html={JSON.stringify({ recentMonthVersionIds })} />
 
-<script define:vars={{ recentMonthVersionIds }}>
-    function registerReleasesDirectory() {
-        const factory = () => ({
-            search: '',
-            selectedYear: 'recent',
-            archiveVersions: null,
-            archiveLoading: false,
-            isScrolled: false,
-            isDark: document.documentElement.classList.contains('dark'),
-            get cleanSearch() {
-                return this.search.toLowerCase().replace(/^v/, '').trim();
-            },
-            monthMatches(month) {
-                const q = this.cleanSearch;
-                if (!q) return true;
-                if (month.toLowerCase().includes(q)) return true;
-                return (recentMonthVersionIds[month] || []).some((id) => id.includes(q));
-            },
-            async ensureArchiveLoaded() {
-                if (this.archiveVersions || this.archiveLoading) return;
-                this.archiveLoading = true;
-                try {
-                    const res = await fetch('/data/track.json');
-                    if (res.ok) {
-                        const data = await res.json();
-                        this.archiveVersions = data.versions || [];
-                    }
-                } catch (e) {
-                    this.archiveVersions = [];
-                } finally {
-                    this.archiveLoading = false;
-                }
-            },
-            async selectYear(year) {
-                this.selectedYear = year;
-                if (year !== 'recent') {
-                    await this.ensureArchiveLoaded();
-                }
-            },
-            get archiveGroups() {
-                const list = this.archiveVersions || [];
-                const q = this.cleanSearch;
-                const yr = this.selectedYear;
-                const groupsMap = new Map();
-                for (const v of list) {
-                    if (!v || !v.date) continue;
-                    if (!q && yr !== 'recent' && !v.date.startsWith(yr)) continue;
-                    if (q && !v.id.includes(q) && !v.date.includes(q)) continue;
-                    const month = v.date.substring(0, 7);
-                    if (!groupsMap.has(month)) groupsMap.set(month, []);
-                    groupsMap.get(month).push(v);
-                }
-                return Array.from(groupsMap.entries()).map(([month, items]) => ({ month, items }));
-            },
-            formatDateStr(dateStr) {
-                if (!dateStr) return '';
-                const parts = dateStr.split('-');
-                if (parts.length !== 3) return dateStr;
-                const date = new Date(Date.UTC(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2])));
-                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
-            },
-            toggleTheme() {
-                this.isDark = !this.isDark;
-                document.documentElement.classList.toggle('dark', this.isDark);
-                try {
-                    localStorage.setItem('theme', this.isDark ? 'dark' : 'light');
-                } catch (e) {}
-                const themeColor = this.isDark ? '#0b0e14' : '#f4f6fa';
-                document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute('content', themeColor));
+<script>
+    import {
+        formatDate,
+        isTypingTarget,
+        loadTrackIndex,
+        openCommandPalette,
+        readPageData,
+        registerAlpineComponent,
+        toggleThemeState
+    } from '../../utils/client';
+
+    interface ReleasesInit {
+        recentMonthVersionIds: Record<string, string[]>;
+    }
+
+    const { recentMonthVersionIds } = readPageData<ReleasesInit>('boto-releases-init', { recentMonthVersionIds: {} });
+
+    registerAlpineComponent('releasesDirectory', () => ({
+        search: '',
+        selectedYear: 'recent',
+        archiveVersions: null as Array<{ id: string; date: string }> | null,
+        archiveLoading: false,
+        isScrolled: false,
+        isDark: document.documentElement.classList.contains('dark'),
+
+        get cleanSearch(): string {
+            return this.search.toLowerCase().replace(/^v/, '').trim();
+        },
+
+        monthMatches(month: string): boolean {
+            const q = this.cleanSearch;
+            if (!q) return true;
+            if (month.toLowerCase().includes(q)) return true;
+            return (recentMonthVersionIds[month] || []).some((id) => id.includes(q));
+        },
+
+        async ensureArchiveLoaded() {
+            if (this.archiveVersions || this.archiveLoading) return;
+            this.archiveLoading = true;
+            try {
+                const data = await loadTrackIndex();
+                this.archiveVersions = data.versions || [];
+            } catch {
+                this.archiveVersions = [];
+            } finally {
+                this.archiveLoading = false;
             }
-        });
+        },
 
-        if (window.Alpine) {
-            window.Alpine.data('releasesDirectory', factory);
-        } else {
-            document.addEventListener('alpine:init', () => {
-                window.Alpine.data('releasesDirectory', factory);
-            });
+        async selectYear(year: string) {
+            this.selectedYear = year;
+            if (year !== 'recent') {
+                await this.ensureArchiveLoaded();
+            }
+        },
+
+        get archiveGroups() {
+            const list = this.archiveVersions || [];
+            const q = this.cleanSearch;
+            const yr = this.selectedYear;
+            const groupsMap = new Map<string, Array<{ id: string; date: string }>>();
+            for (const v of list) {
+                if (!v || !v.date) continue;
+                if (!q && yr !== 'recent' && !v.date.startsWith(yr)) continue;
+                if (q && !v.id.includes(q) && !v.date.includes(q)) continue;
+                const month = v.date.substring(0, 7);
+                if (!groupsMap.has(month)) groupsMap.set(month, []);
+                groupsMap.get(month)!.push(v);
+            }
+            return Array.from(groupsMap.entries()).map(([month, items]) => ({ month, items }));
+        },
+
+        formatDateStr(dateStr: string): string {
+            return formatDate(dateStr);
+        },
+
+        toggleTheme() {
+            this.isDark = toggleThemeState();
+        },
+
+        openPalette() {
+            openCommandPalette('');
+        },
+
+        handleKeydown(e: KeyboardEvent) {
+            if (e.metaKey || e.ctrlKey) return;
+            if (isTypingTarget(e.target)) {
+                if (e.key === 'Escape') (e.target as HTMLElement).blur();
+                return;
+            }
+            if (e.key === '/') {
+                e.preventDefault();
+                document.getElementById('releasesArchiveSearch')?.focus();
+            } else if (e.key === 't' || e.key === 'T') {
+                e.preventDefault();
+                this.toggleTheme();
+            }
         }
-    }
-    registerReleasesDirectory();
+    }));
 </script>

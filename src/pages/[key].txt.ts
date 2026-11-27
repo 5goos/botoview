@@ -1,7 +1,7 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-// @ts-ignore
+// @ts-expect-error cloudflare:workers is provided at runtime by Cloudflare Workers
 import { env as cfWorkerEnv } from 'cloudflare:workers';
 
 export const GET: APIRoute = async ({ params, locals }) => {
@@ -23,8 +23,9 @@ export const GET: APIRoute = async ({ params, locals }) => {
         const staticFiles = ['security', 'humans', 'ads', 'sitemap'];
         if (!requestedKey || staticFiles.includes(requestedKey)) {
             try {
-                // @ts-ignore
-                const assets = (locals as any)?.runtime?.env?.ASSETS || cfWorkerEnv?.ASSETS;
+                const runtimeLocals = locals as { runtime?: { env?: { ASSETS?: { fetch: (u: URL) => Promise<Response> } } } };
+                const workerEnv = cfWorkerEnv as { ASSETS?: { fetch: (u: URL) => Promise<Response> } } | undefined;
+                const assets = runtimeLocals?.runtime?.env?.ASSETS || workerEnv?.ASSETS;
                 if (assets) {
                     const assetRes = await assets.fetch(new URL(`https://botoview.5goos.com/${requestedKey}.txt`));
                     if (assetRes && assetRes.status === 200) {
@@ -53,12 +54,13 @@ export const GET: APIRoute = async ({ params, locals }) => {
 
         let localsEnvKey: string | undefined;
         try {
-            localsEnvKey = (locals as any)?.runtime?.env?.INDEXNOW_KEY;
+            const runtimeLocals = locals as { runtime?: { env?: { INDEXNOW_KEY?: string } } };
+            localsEnvKey = runtimeLocals?.runtime?.env?.INDEXNOW_KEY;
         } catch {}
 
         let cfEnvKey: string | undefined;
         try {
-            // @ts-ignore
+            // @ts-expect-error cloudflare:workers is provided at runtime by Cloudflare Workers
             const cf = await import('cloudflare:workers');
             cfEnvKey = cf?.env?.INDEXNOW_KEY;
         } catch {}

@@ -1,0 +1,262 @@
+<div x-data="commandPalette"
+     @keydown.window="onWindowKeydown($event)"
+     @boto:open-palette.window="open($event.detail?.query || '')"
+     x-cloak>
+    <div x-show="isOpen"
+         x-transition:enter="transition ease-out duration-150"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-120"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         @click="close()"
+         class="fixed inset-0 z-[120] bg-slate-950/45 dark:bg-black/70 backdrop-blur-sm"></div>
+
+    <div x-show="isOpen"
+         x-transition:enter="transition ease-out duration-180"
+         x-transition:enter-start="opacity-0 scale-95 -translate-y-2"
+         x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-120"
+         x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+         x-transition:leave-end="opacity-0 scale-95 -translate-y-2"
+         role="dialog"
+         aria-modal="true"
+         aria-label="Quick search command bar"
+         class="fixed inset-x-0 top-[10vh] sm:top-[14vh] z-[130] mx-auto w-[calc(100%-1.5rem)] max-w-xl command-modal rounded-2xl overflow-hidden">
+        <div class="flex items-center gap-3 px-4 py-3.5">
+            <svg class="w-4 h-4 text-indigo-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            <input x-ref="paletteInput"
+                   type="text"
+                   x-model="query"
+                   @keydown.arrow-down.prevent="moveSelection(1)"
+                   @keydown.arrow-up.prevent="moveSelection(-1)"
+                   @keydown.enter.prevent="executeSelected()"
+                   @keydown.escape.prevent="close()"
+                   placeholder="Jump to Boto3 release (1.44.12), AWS service (bedrock, s3), or API change..."
+                   aria-label="Search Boto3 versions, AWS services, and API changes"
+                   class="w-full bg-transparent text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none font-medium min-w-0" />
+            <button type="button"
+                    @click="close()"
+                    class="kbd-badge cursor-pointer hover:text-slate-900 dark:hover:text-white shrink-0">
+                ESC
+            </button>
+        </div>
+
+        <div class="hairline-divider"></div>
+
+        <div class="max-h-[58vh] overflow-y-auto custom-scroll p-2 space-y-1">
+            <template x-if="loading">
+                <div class="py-8 text-center text-xs mono text-slate-400">Loading release &amp; service index...</div>
+            </template>
+
+            <template x-if="!loading && results.length === 0">
+                <div class="py-8 text-center space-y-1">
+                    <p class="text-xs font-medium text-slate-600 dark:text-slate-300">No matching releases or services</p>
+                    <p class="text-[11px] text-slate-400">Try <span class="mono">bedrock-runtime</span>, <span class="mono">s3</span>, or <span class="mono">1.44.12</span></p>
+                </div>
+            </template>
+
+            <template x-for="(item, idx) in results" :key="item.kind + '-' + item.id + '-' + idx">
+                <button type="button"
+                        @mouseenter="selectedIndex = idx"
+                        @click="selectItem(item)"
+                        :class="selectedIndex === idx ? 'bg-indigo-500/14 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-200' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-900/[0.04] dark:hover:bg-white/[0.05]'"
+                        class="w-full px-3 py-2.5 rounded-xl flex items-center justify-between gap-3 text-left transition-colors cursor-pointer min-w-0">
+                    <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                        <span :class="{
+                            'bg-cyan-500/15 text-cyan-700 dark:text-cyan-300': item.kind === 'service',
+                            'bg-indigo-500/15 text-indigo-700 dark:text-indigo-300': item.kind === 'version',
+                            'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300': item.kind === 'entry'
+                        }" class="px-2 py-0.5 rounded-md text-[10px] mono font-semibold uppercase shrink-0" x-text="item.kindLabel"></span>
+                        <span class="text-xs font-medium truncate min-w-0" x-text="item.title"></span>
+                    </div>
+                    <span class="text-[10.5px] mono text-slate-400 dark:text-slate-500 shrink-0 tabular-nums" x-text="item.meta"></span>
+                </button>
+            </template>
+        </div>
+
+        <div class="hairline-divider"></div>
+
+        <div class="px-4 py-2.5 flex items-center justify-between text-[10.5px] mono text-slate-400 dark:text-slate-500">
+            <div class="flex items-center gap-3">
+                <span><kbd class="kbd-badge">↑</kbd> <kbd class="kbd-badge">↓</kbd> navigate</span>
+                <span><kbd class="kbd-badge">↵</kbd> open</span>
+            </div>
+            <span><kbd class="kbd-badge">⌘K</kbd> / <kbd class="kbd-badge">Ctrl+K</kbd></span>
+        </div>
+    </div>
+</div>
+
+<script>
+    import {
+        isCmdOrCtrlK,
+        loadTrackIndex,
+        registerAlpineComponent,
+        slugifyService,
+        type TrackPayload
+    } from '../utils/client';
+
+    interface PaletteItem {
+        kind: 'service' | 'version' | 'entry';
+        kindLabel: string;
+        id: string;
+        title: string;
+        meta: string;
+        href: string;
+        inAppEvent?: { type: string; value: string; anchor?: string };
+    }
+
+    registerAlpineComponent('commandPalette', () => ({
+        isOpen: false,
+        loading: false,
+        query: '',
+        selectedIndex: 0,
+        track: null as TrackPayload | null,
+
+        async open(initialQuery = '') {
+            this.isOpen = true;
+            this.query = initialQuery;
+            this.selectedIndex = 0;
+
+            requestAnimationFrame(() => {
+                const input = (this as unknown as { $refs: { paletteInput?: HTMLInputElement } }).$refs.paletteInput;
+                input?.focus();
+            });
+
+            if (!this.track) {
+                this.loading = true;
+                try {
+                    this.track = await loadTrackIndex();
+                } catch {
+                    this.track = { versions: [], allServices: [], serviceCounts: {} };
+                } finally {
+                    this.loading = false;
+                }
+            }
+        },
+
+        close() {
+            this.isOpen = false;
+        },
+
+        onWindowKeydown(event: KeyboardEvent) {
+            if (isCmdOrCtrlK(event)) {
+                event.preventDefault();
+                if (this.isOpen) {
+                    this.close();
+                } else {
+                    this.open('');
+                }
+            }
+        },
+
+        get results(): PaletteItem[] {
+            const q = this.query.trim().toLowerCase().replace(/^v(?=\d)/, '');
+            const items: PaletteItem[] = [];
+            const track = this.track;
+            if (!track) return items;
+
+            const currentContext = (window as unknown as {
+                __BOTO_ACTIVE_ENTRIES__?: Array<{ id: string; label: string; text: string; anchor: string }>;
+            }).__BOTO_ACTIVE_ENTRIES__;
+
+            if (q && Array.isArray(currentContext)) {
+                let entryMatches = 0;
+                for (const entry of currentContext) {
+                    if (entryMatches >= 5) break;
+                    if (entry.label.toLowerCase().includes(q) || entry.text.toLowerCase().includes(q)) {
+                        items.push({
+                            kind: 'entry',
+                            kindLabel: 'Diff',
+                            id: entry.anchor,
+                            title: `${entry.label.toUpperCase()}: ${entry.text}`,
+                            meta: 'Jump',
+                            href: `#${entry.anchor}`,
+                            inAppEvent: { type: 'anchor', value: entry.anchor }
+                        });
+                        entryMatches++;
+                    }
+                }
+            }
+
+            const services = track.allServices || [];
+            const serviceCounts = track.serviceCounts || {};
+            const matchedServices = q
+                ? services.filter((s) => s.toLowerCase().includes(q))
+                : ['bedrock-runtime', 's3', 'ec2', 'lambda', 'dynamodb', 'sagemaker'].filter((s) => services.includes(s));
+
+            matchedServices.sort((a, b) => {
+                if (q) {
+                    const aExact = a.toLowerCase() === q ? 0 : (a.toLowerCase().startsWith(q) ? 1 : 2);
+                    const bExact = b.toLowerCase() === q ? 0 : (b.toLowerCase().startsWith(q) ? 1 : 2);
+                    if (aExact !== bExact) return aExact - bExact;
+                }
+                return (serviceCounts[b] || 0) - (serviceCounts[a] || 0);
+            });
+
+            for (const svc of matchedServices.slice(0, 7)) {
+                const slug = slugifyService(svc);
+                items.push({
+                    kind: 'service',
+                    kindLabel: 'Service',
+                    id: svc,
+                    title: svc,
+                    meta: `${serviceCounts[svc] || 0} updates`,
+                    href: `/services/${slug}/`,
+                    inAppEvent: { type: 'service', value: svc }
+                });
+            }
+
+            const versions = track.versions || [];
+            const matchedVersions = q
+                ? versions.filter((v) => v.id.toLowerCase().includes(q) || (v.date && v.date.includes(q)))
+                : versions.slice(0, 5);
+
+            for (const ver of matchedVersions.slice(0, 6)) {
+                items.push({
+                    kind: 'version',
+                    kindLabel: 'Release',
+                    id: ver.id,
+                    title: `boto3 v${ver.id}`,
+                    meta: ver.date || '',
+                    href: `/releases/${ver.id}/`,
+                    inAppEvent: { type: 'version', value: ver.id }
+                });
+            }
+
+            return items;
+        },
+
+        moveSelection(delta: number) {
+            const total = this.results.length;
+            if (!total) return;
+            this.selectedIndex = (this.selectedIndex + delta + total) % total;
+        },
+
+        executeSelected() {
+            const list = this.results;
+            if (list.length > 0) {
+                this.selectItem(list[this.selectedIndex] || list[0]);
+            }
+        },
+
+        selectItem(item: PaletteItem) {
+            this.close();
+            const isHome = window.location.pathname === '/' || window.location.pathname === '';
+            if (item.kind === 'entry' && item.inAppEvent) {
+                const target = document.getElementById(item.inAppEvent.value);
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    return;
+                }
+            }
+            if (isHome && item.inAppEvent && (item.kind === 'service' || item.kind === 'version')) {
+                window.dispatchEvent(new CustomEvent('boto:palette-select', { detail: item.inAppEvent }));
+                return;
+            }
+            window.location.href = item.href;
+        }
+    }));
+</script>

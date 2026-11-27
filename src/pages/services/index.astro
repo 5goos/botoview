@@ -41,7 +41,7 @@ for (const svc of services) {
 const alphabet = Object.keys(groupedServices).sort();
 
 const popularKeys = ['s3', 'bedrock', 'dynamodb', 'lambda', 'ec2', 'iam', 'cloudwatch', 'sqs', 'sns', 'rds', 'secretsmanager', 'sagemaker', 'ecs', 'eks', 'kms'];
-const popularList = services.filter(s => popularKeys.includes(s.id));
+const popularList = services.filter((s) => popularKeys.includes(s.id));
 
 const pageTitle = "AWS Boto3 Services Changelogs Directory | BotoView";
 const pageDescription = `Explore AWS Boto3 changelogs across ${services.length} AWS services. Filter SDK updates, API changes, and bug fixes by service on BotoView.`.slice(0, 155);
@@ -50,18 +50,8 @@ const canonicalUrl = "https://botoview.5goos.com/services/";
 const breadcrumbSchema = {
     "@type": "BreadcrumbList",
     "itemListElement": [
-        {
-            "@type": "ListItem",
-            "position": 1,
-            "name": "Home",
-            "item": "https://botoview.5goos.com/"
-        },
-        {
-            "@type": "ListItem",
-            "position": 2,
-            "name": "Services",
-            "item": canonicalUrl
-        }
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://botoview.5goos.com/" },
+        { "@type": "ListItem", "position": 2, "name": "Services", "item": canonicalUrl }
     ]
 };
 
@@ -72,7 +62,7 @@ const collectionSchema = {
     "description": pageDescription,
     "url": canonicalUrl,
     "inLanguage": "en-US",
-    "hasPart": services.slice(0, 30).map(s => ({
+    "hasPart": services.slice(0, 30).map((s) => ({
         "@type": "TechArticle",
         "name": `AWS Boto3 ${s.name} Changelog`,
         "url": `https://botoview.5goos.com/services/${s.id}/`
@@ -80,39 +70,55 @@ const collectionSchema = {
 };
 ---
 
-<Layout 
-    title={pageTitle} 
-    description={pageDescription} 
+<Layout
+    title={pageTitle}
+    description={pageDescription}
     canonical={canonicalUrl}
-    bodyClass="min-h-screen w-full overflow-y-auto text-[var(--text-secondary)] transition-colors duration-500"
+    bodyClass="min-h-screen w-full overflow-y-auto text-[var(--text-secondary)] transition-colors duration-200"
     jsonLd={[breadcrumbSchema, collectionSchema]}
 >
-    <div class="min-h-screen flex flex-col bg-transparent" x-data="servicesDirectory" @scroll.window="isScrolled = window.scrollY > 10" @keydown.window="if(!['INPUT','TEXTAREA'].includes($event.target.tagName) && $event.key === '/') { $event.preventDefault(); $el.querySelector('input')?.focus(); }">
+    <div class="min-h-screen flex flex-col bg-transparent relative"
+         x-data="servicesDirectory"
+         @scroll.window="isScrolled = window.scrollY > 10"
+         @boto:theme-changed.window="isDark = $event.detail.isDark"
+         @keydown.window="handleKeydown($event)">
+        <div class="pointer-events-none fixed inset-0 z-0 ambient-glow" aria-hidden="true"></div>
+
         <header class="h-14 glass-header sticky top-0 z-40 flex items-center transition-all duration-200" :class="isScrolled ? 'glass-header-scrolled' : ''">
-            <div class="w-full max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-3">
+            <div class="w-full max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-2 min-w-0">
                 <div class="flex items-center gap-2 sm:gap-3 min-w-0">
                     <a href="/" class="flex items-center gap-2 group cursor-pointer shrink-0" aria-label="BotoView Home">
                         <img src="/favicon.svg" width="22" height="22" alt="BotoView logo" class="w-5 h-5 group-hover:scale-105 transition-transform" />
                         <span class="text-[15px] font-semibold tracking-tight text-slate-900 dark:text-slate-100 leading-none">BotoView</span>
                     </a>
                     <span class="text-slate-300 dark:text-white/10 hidden sm:inline">/</span>
-                    <span class="text-xs mono font-semibold text-indigo-600 dark:text-indigo-400 truncate max-w-[140px] sm:max-w-none">
+                    <span class="text-xs mono font-semibold text-indigo-600 dark:text-indigo-400 truncate">
                         Services
                     </span>
                 </div>
 
-                <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
-                    <a href="/releases/" class="px-3 py-1.5 rounded-full text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors">
+                <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
+                    <a href="/releases/" class="px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors">
                         Releases
                     </a>
-                    <button @click="toggleTheme()" 
-                            aria-label="Toggle dark mode"
-                            class="p-2 rounded-full text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-black/[0.04] dark:hover:bg-white/[0.07] transition-colors cursor-pointer shrink-0">
-                        <svg x-show="!isDark" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-                        <svg x-show="isDark" x-cloak class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <button type="button"
+                            @click="openPalette()"
+                            aria-label="Open command search (Cmd/Ctrl+K)"
+                            title="Quick jump (Cmd/Ctrl + K)"
+                            class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium text-slate-600 dark:text-slate-300 bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.08] dark:hover:bg-white/[0.1] transition-colors cursor-pointer shrink-0 min-h-[40px] sm:min-h-0">
+                        <svg class="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        <kbd class="kbd-badge hidden sm:inline-flex">⌘K</kbd>
                     </button>
-                    <a href="/" 
-                       class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full text-xs font-semibold transition-all active:scale-95 shrink-0">
+                    <button type="button"
+                            @click="toggleTheme()"
+                            aria-label="Toggle dark mode"
+                            title="Toggle dark / light theme (t)"
+                            class="rounded-full text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-black/[0.04] dark:hover:bg-white/[0.07] transition-colors cursor-pointer shrink-0 tap-target flex items-center justify-center">
+                        <svg x-show="!isDark" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                        <svg x-show="isDark" class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    </button>
+                    <a href="/"
+                       class="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full text-xs font-semibold transition-all active:scale-95 shrink-0">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                         <span class="hidden sm:inline">Explorer</span>
                         <span class="sm:hidden">App</span>
@@ -121,7 +127,7 @@ const collectionSchema = {
             </div>
         </header>
 
-        <main id="mainScrollArea" tabindex="-1" class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-10">
+        <main id="mainScrollArea" tabindex="-1" class="relative z-10 flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-10 min-w-0">
             <div class="mb-8 max-w-2xl">
                 <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white leading-tight mb-2">
                     AWS Boto3 Services
@@ -131,13 +137,14 @@ const collectionSchema = {
                 </p>
 
                 <div class="relative mt-4 max-w-md">
-                    <input type="text" 
-                           x-model.debounce.100ms="search" 
-                           placeholder={`Filter ${services.length} services (e.g. s3, bedrock, lambda)...`} 
+                    <input type="text"
+                           id="servicesDirectorySearch"
+                           x-model.debounce.100ms="search"
+                           placeholder={`Filter ${services.length} services (e.g. s3, bedrock, lambda)...`}
                            aria-label="Filter services"
-                           class="w-full glass-input rounded-2xl py-2 pl-9 pr-8 text-xs focus:outline-none text-slate-900 dark:text-white font-medium transition-all" />
-                    <svg class="absolute left-3 top-2.5 w-4 h-4 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    <button x-show="search" x-cloak @click="search = ''" aria-label="Clear service search" class="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
+                           class="w-full glass-input rounded-2xl py-2.5 sm:py-2 pl-9 pr-9 text-xs focus:outline-none text-slate-900 dark:text-white font-medium transition-all" />
+                    <svg class="absolute left-3 top-[12px] sm:top-2.5 w-4 h-4 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <button type="button" x-show="search" x-cloak @click="search = ''" aria-label="Clear service search" class="absolute right-2.5 top-[9px] sm:top-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 cursor-pointer">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
@@ -149,8 +156,8 @@ const collectionSchema = {
                 </h2>
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
                     {popularList.map((svc) => (
-                        <a href={`/services/${svc.id}/`} 
-                           class="p-3.5 rounded-2xl changelog-card flex items-center justify-between group active:scale-[0.98]">
+                        <a href={`/services/${svc.id}/`}
+                           class="svc-dir-card group active:scale-[0.98]">
                             <div class="flex items-center gap-2.5 min-w-0">
                                 <div class={`w-8 h-8 rounded-xl flex items-center justify-center font-bold mono text-xs shrink-0 ${getServiceColorClass(svc.id)}`}>
                                     {svc.id.substring(0, 2).toUpperCase()}
@@ -168,11 +175,11 @@ const collectionSchema = {
             </section>
 
             <div class="sticky top-[62px] z-30 mb-8 p-2 rounded-2xl glass-toolbar flex items-center justify-between gap-2 overflow-x-auto hide-scrollbar">
-                <span class="text-[10px] mono uppercase font-semibold text-slate-400 px-2 flex-shrink-0">Jump To:</span>
+                <span class="text-[10px] mono uppercase font-semibold text-slate-500 dark:text-slate-400 px-2 shrink-0">Jump To:</span>
                 <div class="flex items-center gap-1">
                     {alphabet.map((letter) => (
-                        <a href={`#letter-${letter}`} 
-                           class="w-7 h-7 rounded-xl flex items-center justify-center text-xs mono font-bold text-slate-600 dark:text-slate-300 hover:bg-indigo-600 hover:text-white transition-all flex-shrink-0">
+                        <a href={`#letter-${letter}`}
+                           class="w-8 h-8 sm:w-7 sm:h-7 rounded-xl flex items-center justify-center text-xs mono font-bold text-slate-600 dark:text-slate-300 hover:bg-indigo-600 hover:text-white transition-all shrink-0">
                             {letter}
                         </a>
                     ))}
@@ -183,34 +190,35 @@ const collectionSchema = {
                 {alphabet.map((letter) => (
                     <section id={`letter-${letter}`} class="scroll-mt-32" x-show={`letterMatches('${letter}')`}>
                         <div class="flex items-center gap-3 mb-4">
-                            <span class="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold mono text-sm">
+                            <span class="w-8 h-8 rounded-xl bg-indigo-500/12 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold mono text-sm">
                                 {letter}
                             </span>
-                            <span class="text-xs mono uppercase text-slate-400 font-semibold">
+                            <span class="text-xs mono uppercase text-slate-500 dark:text-slate-400 font-semibold">
                                 {groupedServices[letter].length} Services
                             </span>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                             {groupedServices[letter].map((svc) => (
-                                <div x-show={`!cleanSearch || '${svc.id}'.includes(cleanSearch)`} 
-                                     class="p-3.5 rounded-2xl changelog-card flex items-center justify-between group active:scale-[0.98]">
+                                <div x-show={`!cleanSearch || '${svc.id}'.includes(cleanSearch)`}
+                                     class="svc-dir-card group active:scale-[0.98]">
                                     <a href={`/services/${svc.id}/`} class="flex items-center gap-2.5 min-w-0 flex-1">
-                                        <div class={`w-7 h-7 rounded-xl flex items-center justify-center font-bold mono text-[10px] flex-shrink-0 ${getServiceColorClass(svc.id)}`}>
+                                        <div class={`w-7 h-7 rounded-xl flex items-center justify-center font-bold mono text-[10px] shrink-0 ${getServiceColorClass(svc.id)}`}>
                                             {svc.id.substring(0, 2).toUpperCase()}
                                         </div>
                                         <div class="min-w-0 flex-1">
                                             <div class="font-semibold text-xs text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 truncate">
                                                 {svc.name}
                                             </div>
-                                            <div class="text-[9.5px] mono text-slate-400 tabular-nums">
+                                            <div class="text-[10px] mono text-slate-500 dark:text-slate-400 tabular-nums">
                                                 {svc.count} updates
                                             </div>
                                         </div>
                                     </a>
-                                    <a href={`/?s=${svc.id}`} 
-                                       title="Open in interactive timeline" 
-                                       class="p-1.5 rounded-full text-slate-400 hover:text-indigo-600 hover:bg-black/[0.04] dark:hover:bg-white/[0.08] transition-all flex-shrink-0">
+                                    <a href={`/?s=${svc.id}`}
+                                       title="Open in interactive timeline"
+                                       aria-label={`Open ${svc.name} in explorer`}
+                                       class="w-9 h-9 rounded-full text-slate-400 hover:text-indigo-600 hover:bg-black/[0.04] dark:hover:bg-white/[0.08] transition-all shrink-0 flex items-center justify-center">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                                     </a>
                                 </div>
@@ -220,12 +228,12 @@ const collectionSchema = {
                 ))}
 
                 <div x-show="cleanSearch && !hasAnyMatch" x-cloak class="py-16 text-center soft-card rounded-2xl p-6">
-                    <div class="w-14 h-14 bg-slate-100 dark:bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-3 opacity-60">
+                    <div class="w-14 h-14 bg-black/[0.04] dark:bg-white/[0.05] rounded-2xl flex items-center justify-center mx-auto mb-3 opacity-70">
                         <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     </div>
-                    <h3 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">No Services Found</h3>
-                    <p class="text-xs text-slate-400 mt-1">No AWS service matches "<span class="mono font-bold" x-text="search"></span>".</p>
-                    <button @click="search = ''" class="mt-4 px-4 py-1.5 rounded-full bg-indigo-600 text-white text-xs font-semibold cursor-pointer">
+                    <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">No Services Found</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">No AWS service matches "<span class="mono font-bold" x-text="search"></span>".</p>
+                    <button type="button" @click="search = ''" class="mt-4 px-4 py-2 rounded-full bg-indigo-600 text-white text-xs font-semibold cursor-pointer">
                         Clear Search
                     </button>
                 </div>
@@ -233,14 +241,14 @@ const collectionSchema = {
 
             <section class="p-6 sm:p-8 rounded-2xl soft-card space-y-4 mb-16">
                 <h2 class="text-base font-bold tracking-tight text-slate-900 dark:text-white">
-                    Understanding AWS Boto3 Service Updates & Changelogs
+                    Understanding AWS Boto3 Service Updates &amp; Changelogs
                 </h2>
                 <div class="space-y-3 text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
                     <p>
                         The AWS Python SDK (composed of <strong>Boto3</strong> and <strong>Botocore</strong>) updates almost daily to synchronize with new API operations, bug fixes, parameter changes, and region expansions introduced across Amazon Web Services.
                     </p>
                     <p>
-                        With over <strong>570 individual services</strong> under the AWS umbrella, tracking SDK changes at a service level allows engineering teams to identify deprecations, adopt new client methods (such as Bedrock AgentCore or S3 Express One Zone), and avoid runtime breaking changes.
+                        With over <strong>{services.length} individual services</strong> under the AWS umbrella, tracking SDK changes at a service level allows engineering teams to identify deprecations, adopt new client methods (such as Bedrock AgentCore or S3 Express One Zone), and avoid runtime breaking changes.
                     </p>
                     <p>
                         BotoView indexes every changelog JSON file directly from the official <code>boto/botocore</code> repository, cross-referencing release dates with PyPI timestamps to provide a complete, searchable history for every AWS service.
@@ -249,15 +257,15 @@ const collectionSchema = {
             </section>
         </main>
 
-        <footer class="mt-auto py-10 px-4 sm:px-8 bg-transparent">
+        <footer class="relative z-10 mt-auto py-10 px-4 sm:px-8 bg-transparent">
             <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
                 <div class="flex items-center gap-2">
                     <img src="/favicon.svg" width="18" height="18" alt="BotoView" class="w-4 h-4 opacity-80" />
                     <span class="font-bold text-slate-700 dark:text-slate-300">BotoView</span>
-                    <span class="text-slate-400">by <a href="https://5goos.com/" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold underline decoration-slate-300 dark:decoration-slate-700 underline-offset-2">5goos</a></span>
-                    <span class="text-slate-400">&copy; {new Date().getFullYear()}</span>
+                    <span class="text-slate-500 dark:text-slate-400">by <a href="https://5goos.com/" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold underline decoration-slate-300 dark:decoration-slate-700 underline-offset-2">5goos</a></span>
+                    <span class="text-slate-500 dark:text-slate-400">&copy; {new Date().getFullYear()}</span>
                 </div>
-                <div class="flex items-center gap-4 text-slate-500">
+                <div class="flex items-center gap-4 text-slate-500 dark:text-slate-400 flex-wrap justify-center">
                     <a href="/" class="hover:text-indigo-600 dark:hover:text-indigo-400">Interactive Explorer</a>
                     <a href="/services/" class="text-indigo-600 dark:text-indigo-400 font-bold">Services Directory</a>
                     <a href="/releases/" class="hover:text-indigo-600 dark:hover:text-indigo-400">Releases Directory</a>
@@ -268,46 +276,68 @@ const collectionSchema = {
     </div>
 </Layout>
 
-<script define:vars={{ letterServiceIds }}>
-    function registerServicesDirectory() {
-        const factory = () => ({
-            search: '',
-            isScrolled: false,
-            isDark: document.documentElement.classList.contains('dark'),
-            get cleanSearch() {
-                return this.search.toLowerCase().trim();
-            },
-            letterMatches(letter) {
-                const q = this.cleanSearch;
-                if (!q) return true;
-                return (letterServiceIds[letter] || []).some((id) => id.includes(q));
-            },
-            get hasAnyMatch() {
-                const q = this.cleanSearch;
-                if (!q) return true;
-                for (const letter of Object.keys(letterServiceIds)) {
-                    if ((letterServiceIds[letter] || []).some((id) => id.includes(q))) return true;
-                }
-                return false;
-            },
-            toggleTheme() {
-                this.isDark = !this.isDark;
-                document.documentElement.classList.toggle('dark', this.isDark);
-                try {
-                    localStorage.setItem('theme', this.isDark ? 'dark' : 'light');
-                } catch (e) {}
-                const themeColor = this.isDark ? '#0b0e14' : '#f4f6fa';
-                document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute('content', themeColor));
-            }
-        });
+<script is:inline id="boto-services-init" type="application/json" set:html={JSON.stringify({ letterServiceIds })} />
 
-        if (window.Alpine) {
-            window.Alpine.data('servicesDirectory', factory);
-        } else {
-            document.addEventListener('alpine:init', () => {
-                window.Alpine.data('servicesDirectory', factory);
-            });
-        }
+<script>
+    import {
+        isTypingTarget,
+        openCommandPalette,
+        readPageData,
+        registerAlpineComponent,
+        toggleThemeState
+    } from '../../utils/client';
+
+    interface ServicesInit {
+        letterServiceIds: Record<string, string[]>;
     }
-    registerServicesDirectory();
+
+    const { letterServiceIds } = readPageData<ServicesInit>('boto-services-init', { letterServiceIds: {} });
+
+    registerAlpineComponent('servicesDirectory', () => ({
+        search: '',
+        isScrolled: false,
+        isDark: document.documentElement.classList.contains('dark'),
+
+        get cleanSearch(): string {
+            return this.search.toLowerCase().trim();
+        },
+
+        letterMatches(letter: string): boolean {
+            const q = this.cleanSearch;
+            if (!q) return true;
+            return (letterServiceIds[letter] || []).some((id) => id.includes(q));
+        },
+
+        get hasAnyMatch(): boolean {
+            const q = this.cleanSearch;
+            if (!q) return true;
+            for (const letter of Object.keys(letterServiceIds)) {
+                if ((letterServiceIds[letter] || []).some((id) => id.includes(q))) return true;
+            }
+            return false;
+        },
+
+        toggleTheme() {
+            this.isDark = toggleThemeState();
+        },
+
+        openPalette() {
+            openCommandPalette('');
+        },
+
+        handleKeydown(e: KeyboardEvent) {
+            if (e.metaKey || e.ctrlKey) return;
+            if (isTypingTarget(e.target)) {
+                if (e.key === 'Escape') (e.target as HTMLElement).blur();
+                return;
+            }
+            if (e.key === '/') {
+                e.preventDefault();
+                document.getElementById('servicesDirectorySearch')?.focus();
+            } else if (e.key === 't' || e.key === 'T') {
+                e.preventDefault();
+                this.toggleTheme();
+            }
+        }
+    }));
 </script>

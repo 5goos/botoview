@@ -10,59 +10,62 @@ const versionsCountLabel = allVersions.length > 999 ? `${(allVersions.length / 1
 const totalVersionsFormatted = allVersions.length.toLocaleString('en-US');
 ---
 <aside :class="{ 'translate-x-0': showMobileVersions, '-translate-x-full': !showMobileVersions }"
-       class="fixed lg:relative inset-y-0 left-0 -translate-x-full lg:translate-x-0 w-[82vw] max-w-[310px] lg:w-[272px] xl:w-[292px] flex-shrink-0 flex flex-col sidebar-surface shadow-2xl shadow-black/20 lg:shadow-none z-50 lg:z-20 transition-transform duration-300 ease-out select-none"
+       class="fixed lg:relative inset-y-0 left-0 -translate-x-full lg:translate-x-0 w-[85vw] max-w-[310px] lg:w-[272px] xl:w-[292px] shrink-0 flex flex-col sidebar-surface shadow-2xl shadow-black/30 lg:shadow-none z-50 lg:z-20 transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] select-none"
        aria-label="Navigation Sidebar">
 
-    <div class="h-14 flex items-center justify-between px-4 flex-shrink-0">
-        <a href="/" 
+    <div class="h-14 flex items-center justify-between px-4 shrink-0">
+        <a href="/"
            @click.prevent="viewMode = 'release'; selectVersion(versions[0]?.id || selectedVersion); if(isMobile(1024)) showMobileVersions = false;"
-           class="flex items-center gap-2.5 group cursor-pointer" 
+           class="flex items-center gap-2.5 group cursor-pointer"
            aria-label="BotoView Home — Latest AWS Boto3 Releases">
             <img src="/favicon.svg" width="22" height="22" alt="BotoView logo" class="w-5 h-5 group-hover:scale-105 transition-transform" />
             <span class="text-[15px] font-semibold tracking-tight text-slate-900 dark:text-slate-100">BotoView</span>
         </a>
 
-        <button @click="showMobileVersions = false" 
-                aria-label="Close sidebar" 
-                class="lg:hidden p-2 -mr-1.5 rounded-xl text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-black/5 dark:hover:bg-white/[0.07] transition-colors cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center">
+        <button type="button"
+                @click="showMobileVersions = false"
+                aria-label="Close navigation drawer"
+                class="lg:hidden rounded-xl text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-black/5 dark:hover:bg-white/[0.07] transition-colors cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center -mr-1.5">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
     </div>
 
-    <div class="px-3 pb-2.5 flex-shrink-0">
+    <div class="px-3 pb-2.5 shrink-0">
         <nav class="flex items-center p-1 glass-segmented rounded-2xl gap-1" aria-label="Sidebar Sections">
-            <button @click="switchSidebarTab('versions')"
-                    :class="sidebarTab === 'versions' 
-                        ? 'bg-indigo-500/14 dark:bg-white/[0.12] text-indigo-700 dark:text-white font-semibold' 
+            <button type="button"
+                    @click="switchSidebarTab('versions')"
+                    :class="sidebarTab === 'versions'
+                        ? 'bg-indigo-500/14 dark:bg-white/[0.11] text-indigo-700 dark:text-white font-semibold'
                         : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-900/[0.04] dark:hover:bg-white/[0.05] font-medium'"
-                    class="flex-1 inline-flex items-center justify-center gap-1.5 py-2 lg:py-1.5 px-2.5 rounded-xl text-xs lg:text-[11px] transition-all cursor-pointer">
+                    class="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 lg:py-1.5 px-2.5 rounded-xl text-xs lg:text-[11px] transition-all cursor-pointer">
                 <svg class="w-3.5 h-3.5 shrink-0 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
                 <span class="whitespace-nowrap">Releases</span>
-                <span class="shrink-0 px-1.5 py-0.5 text-[9.5px] leading-none rounded-full bg-black/[0.06] dark:bg-white/[0.08] text-slate-700 dark:text-slate-300 font-semibold mono tabular-nums" x-text="versions.length ? (versions.length > 999 ? (versions.length/1000).toFixed(1) + 'k' : versions.length) : '${versionsCountLabel}'">{versionsCountLabel}</span>
+                <span class="shrink-0 px-1.5 py-0.5 text-[9.5px] leading-none rounded-full bg-black/[0.06] dark:bg-white/[0.08] text-slate-700 dark:text-slate-300 font-semibold mono tabular-nums" x-text="versions.length ? (versions.length > 999 ? (versions.length/1000).toFixed(1) + 'k' : versions.length) : '{versionsCountLabel}'">{versionsCountLabel}</span>
             </button>
-            <button @click="switchSidebarTab('services')"
-                    :class="sidebarTab === 'services' 
-                        ? 'bg-indigo-500/14 dark:bg-white/[0.12] text-indigo-700 dark:text-white font-semibold' 
+            <button type="button"
+                    @click="switchSidebarTab('services')"
+                    :class="sidebarTab === 'services'
+                        ? 'bg-indigo-500/14 dark:bg-white/[0.11] text-indigo-700 dark:text-white font-semibold'
                         : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-900/[0.04] dark:hover:bg-white/[0.05] font-medium'"
-                    class="flex-1 inline-flex items-center justify-center gap-1.5 py-2 lg:py-1.5 px-2.5 rounded-xl text-xs lg:text-[11px] transition-all cursor-pointer">
+                    class="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 lg:py-1.5 px-2.5 rounded-xl text-xs lg:text-[11px] transition-all cursor-pointer">
                 <svg class="w-3.5 h-3.5 shrink-0 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                 <span class="whitespace-nowrap">Services</span>
-                <span class="shrink-0 px-1.5 py-0.5 text-[9.5px] leading-none rounded-full bg-black/[0.06] dark:bg-white/[0.08] text-slate-700 dark:text-slate-300 font-semibold mono tabular-nums" x-text="allServices.length || '${allServicesList.length}'">{allServicesList.length}</span>
+                <span class="shrink-0 px-1.5 py-0.5 text-[9.5px] leading-none rounded-full bg-black/[0.06] dark:bg-white/[0.08] text-slate-700 dark:text-slate-300 font-semibold mono tabular-nums" x-text="allServices.length || '{allServicesList.length}'">{allServicesList.length}</span>
             </button>
         </nav>
     </div>
 
     <div x-show="sidebarTab === 'versions'" class="flex-1 flex flex-col min-h-0">
-        <div class="px-3 pb-2.5 flex-shrink-0">
+        <div class="px-3 pb-2.5 shrink-0">
             <div class="relative group/search">
-                <input type="text" id="versionRailSearch" name="versionRailSearch" aria-label="Search releases" 
+                <input type="text" id="versionRailSearch" name="versionRailSearch" aria-label="Filter releases by version or month"
                        x-model.debounce.150ms="versionRailSearch"
                        x-ref="railSearch"
                        @input="railLimit = 50"
                        placeholder="Filter releases (1.44, Nov)..."
-                       class="w-full glass-input rounded-xl py-2 lg:py-1.5 pl-8 pr-7 text-xs lg:text-[11.5px] focus:outline-none text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium">
-                <svg class="absolute left-2.5 top-[10px] lg:top-[8px] w-3.5 h-3.5 text-slate-400 group-focus-within/search:text-indigo-500 transition-colors pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                <button x-show="versionRailSearch" x-cloak @click="versionRailSearch = ''; railLimit = 50" aria-label="Clear version search" class="absolute right-2 top-[8px] lg:top-[7px] text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-0.5 cursor-pointer">
+                       class="w-full glass-input rounded-xl py-2.5 lg:py-1.5 pl-8 pr-8 text-xs lg:text-[11.5px] focus:outline-none text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium" />
+                <svg class="absolute left-2.5 top-[12px] lg:top-[8px] w-3.5 h-3.5 text-slate-400 group-focus-within/search:text-indigo-500 transition-colors pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                <button type="button" x-show="versionRailSearch" x-cloak @click="versionRailSearch = ''; railLimit = 50" aria-label="Clear version search" class="absolute right-2 top-[9px] lg:top-[6px] text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-1 cursor-pointer">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
@@ -73,7 +76,7 @@ const totalVersionsFormatted = allVersions.length.toLocaleString('en-US');
                 <div x-show="!isClientHydrated" class="space-y-0.5">
                     {topVersions.map((v, idx) => (
                         <a href={`/releases/${v.id}/`}
-                           class="w-full px-3 py-2 lg:py-1.5 rounded-xl flex items-center justify-between transition-colors text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100">
+                           class="w-full px-3 py-2.5 lg:py-1.5 rounded-xl flex items-center justify-between transition-colors text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100">
                             <div class="flex items-center gap-2 min-w-0 flex-1">
                                 <span class="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600 shrink-0"></span>
                                 <span class="text-xs mono font-medium tracking-tight truncate">v{v.id}</span>
@@ -86,7 +89,7 @@ const totalVersionsFormatted = allVersions.length.toLocaleString('en-US');
 
                 <template x-for="(group, gIndex) in groupedRailVersions" :key="group.label">
                     <div>
-                        <div class="px-3 pt-2.5 pb-1 flex items-center justify-between text-[10px] mono uppercase tracking-wider font-semibold text-slate-400 dark:text-slate-500 select-none">
+                        <div class="px-3 pt-2.5 pb-1 flex items-center justify-between text-[10px] mono uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400 select-none">
                             <span x-text="group.label"></span>
                             <span class="text-[9.5px] opacity-70 tabular-nums" x-text="group.versions.length"></span>
                         </div>
@@ -97,12 +100,12 @@ const totalVersionsFormatted = allVersions.length.toLocaleString('en-US');
                                    @click.prevent="selectVersion(v.id, true); viewMode = 'release'; if(isMobile(1024)) showMobileVersions = false;"
                                    @mouseenter="prefetchVersion(v.id)"
                                    :data-version="v.id"
-                                   :class="selectedVersion === v.id && viewMode === 'release' 
-                                      ? 'bg-indigo-500/12 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-200 font-semibold' 
+                                   :class="selectedVersion === v.id && viewMode === 'release'
+                                      ? 'bg-indigo-500/12 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-200 font-semibold'
                                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-900/[0.045] dark:hover:bg-white/[0.05]'"
-                                   class="w-full px-3 py-2 lg:py-1.5 rounded-xl flex items-center justify-between transition-all duration-150 group/item text-left cursor-pointer min-w-0">
+                                   class="w-full px-3 py-2.5 lg:py-1.5 rounded-xl flex items-center justify-between transition-all duration-150 group/item text-left cursor-pointer min-w-0">
                                     <div class="flex items-center gap-2 min-w-0 flex-1">
-                                        <span :class="selectedVersion === v.id && viewMode === 'release' ? 'bg-indigo-500 dark:bg-indigo-400 scale-110' : 'bg-slate-300 dark:bg-slate-600 group-hover/item:bg-indigo-400'" 
+                                        <span :class="selectedVersion === v.id && viewMode === 'release' ? 'bg-indigo-500 dark:bg-indigo-400 scale-110' : 'bg-slate-300 dark:bg-slate-600 group-hover/item:bg-indigo-400'"
                                               class="w-1.5 h-1.5 rounded-full transition-all shrink-0"></span>
                                         <span class="text-xs mono font-medium tracking-tight truncate tabular-nums" x-text="'v' + v.id"></span>
                                         <template x-if="gIndex === 0 && vIndex === 0 && !versionRailSearch">
@@ -118,8 +121,9 @@ const totalVersionsFormatted = allVersions.length.toLocaleString('en-US');
 
                 <template x-if="hasMoreVersions">
                     <div class="pt-2 pb-6 px-0.5">
-                        <button @click="loadMoreVersions()"
-                                class="w-full py-2 rounded-xl bg-indigo-500/[0.08] hover:bg-indigo-500/[0.15] dark:bg-white/[0.05] dark:hover:bg-white/[0.09] text-[10.5px] mono font-semibold text-indigo-700 dark:text-slate-300 transition-all cursor-pointer">
+                        <button type="button"
+                                @click="loadMoreVersions()"
+                                class="w-full py-2.5 lg:py-2 rounded-xl bg-indigo-500/[0.08] hover:bg-indigo-500/[0.15] dark:bg-white/[0.05] dark:hover:bg-white/[0.09] text-[10.5px] mono font-semibold text-indigo-700 dark:text-slate-300 transition-all cursor-pointer">
                             Load More Releases (+50)
                         </button>
                     </div>
@@ -129,28 +133,30 @@ const totalVersionsFormatted = allVersions.length.toLocaleString('en-US');
     </div>
 
     <div x-show="sidebarTab === 'services'" class="flex-1 flex flex-col min-h-0" x-cloak>
-        <div class="px-3 pb-2.5 flex-shrink-0 space-y-2">
+        <div class="px-3 pb-2.5 shrink-0 space-y-2">
             <div class="relative group/ssearch">
-                <input type="text" id="serviceSearch" name="serviceSearch" aria-label="Search services"
+                <input type="text" id="serviceSearch" name="serviceSearch" aria-label="Search AWS services"
                        x-model.debounce.150ms="serviceSearch"
                        @input="serviceLimit = 40"
                        placeholder={`Filter ${allServicesList.length} services (s3, ec2)...`}
-                       class="w-full glass-input rounded-xl py-2 lg:py-1.5 pl-8 pr-7 text-xs lg:text-[11.5px] focus:outline-none text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium">
-                <svg class="absolute left-2.5 top-[10px] lg:top-[8px] w-3.5 h-3.5 text-slate-400 group-focus-within/ssearch:text-indigo-500 transition-colors pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                <button x-show="serviceSearch" x-cloak @click="serviceSearch = ''; serviceLimit = 40" aria-label="Clear service search" class="absolute right-2 top-[8px] lg:top-[7px] text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-0.5 cursor-pointer">
+                       class="w-full glass-input rounded-xl py-2.5 lg:py-1.5 pl-8 pr-8 text-xs lg:text-[11.5px] focus:outline-none text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium" />
+                <svg class="absolute left-2.5 top-[12px] lg:top-[8px] w-3.5 h-3.5 text-slate-400 group-focus-within/ssearch:text-indigo-500 transition-colors pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                <button type="button" x-show="serviceSearch" x-cloak @click="serviceSearch = ''; serviceLimit = 40" aria-label="Clear service search" class="absolute right-2 top-[9px] lg:top-[6px] text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-1 cursor-pointer">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
 
             <div class="flex items-center gap-1 p-1 glass-segmented rounded-xl">
-                <button @click="serviceSort = 'popular'"
-                        :class="serviceSort === 'popular' ? 'bg-indigo-500/14 dark:bg-white/[0.12] text-indigo-700 dark:text-white font-semibold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-900/[0.04] dark:hover:bg-white/[0.05] font-medium'"
-                        class="flex-1 py-1 rounded-lg text-[10px] mono uppercase transition-all cursor-pointer">
+                <button type="button"
+                        @click="serviceSort = 'popular'"
+                        :class="serviceSort === 'popular' ? 'bg-indigo-500/14 dark:bg-white/[0.11] text-indigo-700 dark:text-white font-semibold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-900/[0.04] dark:hover:bg-white/[0.05] font-medium'"
+                        class="flex-1 py-1.5 lg:py-1 rounded-lg text-[10px] mono uppercase transition-all cursor-pointer">
                     Most Active
                 </button>
-                <button @click="serviceSort = 'alpha'"
-                        :class="serviceSort === 'alpha' ? 'bg-indigo-500/14 dark:bg-white/[0.12] text-indigo-700 dark:text-white font-semibold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-900/[0.04] dark:hover:bg-white/[0.05] font-medium'"
-                        class="flex-1 py-1 rounded-lg text-[10px] mono uppercase transition-all cursor-pointer">
+                <button type="button"
+                        @click="serviceSort = 'alpha'"
+                        :class="serviceSort === 'alpha' ? 'bg-indigo-500/14 dark:bg-white/[0.11] text-indigo-700 dark:text-white font-semibold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-900/[0.04] dark:hover:bg-white/[0.05] font-medium'"
+                        class="flex-1 py-1.5 lg:py-1 rounded-lg text-[10px] mono uppercase transition-all cursor-pointer">
                     A–Z
                 </button>
             </div>
@@ -160,10 +166,10 @@ const totalVersionsFormatted = allVersions.length.toLocaleString('en-US');
             <div x-show="!isClientHydrated" class="space-y-0.5">
                 {topServices.map((s) => (
                     <a href={`/services/${slugifyService(s)}/`}
-                       class="w-full text-left px-3 py-2 lg:py-1.5 rounded-xl transition-colors flex items-center justify-between text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">
+                       class="w-full text-left px-3 py-2.5 lg:py-1.5 rounded-xl transition-colors flex items-center justify-between text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">
                         <div class="flex items-center gap-2.5 min-w-0 flex-1">
                             <div class={`w-5 h-5 rounded-md flex items-center justify-center mono text-[8.5px] font-bold shrink-0 ${getServiceColorClass(s)}`}>
-                                {s.substring(0,2).toUpperCase()}
+                                {s.substring(0, 2).toUpperCase()}
                             </div>
                             <span class="mono text-xs font-medium uppercase truncate">{s}</span>
                         </div>
@@ -177,9 +183,9 @@ const totalVersionsFormatted = allVersions.length.toLocaleString('en-US');
                    @mouseenter="prefetchService(service)"
                    :data-service="service.toLowerCase().trim()"
                    :class="activeService === service && viewMode === 'service'
-                      ? 'bg-indigo-500/12 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-200 font-semibold' 
+                      ? 'bg-indigo-500/12 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-200 font-semibold'
                       : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-900/[0.045] dark:hover:bg-white/[0.05]'"
-                   class="w-full text-left px-3 py-2 lg:py-1.5 rounded-xl transition-all duration-150 flex items-center justify-between group cursor-pointer min-w-0">
+                   class="w-full text-left px-3 py-2.5 lg:py-1.5 rounded-xl transition-all duration-150 flex items-center justify-between group cursor-pointer min-w-0">
                     <div class="flex items-center gap-2.5 min-w-0 flex-1">
                         <div class="w-5 h-5 rounded-md flex items-center justify-center mono text-[8.5px] font-bold shrink-0"
                              :class="getServiceColorClass(service)"
@@ -195,8 +201,9 @@ const totalVersionsFormatted = allVersions.length.toLocaleString('en-US');
 
             <template x-if="hasMoreServices">
                 <div class="pt-2 pb-6 px-0.5">
-                    <button @click="loadMoreServices()"
-                            class="w-full py-2 rounded-xl bg-indigo-500/[0.08] hover:bg-indigo-500/[0.15] dark:bg-white/[0.05] dark:hover:bg-white/[0.09] text-[10.5px] mono font-semibold text-indigo-700 dark:text-slate-300 transition-all cursor-pointer">
+                    <button type="button"
+                            @click="loadMoreServices()"
+                            class="w-full py-2.5 lg:py-2 rounded-xl bg-indigo-500/[0.08] hover:bg-indigo-500/[0.15] dark:bg-white/[0.05] dark:hover:bg-white/[0.09] text-[10.5px] mono font-semibold text-indigo-700 dark:text-slate-300 transition-all cursor-pointer">
                         Load More Services (+40)
                     </button>
                 </div>
@@ -204,9 +211,9 @@ const totalVersionsFormatted = allVersions.length.toLocaleString('en-US');
         </div>
     </div>
 
-    <div class="px-4 py-3 flex-shrink-0 flex items-center justify-between text-[11px] mono text-slate-500 dark:text-slate-400 font-medium">
-        <a href="/releases/" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors tabular-nums" x-text="(versions.length ? versions.length.toLocaleString('en-US') : '${totalVersionsFormatted}') + ' releases'">{totalVersionsFormatted} releases</a>
+    <div class="px-4 py-3 shrink-0 flex items-center justify-between text-[11px] mono text-slate-500 dark:text-slate-400 font-medium">
+        <a href="/releases/" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors tabular-nums" x-text="(versions.length ? versions.length.toLocaleString('en-US') : '{totalVersionsFormatted}') + ' releases'">{totalVersionsFormatted} releases</a>
         <span class="text-slate-300 dark:text-slate-700">•</span>
-        <a href="/services/" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors tabular-nums" x-text="(allServices.length || '${allServicesList.length}') + ' services'">{allServicesList.length} services</a>
+        <a href="/services/" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors tabular-nums" x-text="(allServices.length || '{allServicesList.length}') + ' services'">{allServicesList.length} services</a>
     </div>
 </aside>

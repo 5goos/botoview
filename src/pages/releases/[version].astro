@@ -2,8 +2,15 @@
 export const prerender = true;
 
 import Layout from '../../layouts/Layout.astro';
-import { getServiceColorClass, formatDescription, formatDate, slugifyService } from '../../utils/formatting';
-import { loadReleaseChanges } from '../../utils/data';
+import {
+    formatDate,
+    formatDescription,
+    getServiceColorClass,
+    makeEntryAnchorId,
+    normalizeChangeType,
+    slugifyService
+} from '../../utils/formatting';
+import { loadReleaseChanges, type ChangelogItem } from '../../utils/data';
 import trackData from '../../../public/data/track.json';
 
 export async function getStaticPaths() {
@@ -29,23 +36,35 @@ export async function getStaticPaths() {
 
 const version = Astro.props.version || Astro.params.version || '';
 const versions: Array<{ id: string; date: string }> = trackData?.versions || [];
-const versionIndex = versions.findIndex(v => v.id === version);
-const newerVersion = Astro.props.newerVersion !== undefined 
-    ? Astro.props.newerVersion 
+const versionIndex = versions.findIndex((v) => v.id === version);
+const newerVersion = Astro.props.newerVersion !== undefined
+    ? Astro.props.newerVersion
     : (versionIndex > 0 ? versions[versionIndex - 1]?.id : null);
-const olderVersion = Astro.props.olderVersion !== undefined 
-    ? Astro.props.olderVersion 
+const olderVersion = Astro.props.olderVersion !== undefined
+    ? Astro.props.olderVersion
     : (versionIndex >= 0 && versionIndex < versions.length - 1 ? versions[versionIndex + 1]?.id : null);
 const date = Astro.props.date || (versionIndex >= 0 ? versions[versionIndex]?.date : '') || '';
 
-let changes: Array<{ category: string; description: string; type: string }> = Astro.props.changes;
+let changes: ChangelogItem[] = Astro.props.changes;
 if (!changes || changes.length === 0) {
     changes = loadReleaseChanges(version);
 }
 changes = changes || [];
 
-const servicesModified = Array.from(new Set(changes.map(c => c.category).filter(Boolean))).sort();
+const servicesModified = Array.from(new Set(changes.map((c) => c.category).filter(Boolean))).sort();
 const totalChanges = changes.length;
+
+let apiCount = 0;
+let featureCount = 0;
+let enhancementCount = 0;
+let fixCount = 0;
+for (const c of changes) {
+    const k = normalizeChangeType(c.type, c.description).key;
+    if (k === 'api-change') apiCount++;
+    else if (k === 'feature') featureCount++;
+    else if (k === 'enhancement') enhancementCount++;
+    else fixCount++;
+}
 
 const pageTitle = `AWS Boto3 v${version} Changelog & Release Notes | BotoView`;
 const pageDescription = `Complete AWS Boto3 v${version} changelog${date ? ' (' + date + ')' : ''}. Explore ${totalChanges} updates across ${servicesModified.length} AWS services, breaking changes, and API updates.`;
@@ -54,24 +73,9 @@ const canonicalUrl = `https://botoview.5goos.com/releases/${version}/`;
 const breadcrumbSchema = {
     "@type": "BreadcrumbList",
     "itemListElement": [
-        {
-            "@type": "ListItem",
-            "position": 1,
-            "name": "Home",
-            "item": "https://botoview.5goos.com/"
-        },
-        {
-            "@type": "ListItem",
-            "position": 2,
-            "name": "Releases",
-            "item": "https://botoview.5goos.com/releases/"
-        },
-        {
-            "@type": "ListItem",
-            "position": 3,
-            "name": `v${version}`,
-            "item": canonicalUrl
-        }
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://botoview.5goos.com/" },
+        { "@type": "ListItem", "position": 2, "name": "Releases", "item": "https://botoview.5goos.com/releases/" },
+        { "@type": "ListItem", "position": 3, "name": `v${version}`, "item": canonicalUrl }
     ]
 };
 
@@ -82,45 +86,40 @@ const articleSchema = {
     "description": pageDescription,
     "url": canonicalUrl,
     "inLanguage": "en-US",
-    "mainEntityOfPage": {
-        "@type": "WebPage",
-        "@id": canonicalUrl
-    },
+    "mainEntityOfPage": { "@type": "WebPage", "@id": canonicalUrl },
     "image": "https://botoview.5goos.com/og-image.png",
     "datePublished": date || new Date().toISOString().split('T')[0],
     "dateModified": date || new Date().toISOString().split('T')[0],
-    "author": {
-        "@type": "Organization",
-        "@id": "https://5goos.com/#organization",
-        "name": "5goos",
-        "url": "https://5goos.com/"
-    },
+    "author": { "@type": "Organization", "@id": "https://5goos.com/#organization", "name": "5goos", "url": "https://5goos.com/" },
     "publisher": {
         "@type": "Organization",
         "@id": "https://5goos.com/#organization",
         "name": "5goos",
         "url": "https://5goos.com/",
-        "logo": {
-            "@type": "ImageObject",
-            "url": "https://botoview.5goos.com/favicon.png"
-        }
+        "logo": { "@type": "ImageObject", "url": "https://botoview.5goos.com/favicon.png" }
     }
 };
 ---
 
-<Layout 
-    title={pageTitle} 
-    description={pageDescription} 
+<Layout
+    title={pageTitle}
+    description={pageDescription}
     canonical={canonicalUrl}
     robots="noindex, follow"
     includeDefaultApp={false}
-    bodyClass="min-h-screen w-full overflow-y-auto text-[var(--text-secondary)] transition-colors duration-500"
+    bodyClass="min-h-screen w-full overflow-y-auto text-[var(--text-secondary)] transition-colors duration-200"
     jsonLd={[breadcrumbSchema, articleSchema]}
 >
-    <div class="min-h-screen flex flex-col bg-transparent" x-data="releasePage" @scroll.window="isScrolled = window.scrollY > 10" @keydown.window="handleKeydown($event)">
+    <div class="min-h-screen flex flex-col bg-transparent relative"
+         x-data="releasePage"
+         @scroll.window="isScrolled = window.scrollY > 10"
+         @boto:theme-changed.window="isDarkMode = $event.detail.isDark"
+         @keydown.window="handleKeydown($event)">
+        <div class="pointer-events-none fixed inset-0 z-0 ambient-glow" aria-hidden="true"></div>
+
         <header class="h-14 glass-header sticky top-0 z-40 flex items-center transition-all duration-200" :class="isScrolled ? 'glass-header-scrolled' : ''">
-            <div class="w-full max-w-5xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-3">
-                <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+            <div class="w-full max-w-5xl mx-auto px-3 sm:px-6 flex items-center justify-between gap-2 min-w-0">
+                <div class="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
                     <a href="/" class="flex items-center gap-2 group cursor-pointer shrink-0" aria-label="BotoView Home">
                         <img src="/favicon.svg" width="22" height="22" alt="BotoView logo" class="w-5 h-5 group-hover:scale-105 transition-transform" />
                         <span class="text-[15px] font-semibold tracking-tight text-slate-900 dark:text-slate-100 leading-none">BotoView</span>
@@ -130,70 +129,81 @@ const articleSchema = {
                         Releases
                     </a>
                     <span class="text-slate-300 dark:text-white/10">/</span>
-                    <span class="text-xs mono font-bold uppercase text-indigo-600 dark:text-indigo-400 truncate max-w-[120px] sm:max-w-none">
+                    <span class="text-xs mono font-bold uppercase text-indigo-600 dark:text-indigo-400 truncate max-w-[90px] sm:max-w-none">
                         v{version}
                     </span>
                 </div>
 
-                <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-                    <div class="flex items-center gap-1">
+                <div class="flex items-center gap-1 sm:gap-2 shrink-0">
+                    <div class="hidden md:flex items-center gap-1">
                         {newerVersion && (
-                            <a href={`/releases/${newerVersion}/`} 
-                               title={`Newer release v${newerVersion}`} 
-                               class="p-1 sm:px-2.5 sm:py-1 rounded-lg text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 hover:bg-slate-200/50 dark:hover:bg-white/10 text-xs mono transition-all flex items-center gap-1">
+                            <a href={`/releases/${newerVersion}/`}
+                               title={`Newer release v${newerVersion}`}
+                               class="px-2.5 py-1 rounded-lg text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 hover:bg-black/[0.04] dark:hover:bg-white/10 text-xs mono transition-all flex items-center gap-1">
                                 <span>&larr;</span>
-                                <span class="hidden sm:inline">v{newerVersion}</span>
+                                <span>v{newerVersion}</span>
                             </a>
                         )}
                         {olderVersion && (
-                            <a href={`/releases/${olderVersion}/`} 
-                               title={`Older release v${olderVersion}`} 
-                               class="p-1 sm:px-2.5 sm:py-1 rounded-lg text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 hover:bg-slate-200/50 dark:hover:bg-white/10 text-xs mono transition-all flex items-center gap-1">
-                                <span class="hidden sm:inline">v{olderVersion}</span>
+                            <a href={`/releases/${olderVersion}/`}
+                               title={`Older release v${olderVersion}`}
+                               class="px-2.5 py-1 rounded-lg text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 hover:bg-black/[0.04] dark:hover:bg-white/10 text-xs mono transition-all flex items-center gap-1">
+                                <span>v{olderVersion}</span>
                                 <span>&rarr;</span>
                             </a>
                         )}
                     </div>
 
-                    <a href={`/?v=${version}`} 
-                       title="Open in interactive timeline explorer"
-                       class="inline-flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full text-xs font-bold transition-all active:scale-95 shadow-sm shadow-indigo-500/25 shrink-0">
-                        <span class="hidden sm:inline">Interactive Timeline</span>
-                        <span class="sm:hidden text-[11px]">Timeline</span>
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                    </a>
-
-                    <button @click="toggleTheme()" 
-                            aria-label="Toggle dark mode"
-                            class="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-white/10 transition-all cursor-pointer shrink-0">
-                        <svg x-show="!isDarkMode" class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-                        <svg x-show="isDarkMode" x-cloak class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <button type="button"
+                            @click="openPalette()"
+                            aria-label="Open command search (Cmd/Ctrl+K)"
+                            title="Quick jump (Cmd/Ctrl + K)"
+                            class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium text-slate-600 dark:text-slate-300 bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.08] dark:hover:bg-white/[0.1] transition-colors cursor-pointer shrink-0 min-h-[40px] sm:min-h-0">
+                        <svg class="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        <kbd class="kbd-badge hidden sm:inline-flex">⌘K</kbd>
                     </button>
 
-                    <a href="https://github.com/5goos/botoview" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository" class="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-white/10 transition-all shrink-0">
+                    <a href={`/?v=${version}`}
+                       title="Open in interactive timeline explorer"
+                       class="inline-flex items-center gap-1 px-2.5 sm:px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full text-xs font-semibold transition-all active:scale-95 shadow-sm shadow-indigo-500/25 shrink-0">
+                        <span class="hidden sm:inline">Explorer</span>
+                        <span class="sm:hidden text-[11px]">App</span>
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </a>
+
+                    <button type="button"
+                            @click="toggleTheme()"
+                            aria-label="Toggle dark mode"
+                            title="Toggle dark / light theme (t)"
+                            class="rounded-full text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-black/[0.04] dark:hover:bg-white/[0.07] transition-colors cursor-pointer shrink-0 tap-target flex items-center justify-center">
+                        <svg x-show="!isDarkMode" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                        <svg x-show="isDarkMode" class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    </button>
+
+                    <a href="https://github.com/5goos/botoview" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository" class="hidden sm:flex rounded-full text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-black/[0.04] dark:hover:bg-white/[0.07] transition-colors shrink-0 tap-target items-center justify-center">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
                     </a>
                 </div>
             </div>
         </header>
 
-        <main id="mainScrollArea" tabindex="-1" class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-5">
-            <nav class="flex items-center gap-2 text-xs mono text-slate-400" aria-label="Breadcrumb">
+        <main id="mainScrollArea" tabindex="-1" class="relative z-10 flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-5 min-w-0">
+            <nav class="flex items-center gap-2 text-xs mono text-slate-500 dark:text-slate-400" aria-label="Breadcrumb">
                 <a href="/" class="hover:text-indigo-600 dark:hover:text-indigo-400">Home</a>
                 <span>/</span>
                 <a href="/releases/" class="hover:text-indigo-600 dark:hover:text-indigo-400">Releases</a>
                 <span>/</span>
-                <span class="text-slate-700 dark:text-slate-200 font-bold">v{version}</span>
+                <span class="text-slate-800 dark:text-slate-200 font-bold">v{version}</span>
             </nav>
 
             <header class="soft-card p-5 sm:p-6 rounded-2xl space-y-4">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div class="space-y-1">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 min-w-0">
+                    <div class="space-y-1 min-w-0">
                         <div class="flex items-center gap-2.5 flex-wrap">
                             <h1 class="text-2xl sm:text-3xl font-bold mono text-slate-900 dark:text-white tracking-tight">
                                 AWS Boto3 v{version}
                             </h1>
-                            <span class="px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 text-xs mono font-semibold">
+                            <span class="px-2.5 py-0.5 rounded-full bg-indigo-500/12 text-indigo-700 dark:text-indigo-300 text-xs mono font-semibold">
                                 <span x-text="allChanges.length || totalChanges">{totalChanges}</span> updates
                             </span>
                         </div>
@@ -204,44 +214,55 @@ const articleSchema = {
                         )}
                     </div>
 
-                    <div class="flex items-center gap-2 p-1.5 pl-3 bg-slate-100/90 dark:bg-white/[0.04] rounded-xl mono text-xs self-start sm:self-auto">
-                        <span class="text-slate-500 select-none">$</span>
-                        <code class="text-indigo-600 dark:text-indigo-400 font-semibold select-all">pip install boto3=={version}</code>
+                    <div class="flex items-center gap-1.5 self-start md:self-auto max-w-full min-w-0">
+                        <div class="inline-flex items-center gap-1 p-1 rounded-xl bg-black/[0.04] dark:bg-white/[0.05] max-w-full overflow-x-auto hide-scrollbar">
+                            <button type="button"
+                                    @click="pinTool = pinTool === 'pip' ? 'uv' : 'pip'"
+                                    title="Switch package manager"
+                                    class="px-2 py-1 rounded-lg text-[10px] mono font-semibold uppercase bg-black/[0.05] dark:bg-white/[0.08] text-slate-600 dark:text-slate-300 cursor-pointer shrink-0">
+                                <span x-text="pinTool">pip</span>
+                            </button>
+                            <code class="px-1.5 text-xs mono text-indigo-700 dark:text-indigo-300 font-semibold whitespace-nowrap select-all"
+                                  x-text="pinTool === 'uv' ? 'uv add boto3==' + currentVersion : 'pip install boto3==' + currentVersion">
+                                pip install boto3=={version}
+                            </code>
+                            <button type="button"
+                                    @click="copyPin()"
+                                    aria-label="Copy version install command"
+                                    class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10.5px] mono font-medium text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-300 cursor-pointer shrink-0">
+                                <svg x-show="!pinCopied" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                <span x-show="pinCopied" x-cloak class="text-emerald-600 dark:text-emerald-400 font-semibold">Copied</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </header>
 
             <section aria-label="Services in this release" class="soft-card rounded-2xl p-4 sm:p-5 space-y-3 w-full max-w-full min-w-0">
                 <div class="flex items-center justify-between gap-2 flex-wrap w-full max-w-full min-w-0">
-                    <div class="flex items-center justify-between sm:justify-start gap-2 w-full sm:w-auto max-w-full min-w-0 flex-wrap">
+                    <div class="flex items-center gap-2 min-w-0 flex-wrap">
                         <h2 class="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 mono flex items-center gap-2 shrink-0">
                             <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0"></span>
                             <span>Services</span>
                         </h2>
-                        <span class="px-2 py-0.5 rounded-full bg-slate-200/50 dark:bg-white/10 text-[9.5px] mono font-bold text-slate-600 dark:text-slate-400 shrink-0 whitespace-nowrap"
+                        <span class="px-2 py-0.5 rounded-full bg-black/[0.04] dark:bg-white/[0.08] text-[10px] mono font-semibold text-slate-600 dark:text-slate-400 shrink-0 whitespace-nowrap"
                               x-text="(servicesList.length || servicesModified.length) + ' services'">
                             {servicesModified.length} services
                         </span>
                     </div>
 
-                    <template x-if="releaseServiceFilter">
-                        <div class="flex items-center gap-2 text-xs flex-wrap w-full sm:w-auto max-w-full min-w-0 pt-1 sm:pt-0">
-                            <span class="text-slate-500 text-[11px] shrink-0">Filtered to:</span>
-                            <span class="px-2.5 py-0.5 rounded-full bg-indigo-600 text-white font-bold mono uppercase text-[9.5px] shrink-0" x-text="releaseServiceFilter"></span>
-                            <button @click="releaseServiceFilter = ''" class="text-slate-400 hover:text-rose-500 text-[10.5px] font-bold cursor-pointer shrink-0" title="Clear service filter">✕ Clear</button>
-                            <a :href="'/services/' + (releaseServiceFilter || '').toLowerCase() + '/'" class="text-indigo-600 dark:text-indigo-400 font-bold hover:underline text-[11px] mono cursor-pointer truncate max-w-[200px] sm:max-w-none">
-                                Explore all <span class="uppercase" x-text="releaseServiceFilter"></span> updates &rarr;
-                            </a>
-                        </div>
-                    </template>
+                    <div class="flex items-center gap-2 md:hidden text-xs mono">
+                        {newerVersion && <a href={`/releases/${newerVersion}/`} class="text-indigo-600 dark:text-indigo-400 hover:underline">&larr; v{newerVersion}</a>}
+                        {olderVersion && <a href={`/releases/${olderVersion}/`} class="text-indigo-600 dark:text-indigo-400 hover:underline">v{olderVersion} &rarr;</a>}
+                    </div>
                 </div>
 
                 <div class="flex items-center gap-1.5 flex-wrap pt-0.5 w-full max-w-full min-w-0">
                     <div x-show="!hasActiveFilter" class="flex items-center gap-1.5 flex-wrap">
-                        {servicesModified.map(svc => (
-                            <a href={`/services/${slugifyService(svc)}/`} 
+                        {servicesModified.map((svc) => (
+                            <a href={`/services/${slugifyService(svc)}/`}
                                title={`View all ${svc} changelog history`}
-                               class={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] mono font-bold uppercase transition-all hover:scale-105 active:scale-95 ${getServiceColorClass(svc)}`}>
+                               class={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10.5px] mono font-bold uppercase transition-all hover:scale-105 active:scale-95 ${getServiceColorClass(svc)}`}>
                                 <span>{svc}</span>
                             </a>
                         ))}
@@ -252,7 +273,7 @@ const articleSchema = {
                             <a :href="'/services/' + (svc || '').toLowerCase() + '/'"
                                :class="getServiceColorClass(svc)"
                                :title="'View all ' + svc.toUpperCase() + ' changelog history'"
-                               class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] mono font-bold uppercase transition-all hover:scale-105 active:scale-95 cursor-pointer max-w-full">
+                               class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10.5px] mono font-bold uppercase transition-all hover:scale-105 active:scale-95 cursor-pointer max-w-full">
                                 <span class="truncate max-w-[200px] sm:max-w-none" x-text="svc"></span>
                             </a>
                         </template>
@@ -260,60 +281,118 @@ const articleSchema = {
                 </div>
             </section>
 
-            <div class="soft-card p-2.5 sm:p-3 rounded-2xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
-                <div class="relative flex-1 group">
-                    <input type="text" 
-                           x-model.debounce.150ms="search" 
-                           placeholder={`Filter changes in this release (e.g. s3, ami, fix)...`} 
+            <div class="soft-card p-2.5 sm:p-3 rounded-2xl flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-2.5">
+                <div class="relative flex-1 group min-w-0">
+                    <input type="text"
+                           id="releaseFilterSearch"
+                           x-model.debounce.150ms="search"
+                           placeholder="Filter changes in this release (e.g. s3, ami, fix)..."
                            aria-label={`Filter updates in v${version}`}
-                           class="w-full glass-input rounded-xl py-1.5 pl-8 pr-7 text-[11px] focus:outline-none text-slate-900 dark:text-white placeholder:text-slate-400 font-medium transition-all" />
-                    <svg class="absolute left-2.5 top-[8px] w-3.5 h-3.5 text-slate-400 group-focus-within:text-indigo-500 transition-colors pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    <button x-show="search" x-cloak @click="search = ''" aria-label="Clear filter" class="absolute right-2 top-[7px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 cursor-pointer">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                           class="w-full glass-input rounded-xl py-2 sm:py-1.5 pl-8 pr-8 text-xs focus:outline-none text-slate-900 dark:text-white placeholder:text-slate-400 font-medium transition-all" />
+                    <svg class="absolute left-2.5 top-[10px] sm:top-[8px] w-3.5 h-3.5 text-slate-400 group-focus-within:text-indigo-500 transition-colors pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <button type="button" x-show="search" x-cloak @click="search = ''" aria-label="Clear filter" class="absolute right-2 top-[8px] sm:top-[6px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 cursor-pointer">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
 
-                <div class="flex items-center gap-1 p-0.5 glass-segmented rounded-xl mono text-[9.5px] shrink-0">
-                    <button @click="activeFilter = 'all'" 
-                            :class="activeFilter === 'all' ? 'bg-indigo-500/14 dark:bg-white/10 text-indigo-700 dark:text-indigo-400 font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-900/[0.04] dark:hover:bg-white/[0.05]'"
-                            class="px-2.5 py-1 rounded-lg uppercase transition-all cursor-pointer">
-                        All (<span x-text="versionCounts.total">{totalChanges}</span>)
-                    </button>
-                    <button @click="activeFilter = 'feature'" 
-                            :class="activeFilter === 'feature' ? 'bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-900/[0.04] dark:hover:bg-white/[0.05]'"
-                            class="px-2.5 py-1 rounded-lg uppercase transition-all cursor-pointer">
-                        Features (<span x-text="versionCounts.features"></span>)
-                    </button>
-                    <button @click="activeFilter = 'fix'" 
-                            :class="activeFilter === 'fix' ? 'bg-rose-500/15 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400 font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-900/[0.04] dark:hover:bg-white/[0.05]'"
-                            class="px-2.5 py-1 rounded-lg uppercase transition-all cursor-pointer">
-                        Fixes (<span x-text="versionCounts.fixes"></span>)
-                    </button>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <select x-model="releaseServiceFilter"
+                            aria-label="Filter by AWS service"
+                            class="glass-input rounded-xl px-2.5 py-1.5 text-slate-700 dark:text-slate-300 font-medium text-[11px] focus:outline-none cursor-pointer mono">
+                        <option value="">All Services</option>
+                        {servicesModified.map((svc) => (
+                            <option value={svc}>{svc}</option>
+                        ))}
+                    </select>
+
+                    <div class="flex items-center gap-1 p-0.5 glass-segmented rounded-xl mono text-[10px] shrink-0 overflow-x-auto hide-scrollbar max-w-full">
+                        <button type="button"
+                                @click="activeFilter = 'all'"
+                                :class="activeFilter === 'all' ? 'bg-indigo-500/14 dark:bg-white/10 text-indigo-700 dark:text-white font-semibold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                                class="px-2.5 py-1.5 sm:py-1 rounded-lg uppercase transition-all cursor-pointer whitespace-nowrap">
+                            All (<span x-text="versionCounts.total">{totalChanges}</span>)
+                        </button>
+                        <button type="button"
+                                @click="activeFilter = 'api-change'"
+                                :class="activeFilter === 'api-change' ? 'bg-teal-500/15 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                                class="px-2.5 py-1.5 sm:py-1 rounded-lg uppercase transition-all cursor-pointer whitespace-nowrap">
+                            API (<span x-text="versionCounts.apiChanges">{apiCount}</span>)
+                        </button>
+                        <button type="button"
+                                @click="activeFilter = 'feature'"
+                                :class="activeFilter === 'feature' ? 'bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                                class="px-2.5 py-1.5 sm:py-1 rounded-lg uppercase transition-all cursor-pointer whitespace-nowrap">
+                            Features (<span x-text="versionCounts.features">{featureCount}</span>)
+                        </button>
+                        <button type="button"
+                                @click="activeFilter = 'enhancement'"
+                                :class="activeFilter === 'enhancement' ? 'bg-sky-500/15 dark:bg-sky-500/20 text-sky-700 dark:text-sky-300 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                                class="px-2.5 py-1.5 sm:py-1 rounded-lg uppercase transition-all cursor-pointer whitespace-nowrap">
+                            Enhance (<span x-text="versionCounts.enhancements">{enhancementCount}</span>)
+                        </button>
+                        <button type="button"
+                                @click="activeFilter = 'bugfix'"
+                                :class="activeFilter === 'bugfix' ? 'bg-rose-500/15 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+                                class="px-2.5 py-1.5 sm:py-1 rounded-lg uppercase transition-all cursor-pointer whitespace-nowrap">
+                            Fixes (<span x-text="versionCounts.fixes">{fixCount}</span>)
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <section aria-label={`Changelog entries in v${version}`} class="space-y-3">
                 <div x-show="!hasActiveFilter" class="space-y-3" id="ssr-changelog-stream">
-                    {changes.map((change) => {
-                        const isFix = change.type.toLowerCase().includes('fix');
-                        const isEnhan = change.type.toLowerCase().includes('enhan');
-                        const isFeature = change.type.toLowerCase().includes('feature') || change.type.toLowerCase().includes('api');
+                    {changes.map((change, idx) => {
+                        const meta = normalizeChangeType(change.type, change.description);
+                        const anchorId = makeEntryAnchorId(change.category, idx);
                         return (
-                            <article class="changelog-card rounded-2xl p-4 sm:p-5 group">
+                            <article id={anchorId} class="changelog-card rounded-2xl p-4 sm:p-5 group scroll-mt-24">
                                 <div class="flex items-center justify-between gap-2 mb-2.5 flex-wrap">
                                     <div class="flex items-center gap-2 flex-wrap min-w-0">
-                                        <a href={`/services/${slugifyService(change.category)}/`} 
+                                        <a href={`/services/${slugifyService(change.category)}/`}
                                            title={`Explore all ${change.category} updates`}
-                                           class={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] mono font-bold uppercase tracking-wider transition-all hover:scale-105 active:scale-95 ${getServiceColorClass(change.category)}`}>
+                                           class={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10.5px] mono font-bold uppercase tracking-wider transition-all hover:scale-105 active:scale-95 ${getServiceColorClass(change.category)}`}>
                                             <span>{change.category}</span>
                                         </a>
-                                        <div class={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] mono font-bold uppercase tracking-wider ${isFix ? 'text-rose-600 dark:text-rose-400 bg-rose-500/10' : (isEnhan ? 'text-blue-600 dark:text-blue-400 bg-blue-500/10' : (isFeature ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10' : 'text-slate-600 dark:text-slate-400 bg-slate-500/10'))}`}>
-                                            <span class={`w-1.5 h-1.5 rounded-full ${isFix ? 'bg-rose-500' : (isEnhan ? 'bg-blue-500' : (isFeature ? 'bg-emerald-500' : 'bg-slate-500'))}`}></span>
-                                            <span>{change.type.includes('api') ? 'API Change' : change.type}</span>
+                                        <div class={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] mono font-semibold uppercase tracking-wider ${meta.badgeClass}`}>
+                                            <span class={`w-1.5 h-1.5 rounded-full ${meta.dotClass}`}></span>
+                                            <span>{meta.label}</span>
                                         </div>
                                     </div>
+                                    <div class="flex items-center gap-1 shrink-0">
+                                        <button type="button"
+                                                @click={`copyAnchorLink('${anchorId}')`}
+                                                title="Copy deep link"
+                                                aria-label="Copy deep link"
+                                                class="tap-target sm:opacity-45 group-hover:opacity-100 focus:opacity-100 inline-flex items-center justify-center rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-all cursor-pointer mono text-xs">
+                                            #
+                                        </button>
+                                        <button type="button"
+                                                @click={`allChanges[${idx}] && copyItem(allChanges[${idx}], ${idx})`}
+                                                title="Copy change entry"
+                                                aria-label="Copy change entry"
+                                                class="tap-target sm:opacity-45 group-hover:opacity-100 focus:opacity-100 inline-flex items-center justify-center gap-1 px-2 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-all cursor-pointer">
+                                            <svg x-show={`copiedIdx !== ${idx}`} class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                            <span x-show={`copiedIdx === ${idx}`} x-cloak class="inline-flex items-center gap-1 text-[10.5px] mono font-semibold text-emerald-600 dark:text-emerald-400">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                                                Copied
+                                            </span>
+                                        </button>
+                                    </div>
                                 </div>
-                                <p class="text-slate-700 dark:text-slate-200 leading-relaxed text-[13.5px] sm:text-[14px] font-normal break-words" set:html={formatDescription(change.description)}></p>
+                                <div class="space-y-2">
+                                    <p :class={change.description.length > 280 ? `!isExpanded('ssr-${idx}') ? 'line-clamp-3' : ''` : undefined}
+                                       class="text-slate-700 dark:text-slate-200 leading-relaxed text-[14px] font-normal break-words"
+                                       set:html={formatDescription(change.description)}></p>
+                                    {change.description.length > 280 && (
+                                        <button type="button"
+                                                @click={`toggleExpand('ssr-${idx}')`}
+                                                class="text-[11px] mono font-semibold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+                                                x-text={`isExpanded('ssr-${idx}') ? 'Show less' : 'Expand full diff'`}>
+                                            Expand full diff
+                                        </button>
+                                    )}
+                                </div>
                             </article>
                         );
                     })}
@@ -328,52 +407,53 @@ const articleSchema = {
                     </template>
 
                     <template x-for="(change, idx) in filteredChanges" :key="(currentVersion || '') + '-' + change.category + '-' + change.type + '-' + idx">
-                        <article class="changelog-card rounded-2xl p-4 sm:p-5 group">
+                        <article :id="makeEntryAnchorId(change.category, idx)" class="changelog-card rounded-2xl p-4 sm:p-5 group scroll-mt-24">
                             <div class="flex items-center justify-between gap-2 mb-2.5 flex-wrap">
                                 <div class="flex items-center gap-2 flex-wrap">
-                                    <a :href="'/services/' + (change.category || '').toLowerCase().trim() + '/'" 
+                                    <a :href="'/services/' + slugifyService(change.category) + '/'"
                                        :title="'View all ' + change.category.toUpperCase() + ' updates'"
                                        :class="getServiceColorClass(change.category)"
-                                       class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] mono font-bold uppercase tracking-wider transition-all hover:scale-105 active:scale-95 cursor-pointer">
+                                       class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10.5px] mono font-bold uppercase tracking-wider transition-all hover:scale-105 active:scale-95 cursor-pointer">
                                         <span x-html="highlight(change.category, search)"></span>
                                     </a>
 
-                                    <div :class="{
-                                        'text-rose-600 dark:text-rose-400 bg-rose-500/10': change.type.toLowerCase().includes('fix'),
-                                        'text-blue-600 dark:text-blue-400 bg-blue-500/10': change.type.toLowerCase().includes('enhan'),
-                                        'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10': change.type.toLowerCase().includes('feature') || change.type.toLowerCase().includes('api'),
-                                        'text-slate-600 dark:text-slate-400 bg-slate-500/10': !['fix', 'enhan', 'feature', 'api'].some(t => change.type.toLowerCase().includes(t))
-                                    }" class="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] mono font-bold uppercase tracking-wider">
-                                        <span :class="{
-                                            'bg-rose-500': change.type.toLowerCase().includes('fix'),
-                                            'bg-blue-500': change.type.toLowerCase().includes('enhan'),
-                                            'bg-emerald-500': change.type.toLowerCase().includes('feature') || change.type.toLowerCase().includes('api'),
-                                            'bg-slate-500': !['fix', 'enhan', 'feature', 'api'].some(t => change.type.toLowerCase().includes(t))
-                                        }" class="w-1.5 h-1.5 rounded-full"></span>
-                                        <span x-text="change.type.includes('api') ? 'API Change' : change.type"></span>
+                                    <div :class="getTypeMeta(change.type, change.description).badgeClass"
+                                         class="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] mono font-semibold uppercase tracking-wider">
+                                        <span :class="getTypeMeta(change.type, change.description).dotClass" class="w-1.5 h-1.5 rounded-full"></span>
+                                        <span x-text="getTypeMeta(change.type, change.description).label"></span>
                                     </div>
                                 </div>
 
-                                <button @click="copyItem(change, idx)"
-                                        title="Copy change entry"
-                                        aria-label="Copy change entry"
-                                        class="inline-flex items-center gap-1 p-1.5 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-black/[0.04] dark:hover:bg-white/[0.08] transition-colors cursor-pointer">
-                                    <svg x-show="copiedIdx !== idx" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                                    <span x-show="copiedIdx === idx" x-cloak class="inline-flex items-center gap-1 text-[10.5px] mono font-semibold text-emerald-600 dark:text-emerald-400">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
-                                        Copied
-                                    </span>
-                                </button>
+                                <div class="flex items-center gap-1 shrink-0">
+                                    <button type="button"
+                                            @click="copyAnchorLink(makeEntryAnchorId(change.category, idx))"
+                                            title="Copy deep link"
+                                            aria-label="Copy deep link"
+                                            class="tap-target sm:opacity-45 group-hover:opacity-100 focus:opacity-100 inline-flex items-center justify-center rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-all cursor-pointer mono text-xs">
+                                        #
+                                    </button>
+                                    <button type="button"
+                                            @click="copyItem(change, 'f-' + idx)"
+                                            title="Copy change entry"
+                                            aria-label="Copy change entry"
+                                            class="tap-target sm:opacity-45 group-hover:opacity-100 focus:opacity-100 inline-flex items-center justify-center gap-1 px-2 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors cursor-pointer">
+                                        <svg x-show="copiedIdx !== 'f-' + idx" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                        <span x-show="copiedIdx === 'f-' + idx" x-cloak class="inline-flex items-center gap-1 text-[10.5px] mono font-semibold text-emerald-600 dark:text-emerald-400">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                                            Copied
+                                        </span>
+                                    </button>
+                                </div>
                             </div>
-                            <p class="text-slate-700 dark:text-slate-200 leading-relaxed text-[13.5px] sm:text-[14px] font-normal break-words" x-html="formatDescription(change.description, search)"></p>
+                            <p class="text-slate-700 dark:text-slate-200 leading-relaxed text-[14px] font-normal break-words" x-html="formatDescription(change.description, search)"></p>
                         </article>
                     </template>
 
                     <template x-if="!isLoading && allChanges.length > 0 && filteredChanges.length === 0">
                         <div class="py-16 text-center soft-card rounded-2xl p-6">
-                            <h3 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">No Matches Found</h3>
-                            <p class="text-xs text-slate-400 mt-1">No updates match your filter criteria.</p>
-                            <button @click="search = ''; activeFilter = 'all'; releaseServiceFilter = ''" class="mt-4 px-4 py-1.5 rounded-full bg-indigo-600 text-white text-xs font-bold cursor-pointer hover:bg-indigo-700 transition-colors">
+                            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">No Matches Found</h2>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">No updates match your filter criteria.</p>
+                            <button type="button" @click="resetFilters()" class="mt-4 px-4 py-2 rounded-full bg-indigo-600 text-white text-xs font-semibold cursor-pointer hover:bg-indigo-700 transition-colors">
                                 Reset Filters
                             </button>
                         </div>
@@ -381,9 +461,9 @@ const articleSchema = {
 
                     <template x-if="!isLoading && allChanges.length === 0">
                         <div class="py-16 text-center soft-card rounded-2xl p-6">
-                            <h3 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">No Changelog Available</h3>
-                            <p class="text-xs text-slate-400 mt-1">No updates were recorded for release v<span x-text="currentVersion"></span>.</p>
-                            <a href="/releases/" class="inline-block mt-4 px-4 py-1.5 rounded-full bg-indigo-600 text-white text-xs font-bold">
+                            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">No Changelog Available</h2>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">No updates were recorded for release v<span x-text="currentVersion"></span>.</p>
+                            <a href="/releases/" class="inline-block mt-4 px-4 py-2 rounded-full bg-indigo-600 text-white text-xs font-semibold">
                                 Browse All Releases &rarr;
                             </a>
                         </div>
@@ -392,15 +472,15 @@ const articleSchema = {
             </section>
         </main>
 
-        <footer class="mt-auto py-8 px-4 sm:px-6 bg-transparent">
+        <footer class="relative z-10 mt-auto py-8 px-4 sm:px-6 bg-transparent">
             <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono">
                 <div class="flex items-center gap-2">
                     <img src="/favicon.svg" width="18" height="18" alt="BotoView" class="w-4 h-4 opacity-80" />
                     <span class="font-bold text-slate-700 dark:text-slate-300">BotoView</span>
-                    <span class="text-slate-400">by <a href="https://5goos.com/" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold underline decoration-slate-300 dark:decoration-slate-700 underline-offset-2">5goos</a></span>
-                    <span class="text-slate-400">&copy; {new Date().getFullYear()}</span>
+                    <span class="text-slate-500 dark:text-slate-400">by <a href="https://5goos.com/" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold underline decoration-slate-300 dark:decoration-slate-700 underline-offset-2">5goos</a></span>
+                    <span class="text-slate-500 dark:text-slate-400">&copy; {new Date().getFullYear()}</span>
                 </div>
-                <div class="flex items-center gap-4 text-slate-500">
+                <div class="flex items-center gap-4 text-slate-500 dark:text-slate-400 flex-wrap justify-center">
                     <a href="/" class="hover:text-indigo-600 dark:hover:text-indigo-400">Timeline Explorer</a>
                     <a href="/services/" class="hover:text-indigo-600 dark:hover:text-indigo-400">Services</a>
                     <a href="/releases/" class="hover:text-indigo-600 dark:hover:text-indigo-400">Releases</a>
@@ -411,246 +491,258 @@ const articleSchema = {
     </div>
 </Layout>
 
-<script define:vars={{ initialChangesJson: changes, currentVersion: version, totalChanges, newerVersion, olderVersion }}>
-    const colorPalette = [
-        'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-500/15',
-        'bg-violet-500/10 text-violet-700 dark:text-violet-300 hover:bg-violet-500/15',
-        'bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 hover:bg-cyan-500/15',
-        'bg-teal-500/10 text-teal-700 dark:text-teal-300 hover:bg-teal-500/15',
-        'bg-slate-500/10 text-slate-700 dark:text-slate-300 hover:bg-slate-500/15'
-    ];
+<script is:inline id="boto-release-init" type="application/json" set:html={JSON.stringify({ initialChangesJson: changes, currentVersion: version, totalChanges, newerVersion, olderVersion })} />
 
-    function getServiceColor(name) {
-        if (!name) return 'bg-slate-500/10 text-slate-700 dark:text-slate-300';
-        let hash = 0;
-        for (let i = 0; i < name.length; i++) {
-            hash = name.charCodeAt(i) + ((hash << 5) - hash);
-        }
-        return colorPalette[Math.abs(hash) % colorPalette.length];
+<script>
+    import {
+        copyToClipboardText,
+        emitToast,
+        formatDescription,
+        getServiceColorClass,
+        highlightText,
+        isTypingTarget,
+        makeEntryAnchorId,
+        normalizeChangeType,
+        openCommandPalette,
+        readPageData,
+        registerAlpineComponent,
+        slugifyService,
+        toggleThemeState
+    } from '../../utils/client';
+    import type { ChangelogItem } from '../../utils/data';
+
+    interface ReleaseInitPayload {
+        initialChangesJson: ChangelogItem[];
+        currentVersion: string;
+        totalChanges: number;
+        newerVersion: string | null;
+        olderVersion: string | null;
     }
 
-    function releasePageData() {
-        return {
-            isClientHydrated: true,
-            isHydrated: true,
-            isLoading: false,
-            isScrolled: false,
-            isDarkMode: false,
-            search: '',
-            activeFilter: 'all',
-            releaseServiceFilter: '',
-            copiedIdx: null,
-            currentVersion,
-            newerVersion,
-            olderVersion,
-            totalChanges,
-            allChanges: initialChangesJson || [],
-            _serviceColorCache: {},
-
-            get hasActiveFilter() {
-                return Boolean((this.search && this.search.trim()) || this.activeFilter !== 'all' || this.releaseServiceFilter);
-            },
-
-            async init() {
-                this.isDarkMode = document.documentElement.classList.contains('dark');
-                if (!this.allChanges || this.allChanges.length === 0) {
-                    this.isLoading = true;
-                    try {
-                        const res = await fetch(`/data/versions/${this.currentVersion}.json`);
-                        if (res.ok) {
-                            this.allChanges = await res.json();
-                        }
-                    } catch (e) {
-                    } finally {
-                        this.isLoading = false;
-                    }
-                }
-            },
-
-            toggleTheme() {
-                this.isDarkMode = !this.isDarkMode;
-                document.documentElement.classList.toggle('dark', this.isDarkMode);
-                try {
-                    localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
-                } catch (e) {}
-                const themeColor = this.isDarkMode ? '#0b0e14' : '#f4f6fa';
-                document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute('content', themeColor));
-            },
-
-            handleKeydown(e) {
-                const isInput = ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName);
-                if (!isInput) {
-                    if (e.key === '/') {
-                        e.preventDefault();
-                        document.querySelector('input[type="text"]')?.focus();
-                    } else if (e.key === 't' || e.key === 'T') {
-                        e.preventDefault();
-                        this.toggleTheme();
-                    } else if (e.key === 'j' && this.olderVersion) {
-                        window.location.href = `/releases/${this.olderVersion}/`;
-                    } else if (e.key === 'k' && this.newerVersion) {
-                        window.location.href = `/releases/${this.newerVersion}/`;
-                    }
-                } else {
-                    if (e.key === 'Escape') {
-                        e.target.blur();
-                        if (this.search) this.search = '';
-                    }
-                }
-            },
-
-            get servicesList() {
-                const s = new Set();
-                for (const c of this.allChanges) {
-                    if (c && c.category) s.add(c.category.toLowerCase().trim());
-                }
-                return Array.from(s).sort();
-            },
-
-            get versionCounts() {
-                let features = 0;
-                let fixes = 0;
-                for (const c of this.allChanges) {
-                    if (c && c.type && c.type.toLowerCase().includes('fix')) {
-                        fixes++;
-                    } else {
-                        features++;
-                    }
-                }
-                return {
-                    total: this.allChanges.length,
-                    features,
-                    fixes
-                };
-            },
-
-            getServiceColorClass(serviceName) {
-                if (!serviceName) return 'bg-slate-500/10 text-slate-700 dark:text-slate-300';
-                if (this._serviceColorCache[serviceName]) return this._serviceColorCache[serviceName];
-                const result = getServiceColor(serviceName);
-                this._serviceColorCache[serviceName] = result;
-                return result;
-            },
-
-            getServiceColor(name) {
-                return this.getServiceColorClass(name);
-            },
-
-            toggleReleaseServiceFilter(svc) {
-                const s = (svc || '').toLowerCase().trim();
-                if (this.releaseServiceFilter.toLowerCase().trim() === s) {
-                    this.releaseServiceFilter = '';
-                } else {
-                    this.releaseServiceFilter = s;
-                }
-            },
-
-            get filteredChanges() {
-                let list = this.allChanges;
-                if (this.activeFilter === 'feature') {
-                    list = list.filter(c => !(c.type && c.type.toLowerCase().includes('fix')));
-                } else if (this.activeFilter === 'fix') {
-                    list = list.filter(c => c.type && c.type.toLowerCase().includes('fix'));
-                }
-
-                if (this.releaseServiceFilter) {
-                    const s = this.releaseServiceFilter.toLowerCase().trim();
-                    list = list.filter(c => c.category && c.category.toLowerCase().trim() === s);
-                }
-
-                if (this.search && this.search.trim()) {
-                    const s = this.search.trim().toLowerCase();
-                    list = list.filter(c => 
-                        (c.category && c.category.toLowerCase().includes(s)) ||
-                        (c.description && c.description.toLowerCase().includes(s))
-                    );
-                }
-                return list;
-            },
-
-            escapeHtml(str) {
-                if (!str) return '';
-                return String(str)
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(/"/g, '&quot;')
-                    .replace(/'/g, '&#39;');
-            },
-
-            highlight(text, search) {
-                if (!text) return '';
-                let escaped = this.escapeHtml(text);
-                if (!search || !search.trim()) return escaped;
-                const s = search.trim();
-                const regex = new RegExp(`(${s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-                return escaped.replace(regex, '<mark class="search-highlight">$1</mark>');
-            },
-
-            formatDescription(text, search) {
-                if (!text) return '';
-                let formatted = this.escapeHtml(text);
-
-                formatted = formatted.replace(
-                    /`([^`]+?)\s*&lt;(https?:\/\/[^&>]+?)&gt;`_+/g,
-                    '<a href="$2" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-0.5 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold underline decoration-indigo-400/40 hover:decoration-indigo-500 transition-colors">$1<svg class="w-2.5 h-2.5 opacity-70 inline ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg></a>'
-                );
-
-                formatted = formatted.replace(
-                    /``([^`]+?)``/g,
-                    '<code class="px-1.5 py-0.5 rounded-md bg-slate-200/50 dark:bg-white/10 text-[11px] mono text-indigo-700 dark:text-indigo-300 font-medium">$1</code>'
-                );
-
-                formatted = formatted.replace(
-                    /`([^`]+?)`/g,
-                    '<code class="px-1.5 py-0.5 rounded-md bg-slate-200/50 dark:bg-white/10 text-[11px] mono text-indigo-700 dark:text-indigo-300 font-medium">$1</code>'
-                );
-
-                formatted = formatted.replace(
-                    /(^|[^"'])(https?:\/\/[a-zA-Z0-9\-\._~:\/\?#\[\]@!$&'()*+,;=%]+)/g,
-                    '$1<a href="$2" target="_blank" rel="noopener noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:underline font-medium break-all">$2</a>'
-                );
-
-                if (search && search.trim()) {
-                    const s = search.trim();
-                    const escapedSearch = s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                    const regex = new RegExp(`(?![^<]*>)(${escapedSearch})`, 'gi');
-                    formatted = formatted.replace(regex, '<mark class="search-highlight">$1</mark>');
-                }
-
-                return formatted;
-            },
-
-            renderDescription(text, search) {
-                return this.formatDescription(text, search);
-            },
-
-            async copyItem(item, idx) {
-                try {
-                    const text = `${(item.category || '').toUpperCase()}: ${item.description} (v${this.currentVersion})`;
-                    await navigator.clipboard.writeText(text);
-                    this.copiedIdx = idx;
-                    setTimeout(() => {
-                        if (this.copiedIdx === idx) this.copiedIdx = null;
-                    }, 2000);
-                } catch(e) {}
-            }
-        };
-    }
-
-    window.releasePageData = releasePageData;
-
-    if (window.Alpine) {
-        window.Alpine.data('releasePage', releasePageData);
-    } else {
-        document.addEventListener('alpine:init', () => {
-            window.Alpine.data('releasePage', releasePageData);
-        });
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        if (window.Alpine) {
-            window.Alpine.data('releasePage', releasePageData);
-        }
+    const payload = readPageData<ReleaseInitPayload>('boto-release-init', {
+        initialChangesJson: [],
+        currentVersion: '',
+        totalChanges: 0,
+        newerVersion: null,
+        olderVersion: null
     });
+
+    registerAlpineComponent('releasePage', () => ({
+        isLoading: false,
+        isScrolled: false,
+        isDarkMode: document.documentElement.classList.contains('dark'),
+        search: '',
+        activeFilter: 'all',
+        releaseServiceFilter: '',
+        copiedIdx: null as string | number | null,
+        pinTool: 'pip' as 'pip' | 'uv',
+        pinCopied: false,
+        expandedMap: {} as Record<string, boolean>,
+        currentVersion: payload.currentVersion,
+        newerVersion: payload.newerVersion,
+        olderVersion: payload.olderVersion,
+        totalChanges: payload.totalChanges,
+        allChanges: payload.initialChangesJson || [],
+        _serviceColorCache: {} as Record<string, string>,
+
+        get hasActiveFilter(): boolean {
+            return Boolean((this.search && this.search.trim()) || this.activeFilter !== 'all' || this.releaseServiceFilter);
+        },
+
+        async init() {
+            this.isDarkMode = document.documentElement.classList.contains('dark');
+            const params = new URLSearchParams(window.location.search);
+            const q = params.get('q');
+            const svc = params.get('svc');
+            const type = params.get('type');
+            if (q) this.search = q;
+            if (svc) this.releaseServiceFilter = svc;
+            if (type && ['all', 'api-change', 'feature', 'enhancement', 'bugfix'].includes(type)) {
+                this.activeFilter = type;
+            }
+
+            if (!this.allChanges || this.allChanges.length === 0) {
+                this.isLoading = true;
+                try {
+                    const res = await fetch(`/data/versions/${this.currentVersion}.json`);
+                    if (res.ok) {
+                        this.allChanges = await res.json();
+                    }
+                } catch {
+                } finally {
+                    this.isLoading = false;
+                }
+            }
+
+            const syncUrl = () => this.syncQueryParams();
+            const watchable = this as unknown as { $watch: (k: string, cb: () => void) => void };
+            watchable.$watch('search', syncUrl);
+            watchable.$watch('activeFilter', syncUrl);
+            watchable.$watch('releaseServiceFilter', syncUrl);
+        },
+
+        syncQueryParams() {
+            const params = new URLSearchParams();
+            if (this.releaseServiceFilter) params.set('svc', this.releaseServiceFilter);
+            if (this.activeFilter !== 'all') params.set('type', this.activeFilter);
+            if (this.search.trim()) params.set('q', this.search.trim());
+            const qs = params.toString();
+            const nextUrl = qs ? `?${qs}${window.location.hash}` : `${window.location.pathname}${window.location.hash}`;
+            window.history.replaceState(window.history.state, '', nextUrl);
+        },
+
+        toggleTheme() {
+            this.isDarkMode = toggleThemeState();
+        },
+
+        openPalette() {
+            openCommandPalette('');
+        },
+
+        isExpanded(key: string): boolean {
+            return Boolean(this.expandedMap[key]);
+        },
+
+        toggleExpand(key: string) {
+            this.expandedMap[key] = !this.expandedMap[key];
+        },
+
+        async copyPin() {
+            const cmd = this.pinTool === 'uv'
+                ? `uv add boto3==${this.currentVersion}`
+                : `pip install boto3==${this.currentVersion}`;
+            const ok = await copyToClipboardText(cmd);
+            if (ok) {
+                this.pinCopied = true;
+                emitToast(`Copied ${cmd}`);
+                setTimeout(() => {
+                    this.pinCopied = false;
+                }, 2000);
+            }
+        },
+
+        async copyAnchorLink(anchorId: string) {
+            const url = new URL(window.location.href);
+            url.hash = anchorId;
+            window.history.replaceState(window.history.state, '', url.toString());
+            const ok = await copyToClipboardText(url.toString());
+            if (ok) emitToast('Copied deep link');
+        },
+
+        resetFilters() {
+            this.search = '';
+            this.activeFilter = 'all';
+            this.releaseServiceFilter = '';
+        },
+
+        handleKeydown(e: KeyboardEvent) {
+            if (e.metaKey || e.ctrlKey) return;
+            if (!isTypingTarget(e.target)) {
+                if (e.key === '/') {
+                    e.preventDefault();
+                    document.getElementById('releaseFilterSearch')?.focus();
+                } else if (e.key === 't' || e.key === 'T') {
+                    e.preventDefault();
+                    this.toggleTheme();
+                } else if (e.key === 'j' && this.olderVersion) {
+                    window.location.href = `/releases/${this.olderVersion}/`;
+                } else if (e.key === 'k' && this.newerVersion) {
+                    window.location.href = `/releases/${this.newerVersion}/`;
+                }
+            } else if (e.key === 'Escape') {
+                (e.target as HTMLElement).blur();
+                if (this.search) this.search = '';
+            }
+        },
+
+        get servicesList(): string[] {
+            const s = new Set<string>();
+            for (const c of this.allChanges) {
+                if (c && c.category) s.add(c.category.toLowerCase().trim());
+            }
+            return Array.from(s).sort();
+        },
+
+        get versionCounts() {
+            let apiChanges = 0;
+            let features = 0;
+            let enhancements = 0;
+            let fixes = 0;
+            for (const c of this.allChanges) {
+                const key = normalizeChangeType(c?.type, c?.description).key;
+                if (key === 'api-change') apiChanges++;
+                else if (key === 'feature') features++;
+                else if (key === 'enhancement') enhancements++;
+                else fixes++;
+            }
+            return {
+                total: this.allChanges.length,
+                apiChanges,
+                features,
+                enhancements,
+                fixes
+            };
+        },
+
+        getServiceColorClass(serviceName: string): string {
+            if (!serviceName) return 'bg-slate-500/10 text-slate-700 dark:text-slate-300';
+            if (this._serviceColorCache[serviceName]) return this._serviceColorCache[serviceName];
+            const result = getServiceColorClass(serviceName);
+            this._serviceColorCache[serviceName] = result;
+            return result;
+        },
+
+        slugifyService(name: string): string {
+            return slugifyService(name);
+        },
+
+        makeEntryAnchorId(prefix: string, idx: number): string {
+            return makeEntryAnchorId(prefix, idx);
+        },
+
+        getTypeMeta(rawType?: string, description?: string) {
+            return normalizeChangeType(rawType, description);
+        },
+
+        get filteredChanges(): ChangelogItem[] {
+            let list = this.allChanges;
+            if (this.activeFilter !== 'all') {
+                list = list.filter((c) => normalizeChangeType(c.type, c.description).key === this.activeFilter);
+            }
+
+            if (this.releaseServiceFilter) {
+                const s = this.releaseServiceFilter.toLowerCase().trim();
+                list = list.filter((c) => c.category && c.category.toLowerCase().trim() === s);
+            }
+
+            if (this.search && this.search.trim()) {
+                const s = this.search.trim().toLowerCase();
+                list = list.filter((c) =>
+                    (c.category && c.category.toLowerCase().includes(s)) ||
+                    (c.description && c.description.toLowerCase().includes(s))
+                );
+            }
+            return list;
+        },
+
+        highlight(text: string, search?: string): string {
+            return highlightText(text, search);
+        },
+
+        formatDescription(text: string, search?: string): string {
+            return formatDescription(text, search);
+        },
+
+        async copyItem(item: ChangelogItem, idx: string | number) {
+            const text = `${(item.category || '').toUpperCase()}: ${item.description} (v${this.currentVersion})`;
+            const ok = await copyToClipboardText(text);
+            if (ok) {
+                this.copiedIdx = idx;
+                emitToast('Copied changelog entry');
+                setTimeout(() => {
+                    if (this.copiedIdx === idx) this.copiedIdx = null;
+                }, 2000);
+            }
+        }
+    }));
 </script>

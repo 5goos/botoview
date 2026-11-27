@@ -6,10 +6,10 @@ import tailwindcss from '@tailwindcss/vite';
 import cloudflare from '@astrojs/cloudflare';
 import alpinejs from '@astrojs/alpinejs';
 
+/** @type {import('astro').AstroIntegration} */
 const cloudflareRedirectRouting = {
   name: 'cloudflare-redirect-routing',
   hooks: {
-    // @ts-ignore
     'astro:build:done': async ({ dir }) => {
       try {
         const serverWranglerPath = fileURLToPath(new URL('../server/wrangler.json', dir));
