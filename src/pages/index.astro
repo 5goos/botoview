@@ -12,7 +12,7 @@ const versionModules = import.meta.glob<Array<{ category: string; description: s
 
 const latestKey = `../../public/data/versions/${latestVersion.id}.json`;
 const initialChanges = versionModules[latestKey] || [];
-const pageTitle = "BotoView — AWS Boto3 Changelog & Release Notes | 5goos";
+const pageTitle = "BotoView — AWS Boto3 Changelog & Release Notes";
 const pageDescription = "Track and filter AWS Boto3 changelogs and release notes by service. Explore Boto3 version updates, breaking changes, and SDK history in real time.";
 const canonicalUrl = "https://botoview.5goos.com/";
 ---
@@ -199,9 +199,30 @@ const canonicalUrl = "https://botoview.5goos.com/";
                 return formatted;
             },
 
+            slugifyService(name) {
+                if (!name) return '';
+                return String(name)
+                    .toLowerCase()
+                    .trim()
+                    .replace(/[\._\s]+/g, '-')
+                    .replace(/-+/g, '-')
+                    .replace(/^-|-$/g, '');
+            },
+
+            async copyPipCommand() {
+                try {
+                    const ver = this.selectedVersion || initialLatestId;
+                    await navigator.clipboard.writeText(`pip install boto3==${ver}`);
+                    this.showPipCopied = true;
+                    setTimeout(() => { this.showPipCopied = false; }, 2000);
+                } catch (e) {}
+            },
+
             async copyItem(item, index) {
                 try {
-                    const text = `${item.category.toUpperCase()}: ${item.description} (${this.selectedVersion})`;
+                    const cat = (item.category || '').toUpperCase();
+                    const ver = this.selectedVersion || initialLatestId;
+                    const text = `${cat}: ${item.description} (${ver})`;
                     await navigator.clipboard.writeText(text);
                     this.copiedItemIndex = index;
                     setTimeout(() => {
@@ -346,10 +367,12 @@ const canonicalUrl = "https://botoview.5goos.com/";
 
             getRelativeDate(dateStr) {
                 if (!dateStr) return '';
-                const date = new Date(dateStr);
+                const parts = dateStr.split('-');
+                if (parts.length !== 3) return '';
+                const dateUtc = Date.UTC(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
                 const now = new Date();
-                const diffTime = Math.abs(now - date);
-                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                const todayUtc = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+                const diffDays = Math.max(0, Math.floor((todayUtc - dateUtc) / (1000 * 60 * 60 * 24)));
                 
                 if (diffDays === 0) return 'Today';
                 if (diffDays === 1) return 'Yesterday';
@@ -375,8 +398,12 @@ const canonicalUrl = "https://botoview.5goos.com/";
 
             getMonthYear(dateStr) {
                 if (!dateStr) return 'Unknown Date';
-                const date = new Date(dateStr);
-                return date.toLocaleString('default', { month: 'long', year: 'numeric' });
+                const parts = dateStr.split('-');
+                if (parts.length === 3) {
+                    const date = new Date(Date.UTC(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2])));
+                    return date.toLocaleString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+                }
+                return 'Unknown Date';
             },
 
             getServiceColorClass(serviceName) {
@@ -420,7 +447,8 @@ const canonicalUrl = "https://botoview.5goos.com/";
             },
 
             async prefetchService(svc) {
-                const serviceId = svc.toLowerCase().trim().replace(/[\._\s]+/g, '-').replace(/-+/g, '-');
+                const serviceId = this.slugifyService(svc);
+                if (!serviceId) return;
                 const cacheKey = `svc_${serviceId}`;
                 if (this.versionCache[cacheKey]) return;
                 try {
@@ -453,9 +481,12 @@ const canonicalUrl = "https://botoview.5goos.com/";
                     const params = new URLSearchParams(window.location.search);
                     const vParam = params.get('v');
                     const sParam = params.get('s');
+                    const sSlug = sParam ? this.slugifyService(sParam) : '';
 
-                    if (sParam && this.allServices.includes(sParam)) {
-                        await this.openService(sParam, false, vParam || null);
+                    if (sSlug && this.allServices.includes(sSlug)) {
+                        await this.openService(sSlug, false, vParam || null);
+                    } else if (sParam && sParam.trim()) {
+                        this.versionSearch = sParam.trim();
                     } else if (vParam && vParam !== initialLatestId && this.versions.find(v => v.id === vParam)) {
                         await this.selectVersion(vParam, false);
                     } else if (vParam === initialLatestId) {
@@ -469,8 +500,9 @@ const canonicalUrl = "https://botoview.5goos.com/";
                         const curParams = new URLSearchParams(window.location.search);
                         const v = curParams.get('v') || (this.versions[0] ? this.versions[0].id : null);
                         const s = curParams.get('s');
-                        if (s && this.allServices.includes(s)) {
-                            this.openService(s, false, curParams.get('v') || (e.state && e.state.navigatedFromVersion) || null);
+                        const sPopSlug = s ? this.slugifyService(s) : '';
+                        if (sPopSlug && this.allServices.includes(sPopSlug)) {
+                            this.openService(sPopSlug, false, curParams.get('v') || (e.state && e.state.navigatedFromVersion) || null);
                         } else if (v) {
                             this.viewMode = 'release';
                             this.navigatedFromVersion = null;
@@ -649,7 +681,7 @@ const canonicalUrl = "https://botoview.5goos.com/";
                     });
                 });
 
-                const serviceId = svc.toLowerCase().trim().replace(/[\._\s]+/g, '-').replace(/-+/g, '-');
+                const serviceId = this.slugifyService(svc);
                 const cacheKey = `svc_${serviceId}`;
 
                 if (this.versionCache[cacheKey]) {
@@ -795,9 +827,9 @@ const canonicalUrl = "https://botoview.5goos.com/";
             get filteredVersionData() {
                 let data = this.currentVersionData;
                 if (this.activeFilter === 'feature') {
-                    data = data.filter(i => !(i.type && i.type.includes('fix')));
+                    data = data.filter(i => !(i.type && i.type.toLowerCase().includes('fix')));
                 } else if (this.activeFilter === 'fix') {
-                    data = data.filter(i => i.type && i.type.includes('fix'));
+                    data = data.filter(i => i.type && i.type.toLowerCase().includes('fix'));
                 }
 
                 if (this.releaseServiceFilter) {
@@ -805,10 +837,10 @@ const canonicalUrl = "https://botoview.5goos.com/";
                     data = data.filter(i => i.category && i.category.toLowerCase().trim() === s);
                 }
 
-                if (!this.versionSearch) return data;
-                const s = this.versionSearch.toLowerCase();
+                if (!this.versionSearch || !this.versionSearch.trim()) return data;
+                const s = this.versionSearch.toLowerCase().trim();
                 return data.filter(i => 
-                    (i.category && i.category.includes(s)) || 
+                    (i.category && i.category.toLowerCase().includes(s)) || 
                     (i.description && i.description.toLowerCase().includes(s))
                 );
             }

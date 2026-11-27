@@ -2,4 +2,3 @@ User-agent: *
 Allow: /
 
 Sitemap: https://botoview.5goos.com/sitemap.xml
-Sitemap: https://botoview.5goos.com/sitemap-index.xml

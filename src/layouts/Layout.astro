@@ -13,9 +13,9 @@ interface Props {
 	googleSiteVerification?: string;
 }
 const {
-	title = "BotoView — AWS Boto3 Changelog & Release Notes | 5goos",
+	title = "BotoView — AWS Boto3 Changelog & Release Notes",
 	description = "Track and filter AWS Boto3 changelogs and release notes by service. Explore Boto3 version updates, breaking changes, and SDK history in real time.",
-	keywords = "botoview, 5goos, botoview 5goos, 5goos botoview, boto changelogs, boto3 changelog, boto3 release notes, boto3 changelog filter by service, aws boto3 version updates, botocore changelog, boto3 updates, aws sdk tracker, python aws development, aws changelog",
+	keywords = "boto3 changelog, botocore release notes, aws boto3 updates, boto3 changelog by service, aws python sdk tracker, botoview, 5goos",
 	canonical,
 	ogType = "website",
 	bodyClass = "min-h-screen w-full transition-colors duration-500",
@@ -95,36 +95,7 @@ const defaultGraph = [
 			"price": "0",
 			"priceCurrency": "USD"
 		}
-	},
-	...(!hasCustomFaq && Astro.url.pathname === '/' ? [{
-		"@type": "FAQPage",
-		"mainEntity": [
-			{
-				"@type": "Question",
-				"name": "What is BotoView?",
-				"acceptedAnswer": {
-					"@type": "Answer",
-					"text": "BotoView is an interactive web application to track, filter, and explore AWS Boto3 changelogs and Botocore release notes. It provides a real-time searchable timeline of all AWS updates."
-				}
-			},
-			{
-				"@type": "Question",
-				"name": "How to filter boto3 changelog by service?",
-				"acceptedAnswer": {
-					"@type": "Answer",
-					"text": "Using BotoView, you can easily filter boto3 changelogs by service (such as S3, Bedrock, Lambda, DynamoDB, and EC2) to track AWS SDK version updates, compare releases, and inspect breaking changes."
-				}
-			},
-			{
-				"@type": "Question",
-				"name": "Where can I find AWS Boto3 release notes and version updates?",
-				"acceptedAnswer": {
-					"@type": "Answer",
-					"text": "BotoView provides comprehensive AWS Boto3 release notes and version updates, indexing all changes across Boto3 and Botocore with instant service-level filtering and fast search."
-				}
-			}
-		]
-	}] : [])
+	}
 ];
 
 const structuredData = {
@@ -212,15 +183,8 @@ const structuredData = {
 	<body class={bodyClass}>
 		<a href="#mainScrollArea" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[200] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-indigo-600 focus:text-white focus:text-sm focus:font-bold focus:shadow-lg">Skip to content</a>
 		<noscript>
-			<div style="padding: 2rem; background: #fff; color: #000; font-family: sans-serif;">
-				<div style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1rem;">BotoView by 5goos — AWS Boto3 Changelog Explorer & Release Notes Tracker</div>
-				<p>
-					<strong>BotoView</strong> (by <a href="https://5goos.com/">5goos</a>) is an interactive web application to track, filter, and explore <strong>boto changelogs</strong>, <strong>boto3 changelog</strong>, and <strong>boto3 release notes</strong>.
-					Filter boto3 changelog by service (such as S3, Bedrock, Lambda, DynamoDB, EC2) and inspect AWS Boto3 version updates across the entire AWS SDK ecosystem.
-				</p>
-				<p>
-					Explore the <a href="/services/">AWS Boto3 Services Directory</a> indexing 570+ AWS services or browse the <a href="/releases/">AWS Boto3 Releases Directory</a> for all version changelogs.
-				</p>
+			<div style="padding: 0.75rem 1.25rem; background: #eef2ff; color: #1e1b4b; font-family: sans-serif; font-size: 0.85rem; border-bottom: 1px solid #c7d2fe;">
+				<strong>BotoView:</strong> Enable JavaScript for interactive filtering, or browse the <a href="/services/" style="text-decoration: underline; font-weight: 700;">AWS Services Directory</a> and <a href="/releases/" style="text-decoration: underline; font-weight: 700;">Boto3 Releases Archive</a>.
 			</div>
 		</noscript>
 		<slot />

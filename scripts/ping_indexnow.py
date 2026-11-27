@@ -80,7 +80,6 @@ def submit_urls(urls: List[str]) -> bool:
 
 
 def get_default_urls() -> List[str]:
-    # Pruned high-authority indexable URLs only (Homepage + Hubs + Top AWS Services)
     urls = [
         f"https://{HOST}/",
         f"https://{HOST}/services/",

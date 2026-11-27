@@ -9,7 +9,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
         const requestedKey = params.key?.trim();
 
         if (requestedKey === 'robots') {
-            const robotsContent = `User-agent: *\nAllow: /\n\nSitemap: https://botoview.5goos.com/sitemap.xml\nSitemap: https://botoview.5goos.com/sitemap-index.xml\n`;
+            const robotsContent = `User-agent: *\nAllow: /\n\nSitemap: https://botoview.5goos.com/sitemap.xml\n`;
             return new Response(robotsContent, {
                 status: 200,
                 headers: {

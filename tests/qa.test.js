@@ -107,13 +107,15 @@ async function runQASuite() {
     assert('Service page includes SDK Telemetry block', serviceBedrockHtml.includes('AWS SDK Telemetry') && serviceBedrockHtml.includes('Past 12 Months'));
     assert('Service page includes client quickstart code snippet', serviceBedrockHtml.includes("boto3.client('bedrock')") || serviceBedrockHtml.includes("boto3.client(&#39;bedrock&#39;)"));
 
-    // DOM Cleanliness checks on Homepage
+    // DOM Cleanliness & Homepage Redesign checks
     const { text: homeHtml } = await fetchPage('/');
     assert('Homepage has NO raw <h2>Connection Override</h2> in static DOM', !homeHtml.includes('<h2>Connection Override</h2>'));
     assert('Homepage has NO static loading text in DOM before main', !homeHtml.includes('<span class="text-xs mono uppercase tracking-widest text-slate-400 font-bold">Initializing Core...</span>'));
-    assert('Homepage has pre-rendered Popular AWS Services section', homeHtml.includes('Popular AWS Services &amp; Changelogs'));
-    assert('Homepage has pre-rendered Recent AWS Boto3 Releases section', homeHtml.includes('Recent AWS Boto3 SDK Releases'));
-    assert('Homepage has more than 30 internal crawlable links in raw HTML', (homeHtml.match(/href="\/services\//g) || []).length >= 30);
+    assert('Homepage removed Popular AWS Services hub section from MainView', !homeHtml.includes('Popular AWS Services &amp; Changelogs'));
+    assert('Homepage removed Recent AWS Boto3 Releases hub section from MainView', !homeHtml.includes('Recent AWS Boto3 SDK Releases'));
+    assert('Homepage removed bulky Release Overview hero card from MainView', !homeHtml.includes('releases &amp; 583 services indexed') && !homeHtml.includes('About BotoView AWS SDK Tracker'));
+    assert('Homepage separates SSR and Alpine service pills via isClientHydrated (no double service names)', homeHtml.includes('x-show="!isClientHydrated" class="contents"') && homeHtml.includes('x-show="isClientHydrated" x-cloak class="contents"'));
+    assert('Homepage has semantic h1 and internal crawlable links in raw HTML', homeHtml.includes('<h1') && (homeHtml.match(/href="\/services\//g) || []).length >= 5 && homeHtml.includes('href="/releases/"'));
 
     // 3. 404 PAGE VERIFICATION
     console.log('\n--- 3. Testing 404 Not Found Page & Error Handling ---');
@@ -127,8 +129,7 @@ async function runQASuite() {
     console.log('\n--- 4. Testing Sitemaps & robots.txt ---');
     const { text: robotsTxt } = await fetchPage('/robots.txt');
     assert('robots.txt allows all', robotsTxt.includes('Allow: /'));
-    assert('robots.txt points to sitemap.xml', robotsTxt.includes('https://botoview.5goos.com/sitemap.xml'));
-    assert('robots.txt points to sitemap-index.xml', robotsTxt.includes('https://botoview.5goos.com/sitemap-index.xml'));
+    assert('robots.txt points to canonical sitemap.xml', robotsTxt.includes('https://botoview.5goos.com/sitemap.xml'));
 
     const { text: sitemapXml } = await fetchPage('/sitemap.xml');
     assert('sitemap.xml has valid sitemapindex XML', sitemapXml.includes('<sitemapindex') && sitemapXml.includes('</sitemapindex>'));
@@ -139,7 +140,8 @@ async function runQASuite() {
     const { text: sitemapServices } = await fetchPage('/sitemap-services.xml');
     assert('sitemap-services.xml has valid urlset XML', sitemapServices.includes('<urlset') && sitemapServices.includes('</urlset>'));
     assert('sitemap-services.xml includes /services/bedrock/', sitemapServices.includes('/services/bedrock/'));
-    assert('sitemap-services.xml includes /services/s3/', sitemapServices.xml ? sitemapServices.includes('/services/s3/') : true);
+    assert('sitemap-services.xml includes /services/s3/', sitemapServices.includes('/services/s3/'));
+    assert('sitemap-services.xml excludes 1-entry thin tokens like /services/six/', !sitemapServices.includes('/services/six/'));
 
     // 5. ALPINE COMPONENT CONTRACT AUDITS
     console.log('\n--- 5. Auditing Alpine Component Directives & Method Contracts ---');
@@ -163,14 +165,16 @@ async function runQASuite() {
     assert('Service page has keyboard shortcut listener', serviceHtml.includes('@keydown.window="handleKeydown($event)"'));
 
     const { text: servicesIndexHtml } = await fetchPage('/services/');
-    assert('Services index has letter section filtering x-show', servicesIndexHtml.includes('letter-') && servicesIndexHtml.includes('.some(id => id.includes(search.toLowerCase().trim()))'));
+    assert('Services index has letter section filtering x-show', servicesIndexHtml.includes('letter-') && servicesIndexHtml.includes("letterMatches('"));
     assert('Services index has no-results empty state', servicesIndexHtml.includes('No Services Found'));
 
     const { text: releasesIndexHtml } = await fetchPage('/releases/');
-    assert('Releases index normalizes search with cleanSearch', releasesIndexHtml.includes('cleanSearch'));
+    assert('Releases index normalizes search with cleanSearch and monthMatches', releasesIndexHtml.includes('cleanSearch') && releasesIndexHtml.includes("monthMatches('"));
+    assert('Releases index has archive telemetry and editorial content', releasesIndexHtml.includes('Release archive telemetry') && releasesIndexHtml.includes('Understanding AWS Boto3'));
     assert('Releases index has no-results empty state', releasesIndexHtml.includes('No Releases Found'));
 
-    // 6. BRANDING & ACCESSIBILITY AUDIT
+    const { text: sixServiceHtml } = await fetchPage('/services/six/');
+    assert('Thin 1-entry service page has noindex, follow', sixServiceHtml.includes('content="noindex, follow'));
     console.log('\n--- 6. Auditing 5goos Organization Branding & Accessibility ---');
     for (const page of ['/', '/releases/', '/releases/1.44.4/', '/services/', '/services/bedrock/']) {
         const { text: html } = await fetchPage(page);

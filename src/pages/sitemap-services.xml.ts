@@ -4,8 +4,6 @@ import type { APIRoute } from 'astro';
 import trackData from '../../public/data/track.json';
 import { TOP_INDEXABLE_SERVICES } from '../utils/serviceTelemetry';
 
-// Use import.meta.glob to discover all service JSON files at build time
-// (fs.readdirSync is unreliable in Cloudflare/Vite prerender context)
 const serviceModules = import.meta.glob<Array<{ v: string; t: string }>>(
     '../../public/data/services/*.json',
     { eager: true, import: 'default' }
@@ -18,7 +16,6 @@ export const GET: APIRoute = async () => {
 
     const topSet = new Set(TOP_INDEXABLE_SERVICES);
 
-    // Extract service slugs from glob keys and build sitemap entries for ALL services
     const entries = Object.entries(serviceModules)
         .map(([pathKey, changes]) => {
             const match = pathKey.match(/\/([^/]+)\.json$/);
@@ -26,6 +23,8 @@ export const GET: APIRoute = async () => {
             if (!service) return null;
 
             const list = Array.isArray(changes) ? changes : [];
+            if (list.length < 3 && !topSet.has(service)) return null;
+
             let lastmod = fallbackDate;
             if (list.length > 0 && list[0]?.v) {
                 const matchDate = versionDateMap.get(list[0].v);

@@ -1,25 +1,31 @@
 ---
 import trackData from '../../public/data/track.json';
-import { getServiceColorClass } from '../utils/formatting';
-const topVersions = (trackData?.versions || []).slice(0, 15);
-const topServices = (trackData?.allServices || []).slice(0, 20);
+import { getServiceColorClass, slugifyService } from '../utils/formatting';
+
+const allVersions = trackData?.versions || [];
+const allServicesList = trackData?.allServices || [];
+const topVersions = allVersions.slice(0, 15);
+const topServices = allServicesList.slice(0, 20);
+const versionsCountLabel = allVersions.length > 999 ? `${(allVersions.length / 1000).toFixed(1)}k` : String(allVersions.length);
+const totalVersionsFormatted = allVersions.length.toLocaleString('en-US');
 ---
 <aside :class="{ 'translate-x-0': showMobileVersions, '-translate-x-full': !showMobileVersions }"
-       class="fixed lg:relative inset-y-0 left-0 -translate-x-full lg:translate-x-0 w-72 sm:w-80 lg:w-72 xl:w-80 max-w-[85vw] flex-shrink-0 flex flex-col bg-white dark:bg-[#07090e] lg:bg-transparent dark:lg:bg-transparent shadow-2xl shadow-slate-900/10 dark:shadow-black/60 lg:shadow-none z-50 lg:z-20 transition-transform duration-300 ease-in-out select-none"
+       class="fixed lg:relative inset-y-0 left-0 -translate-x-full lg:translate-x-0 w-72 sm:w-80 lg:w-[272px] xl:w-[296px] max-w-[85vw] flex-shrink-0 flex flex-col bg-white dark:bg-[#0c0f16] lg:bg-slate-50/75 dark:lg:bg-[#0b0e15]/80 shadow-2xl shadow-slate-900/15 dark:shadow-black/60 lg:shadow-none z-50 lg:z-20 transition-transform duration-300 ease-in-out select-none border-r border-slate-200/80 dark:border-white/[0.06]"
        aria-label="Navigation Sidebar">
 
-    <div class="h-12 flex items-center justify-between px-4 flex-shrink-0 border-b border-slate-100 dark:border-white/5 lg:border-b-0">
+    <div class="h-12 flex items-center justify-between px-4 flex-shrink-0 border-b border-slate-200/70 dark:border-white/[0.06]">
         <a href="/" 
            @click.prevent="viewMode = 'release'; selectVersion(versions[0]?.id || selectedVersion); if(isMobile(1024)) showMobileVersions = false;"
            class="flex items-center gap-2.5 group cursor-pointer" 
            aria-label="BotoView Home — Latest AWS Boto3 Releases">
-            <img src="/favicon.svg" width="22" height="22" alt="BotoView logo" class="w-5.5 h-5.5 group-hover:scale-105 transition-transform" />
+            <img src="/favicon.svg" width="22" height="22" alt="BotoView logo" class="w-5 h-5 group-hover:scale-105 transition-transform" />
             <span class="text-sm font-bold tracking-tight text-slate-900 dark:text-white">BotoView</span>
+            <span class="px-1.5 py-0.5 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[9px] mono font-bold uppercase tracking-wider">SDK</span>
         </a>
 
         <button @click="showMobileVersions = false" 
                 aria-label="Close sidebar" 
-                class="lg:hidden p-2.5 -mr-1 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-white/10 transition-colors cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center">
+                class="lg:hidden p-2 -mr-1 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-white/10 transition-colors cursor-pointer min-w-[40px] min-h-[40px] flex items-center justify-center">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
     </div>
@@ -33,7 +39,7 @@ const topServices = (trackData?.allServices || []).slice(0, 20);
                     class="flex-1 inline-flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-[11px] transition-all cursor-pointer active:scale-98">
                 <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
                 <span class="whitespace-nowrap">Releases</span>
-                <span class="shrink-0 px-1.5 py-0.5 text-[9.5px] leading-none rounded-full bg-slate-200/60 dark:bg-white/10 font-bold mono" x-text="versions.length ? (versions.length > 999 ? (versions.length/1000).toFixed(1) + 'k' : versions.length) : '2.3k'">2.3k</span>
+                <span class="shrink-0 px-1.5 py-0.5 text-[9.5px] leading-none rounded-full bg-slate-200/70 dark:bg-white/10 font-bold mono tabular-nums" x-text="versions.length ? (versions.length > 999 ? (versions.length/1000).toFixed(1) + 'k' : versions.length) : '${versionsCountLabel}'">{versionsCountLabel}</span>
             </button>
             <button @click="switchSidebarTab('services')"
                     :class="sidebarTab === 'services' 
@@ -42,7 +48,7 @@ const topServices = (trackData?.allServices || []).slice(0, 20);
                     class="flex-1 inline-flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-[11px] transition-all cursor-pointer active:scale-98">
                 <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                 <span class="whitespace-nowrap">Services</span>
-                <span class="shrink-0 px-1.5 py-0.5 text-[9.5px] leading-none rounded-full bg-slate-200/60 dark:bg-white/10 font-bold mono" x-text="allServices.length || '582'">582</span>
+                <span class="shrink-0 px-1.5 py-0.5 text-[9.5px] leading-none rounded-full bg-slate-200/70 dark:bg-white/10 font-bold mono tabular-nums" x-text="allServices.length || '${allServicesList.length}'">{allServicesList.length}</span>
             </button>
         </nav>
     </div>
@@ -54,10 +60,10 @@ const topServices = (trackData?.allServices || []).slice(0, 20);
                        x-model.debounce.150ms="versionRailSearch"
                        x-ref="railSearch"
                        @input="railLimit = 50"
-                       placeholder="Filter releases (e.g. 1.43, Nov)..."
+                       placeholder="Jump to version (e.g. 1.44, Nov)..."
                        class="w-full glass-input rounded-xl py-1.5 pl-8 pr-7 text-[11px] focus:outline-none transition-all text-slate-900 dark:text-white placeholder:text-slate-400 font-medium">
                 <svg class="absolute left-2.5 top-[8px] w-3.5 h-3.5 text-slate-400 group-focus-within/search:text-indigo-500 transition-colors pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                <button x-show="versionRailSearch" @click="versionRailSearch = ''; railLimit = 50" aria-label="Clear version search" class="absolute right-2 top-[7px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 cursor-pointer">
+                <button x-show="versionRailSearch" x-cloak @click="versionRailSearch = ''; railLimit = 50" aria-label="Clear version search" class="absolute right-2 top-[7px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 cursor-pointer">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
@@ -65,9 +71,8 @@ const topServices = (trackData?.allServices || []).slice(0, 20);
 
         <div class="flex-1 overflow-y-auto px-2 py-1 custom-scroll">
             <div class="space-y-3 relative">
-                <!-- SSR crawlable releases list for search engines -->
                 <div x-show="!isClientHydrated" class="space-y-0.5">
-                    {topVersions.slice(0, 20).map((v, idx) => (
+                    {topVersions.map((v, idx) => (
                         <a href={`/releases/${v.id}/`}
                            class="w-full px-2.5 py-1.5 rounded-lg flex items-center justify-between transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
                             <div class="flex items-center gap-1.5 min-w-0 flex-1">
@@ -75,7 +80,7 @@ const topServices = (trackData?.allServices || []).slice(0, 20);
                                 <span class="text-[11px] sm:text-xs mono font-semibold tracking-tight truncate">v{v.id}</span>
                                 {idx === 0 && <span class="px-1.5 py-0.5 rounded-full text-[7.5px] mono font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 leading-none shrink-0">Latest</span>}
                             </div>
-                            {v.date && <span class="text-[9px] mono text-slate-400 dark:text-slate-500 font-medium shrink-0 ml-1.5">{v.date}</span>}
+                            {v.date && <span class="text-[9.5px] mono text-slate-400 dark:text-slate-500 font-medium shrink-0 ml-1.5 tabular-nums">{v.date}</span>}
                         </a>
                     ))}
                 </div>
@@ -84,7 +89,7 @@ const topServices = (trackData?.allServices || []).slice(0, 20);
                     <div>
                         <div class="px-2.5 pt-2 pb-1 flex items-center justify-between text-[10px] mono uppercase font-bold text-slate-400 dark:text-slate-500 select-none">
                             <span x-text="group.label"></span>
-                            <span class="text-[9px] opacity-60 font-semibold" x-text="group.versions.length + ' releases'"></span>
+                            <span class="text-[9px] opacity-65 font-semibold tabular-nums" x-text="group.versions.length"></span>
                         </div>
 
                         <div class="space-y-0.5">
@@ -94,18 +99,18 @@ const topServices = (trackData?.allServices || []).slice(0, 20);
                                    @mouseenter="prefetchVersion(v.id)"
                                    :data-version="v.id"
                                    :class="selectedVersion === v.id && viewMode === 'release' 
-                                      ? 'bg-indigo-500/10 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 font-semibold border-l-2 border-indigo-500 shadow-2xs' 
-                                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/40 dark:hover:bg-white/[0.04]'"
+                                      ? 'bg-indigo-500/12 dark:bg-indigo-500/18 text-indigo-700 dark:text-indigo-300 font-semibold border-l-2 border-indigo-500' 
+                                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-white/[0.04]'"
                                    class="w-full px-2.5 py-1.5 rounded-lg flex items-center justify-between transition-all group/item text-left active:scale-98 cursor-pointer min-w-0">
-                                    <div class="flex items-center gap-1.5 min-w-0 flex-1">
+                                    <div class="flex items-center gap-2 min-w-0 flex-1">
                                         <div :class="selectedVersion === v.id && viewMode === 'release' ? 'bg-indigo-600 dark:bg-indigo-400 scale-110' : 'bg-slate-300 dark:bg-white/20 group-hover/item:bg-indigo-400'" 
                                              class="w-1.5 h-1.5 rounded-full transition-all shrink-0"></div>
-                                        <span class="text-[11px] sm:text-xs mono font-semibold tracking-tight truncate" x-text="'v' + v.id"></span>
+                                        <span class="text-[11.5px] mono font-semibold tracking-tight truncate tabular-nums" x-text="'v' + v.id"></span>
                                         <template x-if="gIndex === 0 && vIndex === 0 && !versionRailSearch">
                                             <span class="px-1.5 py-0.5 rounded-full text-[7.5px] mono font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 leading-none shrink-0">Latest</span>
                                         </template>
                                     </div>
-                                    <span class="text-[9px] mono text-slate-400 dark:text-slate-500 font-medium shrink-0 ml-1.5" x-text="v.date ? getRelativeDate(v.date) : ''"></span>
+                                    <span class="text-[9.5px] mono text-slate-400 dark:text-slate-500 font-medium shrink-0 ml-1.5 tabular-nums" x-text="v.date ? getRelativeDate(v.date) : ''"></span>
                                 </a>
                             </template>
                         </div>
@@ -115,7 +120,7 @@ const topServices = (trackData?.allServices || []).slice(0, 20);
                 <template x-if="hasMoreVersions">
                     <div class="pt-2 pb-6 px-1">
                         <button @click="loadMoreVersions()"
-                                class="w-full py-2 rounded-xl bg-white/50 dark:bg-white/[0.02] hover:bg-indigo-50 dark:hover:bg-indigo-500/15 text-[10px] mono font-bold text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all uppercase tracking-wider active:scale-98 cursor-pointer">
+                                class="w-full py-2 rounded-xl bg-white/70 dark:bg-white/[0.03] hover:bg-indigo-50 dark:hover:bg-indigo-500/15 border border-slate-200/60 dark:border-white/[0.06] text-[10px] mono font-bold text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all uppercase tracking-wider active:scale-98 cursor-pointer">
                             Load More Releases (+50)
                         </button>
                     </div>
@@ -130,10 +135,10 @@ const topServices = (trackData?.allServices || []).slice(0, 20);
                 <input type="text" id="serviceSearch" name="serviceSearch" aria-label="Search services"
                        x-model.debounce.150ms="serviceSearch"
                        @input="serviceLimit = 40"
-                       placeholder="Filter 570+ services (e.g. s3, ec2)..."
+                       placeholder={`Filter ${allServicesList.length}+ services (e.g. s3, ec2)...`}
                        class="w-full glass-input rounded-xl py-1.5 pl-8 pr-7 text-[11px] focus:outline-none transition-all text-slate-900 dark:text-white placeholder:text-slate-400 font-medium">
                 <svg class="absolute left-2.5 top-[8px] w-3.5 h-3.5 text-slate-400 group-focus-within/ssearch:text-indigo-500 transition-colors pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                <button x-show="serviceSearch" @click="serviceSearch = ''; serviceLimit = 40" aria-label="Clear service search" class="absolute right-2 top-[7px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 cursor-pointer">
+                <button x-show="serviceSearch" x-cloak @click="serviceSearch = ''; serviceLimit = 40" aria-label="Clear service search" class="absolute right-2 top-[7px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 cursor-pointer">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
@@ -141,22 +146,21 @@ const topServices = (trackData?.allServices || []).slice(0, 20);
             <div class="flex items-center gap-1 p-0.5 glass-segmented rounded-lg">
                 <button @click="serviceSort = 'popular'"
                         :class="serviceSort === 'popular' ? 'bg-white dark:bg-white/10 text-indigo-600 dark:text-indigo-400 font-semibold shadow-xs' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium'"
-                        class="flex-1 py-1 rounded-md text-[9px] mono uppercase transition-all flex items-center justify-center gap-1 cursor-pointer">
-                    <span>🔥 Active</span>
+                        class="flex-1 py-1 rounded-md text-[9.5px] mono uppercase transition-all flex items-center justify-center gap-1 cursor-pointer">
+                    <span>Active</span>
                 </button>
                 <button @click="serviceSort = 'alpha'"
                         :class="serviceSort === 'alpha' ? 'bg-white dark:bg-white/10 text-indigo-600 dark:text-indigo-400 font-semibold shadow-xs' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium'"
-                        class="flex-1 py-1 rounded-md text-[9px] mono uppercase transition-all flex items-center justify-center gap-1 cursor-pointer">
-                    <span>🔤 A–Z</span>
+                        class="flex-1 py-1 rounded-md text-[9.5px] mono uppercase transition-all flex items-center justify-center gap-1 cursor-pointer">
+                    <span>A–Z</span>
                 </button>
             </div>
         </div>
 
         <div class="flex-1 overflow-y-auto px-2 py-1 custom-scroll space-y-0.5">
-            <!-- SSR crawlable services list for search engines -->
             <div x-show="!isClientHydrated" class="space-y-0.5">
                 {topServices.map((s) => (
-                    <a href={`/services/${s.toLowerCase()}/`}
+                    <a href={`/services/${slugifyService(s)}/`}
                        class="w-full text-left px-2.5 py-1.5 rounded-lg transition-all flex items-center justify-between text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">
                         <div class="flex items-center gap-2 min-w-0 flex-1">
                             <div class={`w-5 h-5 rounded flex items-center justify-center mono text-[8px] font-black transition-all shrink-0 ${getServiceColorClass(s)}`}>
@@ -169,23 +173,21 @@ const topServices = (trackData?.allServices || []).slice(0, 20);
             </div>
 
             <template x-for="service in filteredServices" :key="service">
-                <a :href="'/services/' + service.toLowerCase().trim() + '/'"
+                <a :href="'/services/' + slugifyService(service) + '/'"
                    @click.prevent="openService(service, true, false); if(isMobile(1024)) showMobileVersions = false;"
                    @mouseenter="prefetchService(service)"
                    :data-service="service.toLowerCase().trim()"
                    :class="activeService === service && viewMode === 'service'
-                      ? 'bg-indigo-500/10 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 font-semibold border-l-2 border-indigo-500 shadow-2xs' 
-                      : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/40 dark:hover:bg-white/[0.04]'"
+                      ? 'bg-indigo-500/12 dark:bg-indigo-500/18 text-indigo-700 dark:text-indigo-300 font-semibold border-l-2 border-indigo-500' 
+                      : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-white/[0.04]'"
                    class="w-full text-left px-2.5 py-1.5 rounded-lg transition-all flex items-center justify-between group active:scale-98 cursor-pointer min-w-0">
                     <div class="flex items-center gap-2 min-w-0 flex-1">
                         <div class="w-5 h-5 rounded flex items-center justify-center mono text-[8px] font-black transition-all shrink-0"
                              :class="getServiceColorClass(service)"
                              x-text="service.substring(0,2).toUpperCase()"></div>
                         <div class="flex flex-col min-w-0 flex-1">
-                            <span class="mono text-[11px] sm:text-xs font-semibold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 uppercase truncate" x-html="highlight(service, serviceSearch)"></span>
-                            <div class="flex items-center gap-1.5 mt-0.5">
-                                <span class="text-[8.5px] sm:text-[9px] mono text-slate-400 dark:text-slate-500 leading-none" x-text="(serviceCounts[service] || 0) + ' updates'"></span>
-                            </div>
+                            <span class="mono text-[11px] font-semibold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 uppercase truncate" x-html="highlight(service, serviceSearch)"></span>
+                            <span class="text-[9px] mono text-slate-400 dark:text-slate-500 leading-none mt-0.5 tabular-nums" x-text="(serviceCounts[service] || 0) + ' updates'"></span>
                         </div>
                     </div>
                     <svg class="w-3 h-3 text-slate-300 dark:text-slate-600 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-transform group-hover:translate-x-0.5 shrink-0 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
@@ -195,7 +197,7 @@ const topServices = (trackData?.allServices || []).slice(0, 20);
             <template x-if="hasMoreServices">
                 <div class="pt-2 pb-6 px-1">
                     <button @click="loadMoreServices()"
-                            class="w-full py-2 rounded-xl bg-white/50 dark:bg-white/[0.02] hover:bg-indigo-50 dark:hover:bg-indigo-500/15 text-[10px] mono font-bold text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all uppercase tracking-wider active:scale-98 cursor-pointer">
+                            class="w-full py-2 rounded-xl bg-white/70 dark:bg-white/[0.03] hover:bg-indigo-50 dark:hover:bg-indigo-500/15 border border-slate-200/60 dark:border-white/[0.06] text-[10px] mono font-bold text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all uppercase tracking-wider active:scale-98 cursor-pointer">
                         Load More Services (+40)
                     </button>
                 </div>
@@ -203,18 +205,9 @@ const topServices = (trackData?.allServices || []).slice(0, 20);
         </div>
     </div>
 
-    <noscript>
-        <div class="p-3 text-xs space-y-2 border-t border-black/[0.04] dark:border-white/[0.06]">
-            <p class="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-[10px] mono">AWS SDK Directory</p>
-            <p class="text-slate-600 dark:text-slate-400 text-[11px] leading-relaxed">
-                Browse <a href="/releases/" class="text-indigo-600 dark:text-indigo-400 font-bold underline">all 2,300+ AWS Boto3 Releases</a> or explore <a href="/services/" class="text-indigo-600 dark:text-indigo-400 font-bold underline">570+ AWS Services</a>.
-            </p>
-        </div>
-    </noscript>
-
-    <div class="px-4 py-2.5 flex-shrink-0 flex items-center justify-between text-[10px] mono text-slate-400 dark:text-slate-500 font-medium border-t border-slate-100 dark:border-white/5">
-        <span x-text="versions.length ? (versions.length + ' releases') : '2,376 releases'">2,376 releases</span>
-        <span>•</span>
-        <span x-text="(allServices.length || '582') + ' services'">582 services</span>
+    <div class="px-4 py-2.5 flex-shrink-0 flex items-center justify-between text-[10px] mono text-slate-500 dark:text-slate-400 font-medium border-t border-slate-200/70 dark:border-white/[0.06]">
+        <a href="/releases/" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors tabular-nums" x-text="(versions.length ? versions.length.toLocaleString('en-US') : '${totalVersionsFormatted}') + ' releases'">{totalVersionsFormatted} releases</a>
+        <span class="text-slate-300 dark:text-slate-600">•</span>
+        <a href="/services/" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors tabular-nums" x-text="(allServices.length || '${allServicesList.length}') + ' services'">{allServicesList.length} services</a>
     </div>
 </aside>

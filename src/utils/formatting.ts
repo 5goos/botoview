@@ -1,3 +1,13 @@
+export function slugifyService(serviceName: string): string {
+    if (!serviceName) return '';
+    return String(serviceName)
+        .toLowerCase()
+        .trim()
+        .replace(/[\._\s]+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
+}
+
 export function getServiceColorClass(serviceName: string): string {
     if (!serviceName) return 'bg-slate-500/10 text-slate-700 dark:text-slate-300';
     const classes = [

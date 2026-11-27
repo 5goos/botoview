@@ -4,66 +4,64 @@
 
 :root {
     --bg-main: #f8fafc;
-    --glass-surface: rgba(248, 250, 252, 0.85);
-    --glass-blur: blur(12px);
-    --card-surface: rgba(255, 255, 255, 0.75);
-    --card-hover: rgba(255, 255, 255, 0.95);
+    --glass-surface: rgba(255, 255, 255, 0.86);
+    --glass-blur: blur(14px);
+    --card-surface: rgba(255, 255, 255, 0.92);
+    --card-hover: #ffffff;
 
     --text-primary: #0f172a;
     --text-secondary: #475569;
     --text-muted: #94a3b8;
 
-    --border-card: rgba(226, 232, 240, 0.85);
-    --border-hover: rgba(99, 102, 241, 0.35);
+    --border-card: rgba(15, 23, 42, 0.08);
+    --border-hover: rgba(79, 70, 229, 0.35);
 
     --accent-primary: #4f46e5;
     --accent-primary-hover: #4338ca;
     --accent-light: rgba(79, 70, 229, 0.08);
     --accent-glow: rgba(79, 70, 229, 0.15);
 
-    --search-highlight-bg: rgba(99, 102, 241, 0.15);
+    --search-highlight-bg: rgba(99, 102, 241, 0.16);
     --search-highlight-text: #4338ca;
 
-    --shadow-card: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.03);
-    --shadow-card-hover: 0 10px 25px -5px rgba(15, 23, 42, 0.06), 0 8px 10px -6px rgba(15, 23, 42, 0.03);
+    --shadow-card: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
+    --shadow-card-hover: 0 6px 18px -4px rgba(15, 23, 42, 0.07), 0 2px 6px -2px rgba(15, 23, 42, 0.04);
     --shadow-sticky: none;
 }
 
 .dark {
-    --bg-main: #07090e;
-    --glass-surface: rgba(7, 9, 14, 0.85);
-    --glass-blur: blur(12px);
-    --card-surface: rgba(13, 17, 26, 0.55);
-    --card-hover: rgba(18, 24, 38, 0.75);
+    --bg-main: #090b10;
+    --glass-surface: rgba(9, 11, 16, 0.85);
+    --glass-blur: blur(14px);
+    --card-surface: rgba(16, 20, 30, 0.72);
+    --card-hover: rgba(20, 25, 38, 0.92);
 
     --text-primary: #f8fafc;
     --text-secondary: #94a3b8;
     --text-muted: #64748b;
 
-    --border-card: rgba(255, 255, 255, 0.06);
-    --border-hover: rgba(99, 102, 241, 0.45);
+    --border-card: rgba(255, 255, 255, 0.07);
+    --border-hover: rgba(99, 102, 241, 0.42);
 
     --accent-primary: #6366f1;
     --accent-primary-hover: #818cf8;
     --accent-light: rgba(99, 102, 241, 0.14);
     --accent-glow: rgba(99, 102, 241, 0.25);
 
-    --search-highlight-bg: rgba(99, 102, 241, 0.25);
+    --search-highlight-bg: rgba(99, 102, 241, 0.28);
     --search-highlight-text: #c7d2fe;
 
-    --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.35);
-    --shadow-card-hover: 0 12px 28px -4px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(99, 102, 241, 0.2);
+    --shadow-card: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow-card-hover: 0 8px 22px -6px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(99, 102, 241, 0.22);
     --shadow-sticky: none;
 }
 
 html {
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
-    /* Use dynamic viewport height to account for mobile browser bars */
     height: -webkit-fill-available;
 }
 
-/* Ensure full-screen app layout respects mobile browser bars */
 .h-screen {
     height: 100vh;
     height: 100dvh;
@@ -75,7 +73,6 @@ a,
     touch-action: manipulation;
 }
 
-/* Canvas Base */
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background-color: var(--bg-main);
@@ -114,7 +111,6 @@ body {
     outline-offset: 2px;
 }
 
-/* Scrollbar */
 .custom-scroll {
     scrollbar-width: thin;
     scrollbar-color: rgba(148, 163, 184, 0.25) transparent;
@@ -145,7 +141,6 @@ body {
     background: rgba(99, 102, 241, 0.6) !important; 
 }
 
-/* Glass Surfaces */
 .glass-header {
     background: var(--glass-surface);
     backdrop-filter: var(--glass-blur);
@@ -164,24 +159,30 @@ body {
     -webkit-backdrop-filter: var(--glass-blur);
 }
 
-/* Cards */
 .soft-card {
     background: var(--card-surface);
-    backdrop-filter: blur(16px) saturate(150%);
-    -webkit-backdrop-filter: blur(16px) saturate(150%);
     border: 1px solid var(--border-card);
     box-shadow: var(--shadow-card);
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.soft-card:hover {
+.changelog-card {
+    background: var(--card-surface);
+    border: 1px solid var(--border-card);
+    box-shadow: var(--shadow-card);
+    transition: border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.changelog-card:hover {
     background: var(--card-hover);
     border-color: var(--border-hover);
     box-shadow: var(--shadow-card-hover);
-    transform: translateY(-1px);
 }
 
-/* Inputs & Controls */
+.tabular-nums {
+    font-variant-numeric: tabular-nums;
+}
+
 .glass-input {
     background: rgba(255, 255, 255, 0.6);
     border: 1px solid rgba(226, 232, 240, 0.8);
@@ -239,7 +240,6 @@ body {
     font-weight: 600;
 }
 
-/* Keycaps */
 .kbd-badge {
     display: inline-flex;
     align-items: center;

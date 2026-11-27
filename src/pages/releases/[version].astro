@@ -2,7 +2,7 @@
 export const prerender = true;
 
 import Layout from '../../layouts/Layout.astro';
-import { getServiceColorClass, formatDescription, formatDate } from '../../utils/formatting';
+import { getServiceColorClass, formatDescription, formatDate, slugifyService } from '../../utils/formatting';
 import { loadReleaseChanges } from '../../utils/data';
 import trackData from '../../../public/data/track.json';
 
@@ -271,7 +271,7 @@ const faqSchema = {
                 <div class="flex items-center gap-1.5 flex-wrap pt-0.5 w-full max-w-full min-w-0">
                     <div x-show="!hasActiveFilter" class="flex items-center gap-1.5 flex-wrap">
                         {servicesModified.map(svc => (
-                            <a href={`/services/${svc}/`} 
+                            <a href={`/services/${slugifyService(svc)}/`} 
                                title={`View all ${svc} changelog history`}
                                class={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] mono font-bold uppercase transition-all hover:scale-105 active:scale-95 ${getServiceColorClass(svc)}`}>
                                 <span>{svc}</span>
@@ -334,7 +334,7 @@ const faqSchema = {
                             <article class="soft-card rounded-2xl p-4 sm:p-5 group">
                                 <div class="flex items-center justify-between gap-2 mb-2.5 flex-wrap">
                                     <div class="flex items-center gap-2 flex-wrap min-w-0">
-                                        <a href={`/services/${change.category}/`} 
+                                        <a href={`/services/${slugifyService(change.category)}/`} 
                                            title={`Explore all ${change.category} updates`}
                                            class={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] mono font-bold uppercase tracking-wider transition-all hover:scale-105 active:scale-95 ${getServiceColorClass(change.category)}`}>
                                             <span>{change.category}</span>

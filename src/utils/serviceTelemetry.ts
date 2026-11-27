@@ -79,10 +79,7 @@ export function computeServiceTelemetry(
     versionDates: Record<string, string>
 ): ServiceTelemetry {
     const svcLower = service.toLowerCase();
-    // Index all service pages that have at least 1 changelog entry.
-    // Every generated service page contains unique, substantive content
-    // (telemetry, changelog, quickstart, FAQ) and should be crawlable.
-    const isIndexable = changes.length > 0;
+    const isIndexable = changes.length >= 3 || TOP_INDEXABLE_SERVICES.includes(svcLower);
     const totalUpdates = changes.length;
 
     let featuresCount = 0;
