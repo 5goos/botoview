@@ -11,14 +11,11 @@ export function slugifyService(serviceName: string): string {
 export function getServiceColorClass(serviceName: string): string {
     if (!serviceName) return 'bg-slate-500/10 text-slate-700 dark:text-slate-300';
     const classes = [
-        'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-500/15',
-        'bg-sky-500/10 text-sky-700 dark:text-sky-300 hover:bg-sky-500/15',
-        'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/15',
-        'bg-violet-500/10 text-violet-700 dark:text-violet-300 hover:bg-violet-500/15',
-        'bg-rose-500/10 text-rose-700 dark:text-rose-300 hover:bg-rose-500/15',
-        'bg-amber-500/10 text-amber-700 dark:text-amber-300 hover:bg-amber-500/15',
-        'bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 hover:bg-cyan-500/15',
-        'bg-teal-500/10 text-teal-700 dark:text-teal-300 hover:bg-teal-500/15'
+        'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-500/18',
+        'bg-violet-500/10 text-violet-700 dark:text-violet-300 hover:bg-violet-500/18',
+        'bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 hover:bg-cyan-500/18',
+        'bg-teal-500/10 text-teal-700 dark:text-teal-300 hover:bg-teal-500/18',
+        'bg-slate-500/10 text-slate-700 dark:text-slate-300 hover:bg-slate-500/18'
     ];
     let hash = 0;
     for (let i = 0; i < serviceName.length; i++) {
@@ -43,12 +40,12 @@ export function formatDescription(text: string): string {
 
     formatted = formatted.replace(
         /``([^`]+?)``/g,
-        '<code class="px-1.5 py-0.5 rounded-md bg-slate-200/50 dark:bg-white/10 text-[11px] mono text-indigo-700 dark:text-indigo-300 font-medium">$1</code>'
+        '<code class="px-1.5 py-0.5 rounded-md bg-indigo-500/[0.08] dark:bg-white/[0.08] text-[11.5px] mono text-indigo-700 dark:text-indigo-300 font-medium">$1</code>'
     );
 
     formatted = formatted.replace(
         /`([^`]+?)`/g,
-        '<code class="px-1.5 py-0.5 rounded-md bg-slate-200/50 dark:bg-white/10 text-[11px] mono text-indigo-700 dark:text-indigo-300 font-medium">$1</code>'
+        '<code class="px-1.5 py-0.5 rounded-md bg-indigo-500/[0.08] dark:bg-white/[0.08] text-[11.5px] mono text-indigo-700 dark:text-indigo-300 font-medium">$1</code>'
     );
 
     formatted = formatted.replace(

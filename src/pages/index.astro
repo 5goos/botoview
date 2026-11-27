@@ -7,17 +7,43 @@ import MainView from '../components/MainView.astro';
 import trackData from '../../public/data/track.json';
 
 const latestVersion = trackData?.versions?.[0] || { id: 'latest', date: '' };
+const totalVersionsCount = trackData?.versions?.length || 0;
+const totalServicesCount = trackData?.allServices?.length || 0;
 
 const versionModules = import.meta.glob<Array<{ category: string; description: string; type: string }>>('../../public/data/versions/*.json', { eager: true, import: 'default' });
 
 const latestKey = `../../public/data/versions/${latestVersion.id}.json`;
 const initialChanges = versionModules[latestKey] || [];
-const pageTitle = "BotoView — AWS Boto3 Changelog & Release Notes";
-const pageDescription = "Track and filter AWS Boto3 changelogs and release notes by service. Explore Boto3 version updates, breaking changes, and SDK history in real time.";
+const pageTitle = "BotoView — AWS Boto3 Changelogs & Release Notes";
+const pageDescription = "Browse AWS Boto3 changelogs and release notes by service with BotoView. Search API changes, bug fixes, and SDK updates across 570+ AWS services.";
 const canonicalUrl = "https://botoview.5goos.com/";
+
+const homeWebPageSchema = {
+    "@type": "WebPage",
+    "@id": `${canonicalUrl}#webpage`,
+    "url": canonicalUrl,
+    "name": pageTitle,
+    "description": pageDescription,
+    "inLanguage": "en-US",
+    "isPartOf": { "@id": "https://botoview.5goos.com/#website" },
+    "about": [
+        { "@type": "Thing", "name": "AWS Boto3" },
+        { "@type": "Thing", "name": "Botocore" },
+        { "@type": "Thing", "name": "AWS Python SDK Changelogs" }
+    ],
+    "dateModified": latestVersion.date || new Date().toISOString().split('T')[0],
+    "mainEntity": {
+        "@type": "Dataset",
+        "name": "BotoView AWS Boto3 & Botocore Changelog Archive",
+        "description": `Structured history of ${totalVersionsCount.toLocaleString('en-US')} AWS Boto3 SDK releases across ${totalServicesCount} AWS services.`,
+        "url": canonicalUrl,
+        "creator": { "@id": "https://5goos.com/#organization" },
+        "license": "https://opensource.org/licenses/MIT"
+    }
+};
 ---
 
-<Layout title={pageTitle} description={pageDescription} canonical={canonicalUrl}>
+<Layout title={pageTitle} description={pageDescription} canonical={canonicalUrl} jsonLd={homeWebPageSchema}>
     <div class="flex h-screen w-full overflow-hidden bg-transparent text-[var(--text-secondary)] transition-all" 
          style="height: 100dvh;"
          x-data="botoCore" 
@@ -50,7 +76,7 @@ const canonicalUrl = "https://botoview.5goos.com/";
         </template>
 
         <template x-if="loading">
-            <div class="fixed inset-0 z-[140] flex flex-col items-center justify-center bg-white dark:bg-[#07090e] transition-colors duration-500">
+            <div class="fixed inset-0 z-[140] flex flex-col items-center justify-center bg-[#f4f6fa] dark:bg-[#0b0e14] transition-colors duration-500">
                 <div class="relative w-16 h-16 mb-6">
                     <div class="absolute inset-0 border-3 border-indigo-500/15 rounded-2xl"></div>
                     <div class="absolute inset-0 border-3 border-t-indigo-600 dark:border-t-indigo-400 rounded-2xl animate-spin"></div>
@@ -118,6 +144,7 @@ const canonicalUrl = "https://botoview.5goos.com/";
             serviceHistoryLoading: false,
             showMobileVersions: false,
             showBackToTop: false,
+            isScrolled: false,
             error: null,
             loading: false,
             versionCache: initialLatestId ? { [initialLatestId]: initialChangesJson } : {},
@@ -138,7 +165,7 @@ const canonicalUrl = "https://botoview.5goos.com/";
                 try {
                     localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
                 } catch(e) {}
-                const themeColor = this.isDarkMode ? '#07090e' : '#f8fafc';
+                const themeColor = this.isDarkMode ? '#0b0e14' : '#f4f6fa';
                 document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute('content', themeColor));
             },
 
@@ -176,12 +203,12 @@ const canonicalUrl = "https://botoview.5goos.com/";
 
                 formatted = formatted.replace(
                     /``([^`]+?)``/g,
-                    '<code class="px-1.5 py-0.5 rounded-md bg-slate-200/50 dark:bg-white/10 text-[11px] mono text-indigo-700 dark:text-indigo-300 font-medium">$1</code>'
+                    '<code class="px-1.5 py-0.5 rounded-md bg-indigo-500/[0.08] dark:bg-white/[0.08] text-[11.5px] mono text-indigo-700 dark:text-indigo-300 font-medium">$1</code>'
                 );
 
                 formatted = formatted.replace(
                     /`([^`]+?)`/g,
-                    '<code class="px-1.5 py-0.5 rounded-md bg-slate-200/50 dark:bg-white/10 text-[11px] mono text-indigo-700 dark:text-indigo-300 font-medium">$1</code>'
+                    '<code class="px-1.5 py-0.5 rounded-md bg-indigo-500/[0.08] dark:bg-white/[0.08] text-[11.5px] mono text-indigo-700 dark:text-indigo-300 font-medium">$1</code>'
                 );
 
                 formatted = formatted.replace(
@@ -221,7 +248,7 @@ const canonicalUrl = "https://botoview.5goos.com/";
             async copyItem(item, index) {
                 try {
                     const cat = (item.category || '').toUpperCase();
-                    const ver = this.selectedVersion || initialLatestId;
+                    const ver = item.version || this.selectedVersion || initialLatestId;
                     const text = `${cat}: ${item.description} (${ver})`;
                     await navigator.clipboard.writeText(text);
                     this.copiedItemIndex = index;
@@ -350,7 +377,8 @@ const canonicalUrl = "https://botoview.5goos.com/";
 
                 if (e.key === '/') {
                     e.preventDefault();
-                    const searchInput = document.getElementById('versionSearch') || document.getElementById('serviceHistorySearch');
+                    const searchId = this.viewMode === 'service' ? 'serviceHistorySearch' : 'versionSearch';
+                    const searchInput = document.getElementById(searchId);
                     if (searchInput) searchInput.focus();
                     return;
                 }
@@ -410,14 +438,11 @@ const canonicalUrl = "https://botoview.5goos.com/";
                 if (!serviceName) return 'bg-slate-500/10 text-slate-700 dark:text-slate-300';
                 if (this._serviceColorCache[serviceName]) return this._serviceColorCache[serviceName];
                 const classes = [
-                    'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-500/15',
-                    'bg-sky-500/10 text-sky-700 dark:text-sky-300 hover:bg-sky-500/15',
-                    'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/15',
-                    'bg-violet-500/10 text-violet-700 dark:text-violet-300 hover:bg-violet-500/15',
-                    'bg-rose-500/10 text-rose-700 dark:text-rose-300 hover:bg-rose-500/15',
-                    'bg-amber-500/10 text-amber-700 dark:text-amber-300 hover:bg-amber-500/15',
-                    'bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 hover:bg-cyan-500/15',
-                    'bg-teal-500/10 text-teal-700 dark:text-teal-300 hover:bg-teal-500/15'
+                    'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-500/18',
+                    'bg-violet-500/10 text-violet-700 dark:text-violet-300 hover:bg-violet-500/18',
+                    'bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 hover:bg-cyan-500/18',
+                    'bg-teal-500/10 text-teal-700 dark:text-teal-300 hover:bg-teal-500/18',
+                    'bg-slate-500/10 text-slate-700 dark:text-slate-300 hover:bg-slate-500/18'
                 ];
                 let hash = 0;
                 for (let i = 0; i < serviceName.length; i++) {

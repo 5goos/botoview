@@ -91,6 +91,28 @@ def get_default_urls() -> List[str]:
         if url not in urls:
             urls.append(url)
 
+    data_dir = Path(__file__).resolve().parent.parent / "public" / "data"
+    track_file = data_dir / "track.json"
+    if track_file.exists():
+        try:
+            track = json.loads(track_file.read_text(encoding="utf-8"))
+            for v in (track.get("versions") or [])[:5]:
+                ver_file = data_dir / "versions" / f"{v.get('id', '')}.json"
+                if not ver_file.exists():
+                    continue
+                entries = json.loads(ver_file.read_text(encoding="utf-8"))
+                for item in entries:
+                    svc = (item.get("category") or "").lower().strip().replace(".", "-").replace("_", "-").replace(" ", "-")
+                    svc_file = data_dir / "services" / f"{svc}.json"
+                    if svc_file.exists():
+                        svc_changes = json.loads(svc_file.read_text(encoding="utf-8"))
+                        if len(svc_changes) >= 3 or svc in TOP_INDEXABLE_SERVICES:
+                            svc_url = f"https://{HOST}/services/{svc}/"
+                            if svc_url not in urls:
+                                urls.append(svc_url)
+        except Exception as exc:
+            logger.warning(f"Failed reading recent versions for IndexNow: {exc}")
+
     return urls
 
 

@@ -10,17 +10,19 @@ interface Props {
 	bodyClass?: string;
 	robots?: string;
 	jsonLd?: Record<string, any> | Array<Record<string, any>>;
+	includeDefaultApp?: boolean;
 	googleSiteVerification?: string;
 }
 const {
-	title = "BotoView — AWS Boto3 Changelog & Release Notes",
-	description = "Track and filter AWS Boto3 changelogs and release notes by service. Explore Boto3 version updates, breaking changes, and SDK history in real time.",
-	keywords = "boto3 changelog, botocore release notes, aws boto3 updates, boto3 changelog by service, aws python sdk tracker, botoview, 5goos",
+	title = "BotoView — AWS Boto3 Changelogs & Release Notes",
+	description = "Browse AWS Boto3 changelogs and release notes by service with BotoView. Search API changes, bug fixes, and SDK updates across 570+ AWS services.",
+	keywords = "botoview, boto3 changelogs, aws boto3 changelogs, botocore release notes, aws python sdk changelog",
 	canonical,
 	ogType = "website",
 	bodyClass = "min-h-screen w-full transition-colors duration-500",
 	robots = "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1",
 	jsonLd,
+	includeDefaultApp = true,
 	googleSiteVerification = process.env.GOOGLE_SITE_VERIFICATION || (import.meta.env as any)?.PUBLIC_GOOGLE_SITE_VERIFICATION || "yNlBXN3mZgfAx_NAuIyOfebJcgd9H0sczXDus8gfYPA",
 } = Astro.props;
 
@@ -48,13 +50,14 @@ const canonicalUrl = normalizeCanonical(canonical);
 const userGraph = Array.isArray(jsonLd) ? jsonLd : (jsonLd ? [jsonLd] : []);
 const hasCustomFaq = userGraph.some((node: any) => node?.["@type"] === "FAQPage");
 
-const defaultGraph = [
+const defaultGraph: Array<Record<string, any>> = [
 	{
 		"@type": "WebSite",
 		"@id": "https://botoview.5goos.com/#website",
 		"url": "https://botoview.5goos.com/",
 		"name": "BotoView",
-		"alternateName": ["BotoView by 5goos", "5goos BotoView", "BotoView App"],
+		"alternateName": ["BotoView by 5goos", "5goos BotoView", "BotoView AWS Boto3 Changelogs"],
+		"inLanguage": "en-US",
 		"publisher": { "@id": "https://5goos.com/#organization" },
 		"description": description,
 		"potentialAction": {
@@ -78,8 +81,11 @@ const defaultGraph = [
 			"https://github.com/5goos",
 			"https://github.com/5goos/botoview"
 		]
-	},
-	{
+	}
+];
+
+if (includeDefaultApp) {
+	defaultGraph.push({
 		"@type": "SoftwareApplication",
 		"@id": "https://botoview.5goos.com/#software",
 		"name": "BotoView",
@@ -95,8 +101,8 @@ const defaultGraph = [
 			"price": "0",
 			"priceCurrency": "USD"
 		}
-	}
-];
+	});
+}
 
 const structuredData = {
 	"@context": "https://schema.org",
@@ -121,14 +127,14 @@ const structuredData = {
 		<meta name="msvalidate.01" content="EA96FCA4764C5D0B8E4B3EB0811BD6DE" />
 		<meta name="google-site-verification" content={googleSiteVerification} />
 
-		<meta name="theme-color" content="#07090e" media="(prefers-color-scheme: dark)" />
-		<meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)" />
+		<meta name="theme-color" content="#0b0e14" media="(prefers-color-scheme: dark)" />
+		<meta name="theme-color" content="#f4f6fa" media="(prefers-color-scheme: light)" />
 		<meta name="mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
 		<meta property="og:type" content={ogType} />
 		<meta property="og:locale" content="en_US" />
-		<meta property="og:site_name" content="BotoView by 5goos" />
+		<meta property="og:site_name" content="BotoView" />
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
 		<meta property="og:url" content={canonicalUrl} />
