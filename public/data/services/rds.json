@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.13",
+    "t": "Aurora PostgreSQL and Aurora MySQL now let you delete a DB cluster and all its instances in a single API call or console action, without deleting each instance first. Cluster deletion also completes faster."
+  },
+  {
     "v": "1.44.7",
     "t": "Adds the PrimaryEndpoint structure to DBInstance. It returns the connection endpoint for the current primary instance, so no need to reconnect to a different DNS name after the switchover. Create Aurora clusters with express configuration in a VPC, and move clusters into, out of, or between VPCs."
   },

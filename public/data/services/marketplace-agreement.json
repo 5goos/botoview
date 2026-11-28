@@ -1,5 +1,9 @@
 [
   {
+    "v": "1.44.13",
+    "t": "This release adds per-Region pricing to AWS Marketplace usage-based pricing terms. Rate card items can now include Region-specific price overrides. When a Regional price is present for an AWS Region, it replaces the default price for that dimension."
+  },
+  {
     "v": "1.44.5",
     "t": "Adds buyer agreement request and approval APIs. Buyers can get, list and cancel agreement requests and start approvals, which organization administrators approve or reject. Buyers can share a contact when they create an agreement request, and sellers can retrieve it with GetAgreementContacts."
   },
